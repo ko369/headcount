@@ -63,15 +63,16 @@ body {
   color: var(--text);
   font-family: 'Noto Sans JP', 'Noto Serif JP', sans-serif;
   line-height: 1.6;
-  overflow: hidden;
+  overflow: auto;
 }
 
 /* Layout */
 .app {
   display: grid;
   grid-template-columns: 280px 1fr;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto auto;
   min-height: 100vh;
+  width: 100%;
 }
 
 /* Header */
@@ -80,8 +81,12 @@ body {
   display: flex;
   align-items: center;
   padding: 0 28px;
+  height: 56px;
   border-bottom: 1px solid var(--line);
   background: var(--bg2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
   gap: 32px;
 }
 .logo {
@@ -116,14 +121,13 @@ body {
 /* Sidebar */
 .sidebar {
   border-right: 1px solid var(--line);
-  overflow-y: visible;
   padding: 24px 0;
   background: #fff;
-  align-self: start;
   position: sticky;
   top: 56px;
-  max-height: calc(100vh - 56px);
+  height: calc(100vh - 56px);
   overflow-y: auto;
+  align-self: start;
 }
 .sidebar::-webkit-scrollbar { width: 4px; }
 .sidebar::-webkit-scrollbar-track { background: transparent; }
@@ -204,15 +208,16 @@ body {
 .add-icon { width: 14px; height: 14px; border: 1px solid currentColor; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 12px; line-height: 1; }
 
 /* Main */
-.main { overflow: visible; display: flex; flex-direction: column; }
+.main { overflow: visible; display: flex; flex-direction: column; min-width: 0; }
 
 /* Main header strip */
 .main-header {
-  padding: 20px 32px 0;
+  padding: 16px 28px 12px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   flex-shrink: 0;
+  border-bottom: 1px solid var(--line);
 }
 .company-title {
   font-family: 'Noto Sans JP', sans-serif;
@@ -302,6 +307,7 @@ body {
   padding: 0 32px;
   max-height: none;
   overflow-y: visible;
+  overflow-x: auto;
 }
 .data-table-wrap::-webkit-scrollbar { height: 4px; width: 4px; }
 .data-table-wrap::-webkit-scrollbar-thumb { background: var(--line2); }
