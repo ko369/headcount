@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Headcount — 日本スタートアップ在職者数データベース</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1645,7 +1646,7 @@ function setRange(range, btn) {
 // ══════════════════════════════════════════════════════
 // GoogleスプレッドシートのURLから「/d/」と「/edit」の間の文字列をコピーして貼り付ける
 // 例: https://docs.google.com/spreadsheets/d/【ここをコピー】/edit
-const SHEET_ID = 'YOUR_SHEET_ID_HERE';
+const SHEET_ID = '1e8nkbh_PogCIXYccOhu7AcnEu4EibNFC';
 
 // ══════════════════════════════════════════════════════
 // Google Sheets CSV 読み込み
@@ -1677,7 +1678,7 @@ function parseCsv(text) {
 
 async function loadSiteData() {
   // SHEET_ID が未設定の場合はスキップ
-  if (SHEET_ID === 'YOUR_SHEET_ID_HERE') {
+  if (SHEET_ID === '1e8nkbh_PogCIXYccOhu7AcnEu4EibNFC') {
     console.info('[Sheets] SHEET_ID が未設定のため手動データを使用します');
     showDataBadge('手動入力データ', 'fallback');
     return;
