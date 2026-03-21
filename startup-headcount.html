@@ -70,8 +70,8 @@ body {
 .app {
   display: grid;
   grid-template-columns: 280px 1fr;
-  grid-template-rows: 56px 1fr;
-  height: 100vh;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
 }
 
 /* Header */
@@ -116,9 +116,14 @@ body {
 /* Sidebar */
 .sidebar {
   border-right: 1px solid var(--line);
-  overflow-y: auto;
+  overflow-y: visible;
   padding: 24px 0;
   background: #fff;
+  align-self: start;
+  position: sticky;
+  top: 56px;
+  max-height: calc(100vh - 56px);
+  overflow-y: auto;
 }
 .sidebar::-webkit-scrollbar { width: 4px; }
 .sidebar::-webkit-scrollbar-track { background: transparent; }
@@ -199,7 +204,7 @@ body {
 .add-icon { width: 14px; height: 14px; border: 1px solid currentColor; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 12px; line-height: 1; }
 
 /* Main */
-.main { overflow: hidden; display: flex; flex-direction: column; }
+.main { overflow: visible; display: flex; flex-direction: column; }
 
 /* Main header strip */
 .main-header {
@@ -253,14 +258,14 @@ body {
 
 /* Chart area */
 .chart-area {
-  flex: 1;
   padding: 16px 32px 0;
   position: relative;
-  min-height: 0;
+  height: 270px;
+  flex-shrink: 0;
 }
 .chart-wrap {
   width: 100%;
-  height: calc(100% - 8px);
+  height: 240px;
   position: relative;
 }
 
@@ -295,8 +300,8 @@ body {
   flex-shrink: 0;
   border-top: 1px solid var(--line);
   padding: 0 32px;
-  max-height: 160px;
-  overflow-y: auto;
+  max-height: none;
+  overflow-y: visible;
 }
 .data-table-wrap::-webkit-scrollbar { height: 4px; width: 4px; }
 .data-table-wrap::-webkit-scrollbar-thumb { background: var(--line2); }
@@ -485,7 +490,7 @@ body {
   flex-shrink: 0;
   border-top: 1px solid var(--line);
   padding: 0 32px;
-  height: 148px;
+  height: 160px;
   position: relative;
 }
 .events-strip-inner {
