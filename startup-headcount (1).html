@@ -1,0 +1,1960 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Headcount — 日本スタートアップ在職者数データベース</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&family=Noto+Serif+JP:wght@300;400;600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,500;1,6..72,300&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* ─ ベース ─ */
+  --bg:   #ffffff;
+  --bg2:  #F8F9FA;
+  --bg3:  #EEF1F5;
+  --line: #E8E8E8;
+  --line2: #C0CAD5;
+  --text:  #1A1A1A;
+  --text2: #555555;
+  --text3: #A0A0A0;
+
+  /* ─ スレートグレー（UI基調） ─ */
+  --slate:       #5A6A80;
+  --slate-dark:  #3A4A5C;
+  --slate-light: #EEF1F5;
+  --slate-mid:   #C0CAD5;
+
+  /* ─ 企業カラー ─ */
+  --smarthr: #E8A020;
+  --smarthr-light: #FEF8EE;
+  --smarthr-mid:   #F5D090;
+  --layerx:  #3BAA90;
+  --layerx-light:  #EDFAF6;
+  --layerx-mid:    #90D8C0;
+  --ubie:    #5B8FCC;
+  --ubie-light:    #EEF4FC;
+  --ubie-mid:      #A8C8F0;
+
+  /* ─ タグカラー ─ */
+  --tag-ok-bg:    #EAF5F0; --tag-ok-c:    #1A7A50; --tag-ok-b:    #A8D8C0;
+  --tag-est-bg:   #FEF8EC; --tag-est-c:   #9A6800; --tag-est-b:   #F0D590;
+  --tag-press-bg: #FDF0F0; --tag-press-c: #9A3030; --tag-press-b: #E8B8B8;
+  --tag-note-bg:  #EFF6FF; --tag-note-c:  #2A5CA8; --tag-note-b:  #B8D0F0;
+  --tag-web-bg:   #F5F0FF; --tag-web-c:   #6040A0; --tag-web-b:   #C8B0E8;
+
+  /* ─ 後方互換（旧カラー参照を置き換え） ─ */
+  --amber:      #E8A020;
+  --amber2:     #B87010;
+  --amber-dim:  rgba(232,160,32,0.08);
+  --teal:       #3BAA90;
+  --rose:       #C04040;
+  --blue:       #5B8FCC;
+  --font-serif: 'Newsreader', 'Noto Serif JP', serif;
+  --font-mono:  'JetBrains Mono', monospace;
+}
+
+html, body { height: 100%; }
+body {
+  background: var(--bg2);
+  color: var(--text);
+  font-family: 'Noto Sans JP', 'Noto Serif JP', sans-serif;
+  line-height: 1.6;
+  overflow: hidden;
+}
+
+/* Layout */
+.app {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  grid-template-rows: 56px 1fr;
+  height: 100vh;
+}
+
+/* Header */
+.header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg2);
+  gap: 32px;
+}
+.logo {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--slate-dark);
+}
+.logo span { color: var(--text3); font-size: 11px; letter-spacing: 0.06em; display: block; margin-top: 1px; }
+.logo-icon { width:26px; height:26px; background:var(--slate-dark); border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-right:8px; }
+.logo-icon span { color:#fff; font-size:9px; font-weight:500; letter-spacing:0.02em; display:block; margin:0; }
+.header-divider { width: 1px; height: 24px; background: var(--line2); }
+.header-meta { font-family: 'Noto Sans JP', sans-serif; font-size: 10px; color: var(--text3); letter-spacing: 0.02em; }
+.header-meta strong { color: var(--text2); font-weight: 400; }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 20px; }
+.source-badge {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.02em;
+  color: var(--text3);
+  border: 1px solid var(--slate-mid);
+  padding: 3px 10px;
+  border-radius: 20px;
+  text-transform: none;
+  background: var(--slate-light);
+  color: var(--slate);
+}
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--slate); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* Sidebar */
+.sidebar {
+  border-right: 1px solid var(--line);
+  overflow-y: auto;
+  padding: 24px 0;
+  background: #fff;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 2px; }
+
+.sidebar-label {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding: 0 20px 12px;
+}
+
+.company-card {
+  padding: 14px 20px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all 0.18s;
+  position: relative;
+}
+.company-card:hover { background: var(--bg3); }
+.company-card.active {
+  background: var(--bg2);
+  border-left-color: var(--slate);
+}
+.company-card.active[data-color='smarthr'] { background:var(--smarthr-light); border-left-color:var(--smarthr); }
+.company-card.active[data-color='layerx']  { background:var(--layerx-light);  border-left-color:var(--layerx);  }
+.company-card.active[data-color='ubie']    { background:var(--ubie-light);    border-left-color:var(--ubie);    }
+.company-name {
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Noto Sans JP', sans-serif;
+  color: var(--text);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.company-badge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  padding: 1px 6px;
+  background: var(--slate-light);
+  color: var(--slate);
+  letter-spacing: 0.04em;
+  border-radius: 20px;
+  border: 1px solid var(--slate-mid);
+}
+.company-card.active .company-badge { background: rgba(240,167,50,0.15); color: var(--amber2); }
+.company-stats {
+  display: flex;
+  gap: 16px;
+  margin-top: 6px;
+}
+.stat { font-family: 'Noto Sans JP', sans-serif; font-size: 10px; color: var(--text3); }
+.stat-val { color: var(--slate-dark); font-size: 11px; }
+.stat-label { font-size: 9px; color: var(--text3); margin-top: 1px; }
+.sparkline-wrap { margin-top: 8px; height: 24px; }
+
+/* mini sparkline canvas */
+.spark { width: 100%; height: 24px; opacity: 0.7; }
+
+.sidebar-divider { height: 1px; background: var(--line); margin: 16px 0; }
+.add-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 10px;
+  color: var(--text3);
+  cursor: pointer;
+  transition: color 0.15s;
+  letter-spacing: 0.02em;
+}
+.add-btn:hover { color: var(--amber); }
+.add-icon { width: 14px; height: 14px; border: 1px solid currentColor; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 12px; line-height: 1; }
+
+/* Main */
+.main { overflow: hidden; display: flex; flex-direction: column; }
+
+/* Main header strip */
+.main-header {
+  padding: 20px 32px 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.company-title {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.2;
+}
+.company-subtitle {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 0.02em;
+  margin-top: 4px;
+}
+.metric-row {
+  display: flex;
+  gap: 32px;
+  align-items: flex-end;
+}
+.metric-block { text-align: right; }
+.metric-val {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--slate-dark);
+  line-height: 1;
+}
+.metric-label {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: 0.02em;
+  margin-top: 4px;
+}
+.metric-change {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 11px;
+  color: var(--teal);
+  margin-top: 2px;
+}
+.metric-change.neg { color: var(--rose); }
+
+/* Chart area */
+.chart-area {
+  flex: 1;
+  padding: 16px 32px 0;
+  position: relative;
+  min-height: 0;
+}
+.chart-wrap {
+  width: 100%;
+  height: calc(100% - 8px);
+  position: relative;
+}
+
+/* Year range selector */
+.range-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 32px;
+  margin-bottom: 4px;
+  flex-shrink: 0;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--line);
+}
+.range-btn {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 9px;
+  padding: 4px 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--text3);
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  transition: all 0.15s;
+  border-radius: 20px;
+}
+.range-btn:hover { border-color: var(--slate); color: var(--slate); }
+.range-btn.active { border-color: var(--slate-dark); color: #fff; background: var(--slate-dark); border-radius: 20px; }
+
+/* Data table */
+.data-table-wrap {
+  flex-shrink: 0;
+  border-top: 1px solid var(--line);
+  padding: 0 32px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+.data-table-wrap::-webkit-scrollbar { height: 4px; width: 4px; }
+.data-table-wrap::-webkit-scrollbar-thumb { background: var(--line2); }
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 11px;
+}
+.data-table th {
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text3);
+  text-align: left;
+  padding: 10px 0 8px;
+  border-bottom: 1.5px solid var(--slate-mid);
+  font-weight: 500;
+  font-family: 'Noto Sans JP', sans-serif;
+  position: sticky;
+  top: 0;
+  background: var(--bg2);
+}
+.data-table td {
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--text2);
+  vertical-align: middle;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table td.year { color: var(--text); font-weight: 400; width: 60px; }
+.data-table td.count { color: var(--amber); font-size: 13px; width: 100px; }
+.data-table td.src { color: var(--text3); font-size: 10px; }
+.data-table td.src a { color: var(--blue); text-decoration: none; }
+.src-link {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 8px;
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  color: var(--blue) !important;
+  font-size: 10px;
+  text-decoration: none !important;
+  transition: background 0.12s, border-color 0.12s;
+  margin-left: 2px;
+}
+.src-link:hover { background: var(--amber-dim); border-color: var(--amber); color: var(--amber) !important; }
+.data-table td.src a:hover { color: var(--amber); text-decoration: underline; }
+.est-tag {
+  display: inline-block;
+  font-size: 8px;
+  padding: 1px 6px;
+  background: var(--tag-est-bg);
+  color: var(--tag-est-c);
+  border: 1px solid var(--tag-est-b);
+  margin-left: 4px;
+  vertical-align: middle;
+  border-radius: 20px;
+}
+.verified-tag {
+  display: inline-block;
+  font-size: 8px;
+  padding: 1px 6px;
+  background: var(--tag-ok-bg);
+  color: var(--tag-ok-c);
+  border: 1px solid var(--tag-ok-b);
+  margin-left: 4px;
+  vertical-align: middle;
+  border-radius: 20px;
+}
+/* 複数ソース対応スタイル */
+.multi-src-row td { border-bottom: none !important; padding-bottom: 2px !important; }
+.src-sub-row td {
+  padding-top: 3px !important;
+  padding-bottom: 3px !important;
+  border-bottom: none !important;
+}
+.src-sub-row:last-of-type td { border-bottom: 1px solid var(--line) !important; }
+.src-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text3);
+}
+.src-line .src-bullet {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: var(--text3);
+  border: 1px solid var(--line2);
+  border-radius: 20px;
+  margin-top: 0px;
+}
+.src-line.primary .src-bullet { color: var(--amber); border-color: rgba(240,167,50,0.3); }
+.src-line .src-text { flex: 1; line-height: 1.4; }
+.src-method-tag {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  padding: 1px 5px;
+  background: var(--bg3);
+  color: var(--text3);
+  border: 1px solid var(--line2);
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.src-method-tag.wayback { border-color: var(--tag-web-b); color: var(--tag-web-c); background: var(--tag-web-bg); }
+.src-method-tag.note { border-color: var(--tag-note-b); color: var(--tag-note-c); background: var(--tag-note-bg); }
+.src-method-tag.press { border-color: var(--tag-press-b); color: var(--tag-press-c); background: var(--tag-press-bg); }
+.multi-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  padding: 1px 6px 1px 4px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--line2);
+  border-radius: 20px;
+  color: var(--text2);
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.multi-badge .dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: 0.7; }
+.count-range {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 2px;
+}
+.conflict-icon { color: var(--amber2); font-size: 9px; margin-left: 4px; }
+
+/* 資金調達バッジ */
+.funding-cell { font-family: var(--font-mono); font-size: 10px; }
+.funding-round {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 7px;
+  border-radius: 20px;
+  background: rgba(130,70,180,0.08);
+  border: 1px solid rgba(130,70,180,0.2);
+}
+.funding-round .round-label {
+  font-size: 9px;
+  color: var(--slate-dark);
+  letter-spacing: 0.06em;
+  font-weight: 400;
+}
+.funding-round .round-amount {
+  font-size: 11px;
+  color: var(--slate-dark);
+}
+.funding-round .round-unit { font-size: 9px; color: var(--slate); }
+.funding-none { color: var(--text3); font-size: 10px; }
+.funding-toggle.active { border-color: var(--slate-dark); color: var(--slate-dark); background: rgba(176,106,219,0.08); }
+
+/* Bottom bar */
+.bottom-bar {
+  padding: 8px 32px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-shrink: 0;
+}
+.bottom-note { font-family: 'Noto Sans JP', sans-serif; font-size: 9px; color: var(--text3); letter-spacing: 0.02em; }
+.bottom-note strong { color: var(--text2); font-weight: 400; }
+.legend { display: flex; gap: 16px; margin-left: auto; align-items: center; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-family: 'Noto Sans JP', sans-serif; font-size: 9px; color: var(--text3); letter-spacing: 0.02em; }
+.legend-line { width: 16px; height: 2px; }
+.legend-dash { width: 16px; height: 1px; border-top: 1px dashed var(--text3); }
+
+/* Events timeline */
+.events-strip {
+  flex-shrink: 0;
+  border-top: 1px solid var(--line);
+  padding: 0 32px;
+  height: 148px;
+  position: relative;
+}
+.events-strip-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line2) transparent;
+  padding: 12px 0 10px;
+}
+.events-strip-inner::-webkit-scrollbar { height: 3px; }
+.events-strip-inner::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 2px; }
+
+.event-year-col {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 36px;
+  margin-right: 12px;
+}
+.event-year-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: 0.06em;
+  padding: 0 0 6px;
+  border-bottom: 1px solid var(--line2);
+  margin-bottom: 8px;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+.event-year-col.highlighted .event-year-label {
+  color: var(--company-color, var(--amber));
+  border-bottom-color: var(--company-color, var(--amber));
+}
+.event-cards-col {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 220px;
+  max-width: 260px;
+  margin-right: 24px;
+}
+.event-card {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: default;
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+.event-card.has-url { cursor: pointer; }
+.event-card.has-url:hover { border-color: var(--line2); background: var(--bg3); }
+.event-card.highlighted { border-color: rgba(240,167,50,0.3); background: rgba(240,167,50,0.04); }
+/* 左端のカラーバー */
+.event-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: transparent;
+  transition: background 0.15s;
+}
+.event-card.interview::before { background: var(--tag-ok-c); }
+.event-card.product::before   { background: var(--tag-note-c); }
+.event-card.org::before       { background: var(--slate); }
+.event-card.award::before     { background: var(--tag-press-c); }
+.event-card.media::before     { background: var(--tag-press-c); }
+
+/* カードヘッダー行 */
+.event-card-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+  flex-wrap: wrap;
+}
+.event-card-type {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  padding: 1px 5px;
+  border-radius: 20px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.event-card-type.interview { background: var(--tag-ok-bg); color: var(--tag-ok-c); border: 1px solid var(--tag-ok-b); }
+.event-card-type.product   { background: var(--tag-note-bg); color: var(--tag-note-c); border: 1px solid var(--tag-note-b); }
+.event-card-type.org       { background: var(--slate-light); color: var(--slate-dark); border: 1px solid var(--slate-mid); }
+.event-card-type.award     { background: rgba(176,106,219,0.1); color: var(--slate-dark); border: 1px solid rgba(176,106,219,0.2); }
+.event-card-type.media     { background: var(--tag-press-bg); color: var(--tag-press-c); border: 1px solid var(--tag-press-b); }
+.event-card-source {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text3);
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.event-card-source.verified { color: var(--teal); }
+.event-card-date {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text3);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+/* タイトル */
+.event-card-title {
+  font-size: 11px;
+  color: var(--text);
+  line-height: 1.35;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 400;
+  margin-bottom: 4px;
+}
+/* 引用 */
+.event-card-quote {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 9.5px;
+  color: var(--text2);
+  line-height: 1.5;
+  border-left: 2px solid var(--line2);
+  padding-left: 7px;
+  margin: 4px 0;
+}
+.event-card-quote .quote-attr {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text3);
+  display: block;
+  margin-top: 2px;
+}
+/* 説明文 */
+.event-card-desc {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text3);
+  line-height: 1.4;
+  margin-top: 3px;
+}
+/* リンク */
+.event-card-link {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  color: var(--blue);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 5px;
+  opacity: 0.8;
+  transition: opacity 0.12s;
+}
+.event-card-link:hover { opacity: 1; color: var(--amber); }
+/* URLなしの場合 */
+.event-card-no-url {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text3);
+  margin-top: 5px;
+  opacity: 0.6;
+}
+.events-empty {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text3);
+}
+
+/* Grid overlay */
+.chart-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* Transition */
+.company-card { transition: background 0.15s, border-color 0.15s; }
+canvas { transition: opacity 0.3s; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo-icon"><span>HC</span></div>
+    <div class="logo">
+      HEADCOUNT
+      <span>日本スタートアップ在職者数データベース</span>
+    </div>
+    <div class="header-divider"></div>
+    <div class="header-meta">
+      <strong>3</strong> 企業 &nbsp;·&nbsp; <strong>2013–2026</strong> &nbsp;·&nbsp; 公開情報より収集
+    </div>
+    <div class="header-right">
+      <div class="source-badge">Wayback Machine / Corporate Site / PR Times</div>
+      <div class="live-dot" title="データ収集中"></div>
+    </div>
+  </header>
+
+  <!-- Sidebar（JS で動的生成） -->
+  <aside class="sidebar"></aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="main-header">
+      <div>
+        <div class="company-title" id="main-title">SmartHR</div>
+        <div class="company-subtitle" id="main-sub">設立 2013年1月 · クラウド人事労務ソフト · 東京都港区</div>
+      </div>
+      <div class="metric-row">
+        <div class="metric-block">
+          <div class="metric-val" id="metric-current">1,593</div>
+          <div class="metric-label">最新在職者数</div>
+          <div class="metric-change" id="metric-change">+45% (前年比)</div>
+        </div>
+        <div class="metric-block">
+          <div class="metric-val" id="metric-peak">1,593</div>
+          <div class="metric-label">過去最高</div>
+          <div class="metric-label" id="metric-peak-year">2026年</div>
+        </div>
+        <div class="metric-block">
+          <div class="metric-val" style="color:#7a3fb5;font-size:22px" id="metric-raised">約323億円</div>
+          <div class="metric-label">累計調達額</div>
+          <div class="metric-label" id="metric-rounds">5ラウンド</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="range-bar">
+      <button class="range-btn" onclick="setRange('all',this)">全期間</button>
+      <button class="range-btn active" onclick="setRange('5y',this)">5年</button>
+      <button class="range-btn" onclick="setRange('3y',this)">3年</button>
+      <div style="width:1px;height:16px;background:var(--line2);margin:0 8px"></div>
+      <button class="range-btn funding-toggle active" id="fundingToggle" onclick="toggleFunding()">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#7a3fb5;margin-right:5px;vertical-align:middle;opacity:0.85"></span>資金調達を表示
+      </button>
+    </div>
+
+    <div class="chart-area">
+      <div class="chart-wrap">
+        <canvas id="mainChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Events timeline strip -->
+    <div class="events-strip">
+      <div class="events-strip-inner" id="eventsStrip">
+        <div class="events-empty">記事・トピックデータを読み込み中...</div>
+      </div>
+    </div>
+
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width:54px">年</th>
+            <th style="width:110px">在職者数</th>
+            <th style="width:130px" id="th-funding">資金調達</th>
+            <th style="width:56px">信頼度</th>
+            <th>ソース（複数ある場合は全件表示）</th>
+          </tr>
+        </thead>
+        <tbody id="data-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="bottom-note">
+        <strong>注:</strong> 推定値は公開情報・文脈からの算出。確認済みは企業公式発表・Wayback Machineアーカイブより。
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-line" style="background:var(--amber)"></div>確認済みデータ</div>
+        <div class="legend-item"><div class="legend-dash"></div>推定値</div>
+        <div class="legend-item"><div class="legend-line" style="background:#7a3fb5;opacity:0.7;height:8px;border-radius:1px"></div>資金調達</div>
+        <div style="width:1px;height:12px;background:var(--line2)"></div>
+        <div class="legend-item"><span class="event-card-type interview" style="margin-bottom:0">記事</span></div>
+        <div class="legend-item"><span class="event-card-type org" style="margin-bottom:0">組織</span></div>
+        <div class="legend-item"><span class="event-card-type product" style="margin-bottom:0">プロダクト</span></div>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+const COMPANIES = [
+  {
+    name: 'SmartHR',
+    sub: '設立 2013年1月 · クラウド人事労務ソフト · 東京都港区',
+    sector: 'HRTech',
+    color: '#f0a732',
+    colorDim: 'rgba(240,167,50,0.15)',
+    funding: [
+      { year: 2015, round: 'Seed',     amount: 0.2,  note: 'YC等初期調達' },
+      { year: 2017, round: 'Series A', amount: 1.5,  note: 'インキュベイトファンド等' },
+      { year: 2018, round: 'Series B', amount: 15,   note: 'WiL・Eight Roads等' },
+      { year: 2019, round: 'Series C', amount: 61.5, note: 'Sequoia・WiL等' },
+      { year: 2021, round: 'Series D', amount: 156,  note: 'Light Street・Sequoia等' },
+      { year: 2024, round: 'Series E', amount: 214,  note: 'KKR・Ontario Teachers等' },
+    ],
+    events: [
+      { year: 2015, type: 'product',   title: 'SmartHRサービスリリース', desc: 'TechCrunch Tokyo 2015でグランプリ受賞。労務手続きのペーパーレス化を開始。', url: 'https://jp.techcrunch.com/2015/11/19/techcrunch-tokyo-2015-startup-battle/' },
+      { year: 2017, type: 'product',   title: '初のテレビCM放送・5,000社突破', desc: 'テレビCMで認知拡大。リリースから1年半で5,000社突破。', url: '' },
+      { year: 2018, type: 'interview', title: '採用面接資料を公開、応募5.3倍に', desc: 'CEO宮田氏がブログで採用ピッチ資料を公開。応募者数が5.3倍に増加した採用ブランディング事例。', url: '' },
+      { year: 2019, type: 'org',       title: '関西支社設立・T2D3急成長期へ', desc: 'Series C 61.5億円調達。大阪支社を設立。ARR成長で日本初のT2D3達成へ向けた組織拡大開始。', url: '' },
+      { year: 2020, type: 'interview', title: 'コロナ禍のリモートワーク対応', desc: 'コロナ禍で電子申請需要が急増。九州・東海支社設立。登録社数3万社突破。', url: '' },
+      { year: 2021, type: 'org',       title: 'ユニコーン企業に・組織1,000人への壁', desc: 'Series D 156億円調達で評価額1,700億円、国内10社目のユニコーンへ。300人・1,000人の「壁」を同時に経験。', url: 'https://blog.allstarsaas.com/posts/tackle-org-impediments' },
+      { year: 2021, type: 'interview', title: '採用組織の構築：2.5年のあゆみ', desc: '採用担当1人→18名体制へ。1人あたり年20名の内定承諾獲得ペースを確立した採用組織の設計。', url: 'https://note.com/hinas119/n/nc29283e67300' },
+      { year: 2022, type: 'org',       title: 'CEO交代・ミッション刷新', desc: '創業者宮田氏がCEO退任、芹澤氏が就任。ミッションを「well-working」に改定。マルチプロダクト戦略へ転換。', url: '' },
+      { year: 2022, type: 'interview', title: '人事体制構築：1,000人への壁の超え方', desc: '社員数60人〜800人をリードしたVP-HRが語る組織成長の知見。グレイナーモデルと権限委譲のリアル。', url: 'https://blog.allstarsaas.com/posts/tackle-org-impediments' },
+      { year: 2023, type: 'product',   title: 'タレントマネジメント本格展開', desc: '人事評価・配置シミュレーション・スキル管理など23機能を展開。有料顧客の30%がタレントマネジメント利用へ。', url: '' },
+      { year: 2024, type: 'interview', title: 'CFOが語るシリーズEと2030年戦略', desc: '29歳CFO森雄志氏が214億円調達をリード。「国内SaaSが経験したことのない山」を目指す成長戦略を語る。', url: 'https://note.com/smarthr_co/n/n083af858a652' },
+      { year: 2024, type: 'award',     title: '7年連続シェアNo.1・70,000社突破', desc: '労務管理クラウド7年連続シェアNo.1を維持。登録社数70,000社を突破。', url: '' },
+      { year: 2025, type: 'interview', title: '人的資本情報の開示強化', desc: '従業員1,320名。人的資本ページを公開し、エンゲージメント・育成・DEIBの定量指標を開示。', url: 'https://smarthr.co.jp/sustainability/human-capital/' },
+      { year: 2026, type: 'org',       title: '1,593名・スケールアップ宣言', desc: '「スタートアップにも大企業にもなれないスケールアップ企業」を宣言。2030年売上1,000億円に向けた組織体制を構築。', url: '' },
+    ],
+    data: [
+      { year: 2013, count: 2, est: false, sources: [
+        { text: '創業', method: '—', type: 'default' }
+      ]},
+      { year: 2014, count: 5, est: true, sources: [
+        { text: 'サービス開発期・推算', method: '推算', type: 'default' }
+      ]},
+      { year: 2015, count: 15, est: true, sources: [
+        { text: 'サービスリリース年・推算', method: '推算', type: 'default' }
+      ]},
+      { year: 2016, count: 25, est: true, sources: [
+        { text: '文脈から推算', method: '推算', type: 'default' }
+      ]},
+      { year: 2017, count: 40, est: false, sources: [
+        { text: 'officee magazine（移転記録）「従業員数が40名以上になり...」', method: 'Webアーカイブ', type: 'wayback' }
+      ]},
+      { year: 2018, count: 60, est: false, sources: [
+        { text: 'ALL STAR SAAS FUND記事（VP-HR入社時「社員数60人から800人規模まで...」）', method: 'メディア記事', type: 'default' },
+        { text: 'officee magazine（移転記録）「入居から1年3ヶ月...従業員数が100名を超え」←2019年初', method: 'Webアーカイブ', type: 'wayback' }
+      ]},
+      { year: 2019, count: 100, est: false, sources: [
+        { text: 'officee magazine（移転記録）「従業員数が100名を超え、想定よりも早く移転」', method: 'Webアーカイブ', type: 'wayback' },
+        { text: 'CFO note記事「入社した頃の従業員数は200人ほどでした」（2020年3月入社）との整合', method: '公式note', type: 'note' }
+      ]},
+      { year: 2020, count: 200, est: true, sources: [
+        { text: 'CFO note（2020年3月入社時「従業員数は200人ほど」）', method: '公式note', type: 'note' },
+        { text: '「2020〜22年に年間約200名増」記述から期初値を逆算', method: '推算', type: 'default' }
+      ]},
+      { year: 2021, count: 400, est: false, sources: [
+        { text: 'officee magazine「2021年3月現在では、従業員数は400名弱」', method: 'メディア記事', type: 'default' },
+        { text: 'ALL STAR SAAS FUND（VP-HR）「社員数60人から800人規模まで...2020〜2022年で年間200名増」', method: 'メディア記事', type: 'default' }
+      ]},
+      { year: 2022, count: 686, est: false, sources: [
+        { text: '採用サイト記載（2022年8月1日時点）「従業員数は686名」', method: 'コーポレートサイト', type: 'wayback' },
+        { text: 'ALL STAR SAAS FUND（VP-HR）「現在のSmartHRは約900名」（インタビュー時、2023年）←2022年末推算と整合', method: 'メディア記事', type: 'default' }
+      ]},
+      { year: 2023, count: 900, est: false, sources: [
+        { text: 'ALL STAR SAAS FUND（VP-HR発言）「現在のSmartHRは約900名の規模です」', method: 'メディア記事', type: 'default' }
+      ]},
+      { year: 2024, count: 1100, est: false, sources: [
+        { text: '自社PRリリース（2024年3月）「従業員数は2024年3月時点で1,100名」', method: 'PRリリース', type: 'press' },
+        { text: 'CFO note記事（2024年12月）「1,300名を超えました」←年末値', method: '公式note', type: 'note' }
+      ]},
+      { year: 2025, count: 1320, est: false, sources: [
+        { text: '自社Webサイト 人的資本ページ「従業員数 1,320名（2024年12月時点）」', method: 'コーポレートサイト', type: 'wayback' }
+      ]},
+      { year: 2026, count: 1593, est: false, sources: [
+        { text: '会社紹介資料 Speaker Deck「1,593名（2026年1月1日時点）」', method: 'カルチャーデック', type: 'press' }
+      ]},
+    ]
+  },
+  {
+    name: 'LayerX',
+    sub: '設立 2018年8月 · 法人支出管理SaaS「バクラク」 · 東京都中央区',
+    sector: 'SaaS',
+    color: '#3db8a0',
+    colorDim: 'rgba(61,184,160,0.1)',
+    funding: [
+      { year: 2021, round: 'Series A', amount: 28.8, note: 'DNX・三菱UFJ等（ファーストクローズ）' },
+      { year: 2023, round: 'Series A+', amount: 55,  note: 'セカンドクローズ含む累計' },
+    ],
+    events: [
+      { year: 2018, type: 'org',       title: 'LayerX創業：ブロックチェーン事業からスタート', desc: 'Gunosyとの合弁として設立。ブロックチェーン・DLT関連のコンサルティング・実証実験支援を主軸に。', url: '' },
+      { year: 2020, type: 'product',   title: 'バクラク請求書をローンチ・事業ピボット', desc: '請求書処理のデジタル化にフォーカス。電子帳簿保存法・インボイス制度の追い風を見据えたピボット。', url: '' },
+      { year: 2021, type: 'interview', title: 'MBO独立・コンパウンドスタートアップ戦略発表', desc: 'CEO福島氏がMBOで独立。複数プロダクトを同時開発する「コンパウンドスタートアップ」戦略を公表。', url: '' },
+      { year: 2022, type: 'org',       title: 'LayerX羅針盤 v1.0 公開・全員広報カルチャー確立', desc: '行動指針「LayerX羅針盤」を公開（累計91万View）。全社員がSNSで発信する「全員広報」文化が話題に。', url: 'https://speakerdeck.com/layerx/layerx-compass' },
+      { year: 2022, type: 'interview', title: 'イネーブルメント専門チームの立ち上げ', desc: '執行役員・名村卓氏がエンジニアリング組織のイネーブルメント専門チームを設立。テックを活用した生産性向上施策。', url: '' },
+      { year: 2023, type: 'interview', title: '「はたらきかた2023-2024」公開：220名組織の実態', desc: 'eNPS・出社率・育休取得数など組織KPIを全公開。人的資本経営の先進事例として注目を集める。', url: 'https://note.layerx.co.jp/n/n1af100ddc022' },
+      { year: 2023, type: 'product',   title: 'AI・LLM事業部を新設', desc: 'LLM Labsと Privacy Tech事業部を統合しAI・LLM事業部を設立。企業・行政のデータ活用・業務効率化支援へ。', url: '' },
+      { year: 2023, type: 'media',     title: 'ダイヤモンド「2025年に500人体制」報道', desc: 'シリーズA資金調達を報じたダイヤモンド記事。「2025年度に現在（約160人）の3倍強にあたる500人体制を目指す」。', url: 'https://diamond.jp/articles/-/334042' },
+      { year: 2024, type: 'interview', title: 'CEO福島「今LayerXに入るべき理由2024年版」', desc: '「社員数は300名を超えた。今期200名以上採用計画」。スケールアップ期でもスタートアップ体感が得られる理由を語る。', url: 'https://note.com/fukkyy/n/nfee7c476287e' },
+      { year: 2024, type: 'org',       title: '経団連加入・三菱UFJ等との業務提携拡大', desc: '2024年10月に経団連へ加入。金融機関・大手企業との業務提携を次々締結しエンタープライズ展開を加速。', url: 'https://www.keidanren.or.jp/journal/monthly/2024/10_newface3.html' },
+      { year: 2025, type: 'interview', title: '「はたらきかた2025」：390名・eNPS改善の軌跡', desc: 'フルリモート社員3割・非関東圏社員16%。育休延べ40名超。急拡大と社員エンゲージメントを両立する施策を公開。', url: 'https://note.layerx.co.jp/n/n8edcdec6410c' },
+      { year: 2026, type: 'interview', title: '「はたらきかた2026」：582名・eNPS 20pt改善', desc: '1年で390名→582名に急拡大しながらeNPSが20ポイント以上改善。HR Enabling部を新設しデータドリブンHRを本格化。', url: 'https://note.layerx.co.jp/n/n4ca3a768c9bf' },
+    ],
+    data: [
+      { year: 2018, count: 2, est: false, sources: [
+        { text: '創業', method: '—', type: 'default' }
+      ]},
+      { year: 2019, count: 20, est: true, sources: [
+        { text: 'ブロックチェーン期・文脈から推算', method: '推算', type: 'default' }
+      ]},
+      { year: 2020, count: 30, est: true, sources: [
+        { text: 'バクラクへのピボット期・文脈から推算', method: '推算', type: 'default' }
+      ]},
+      { year: 2021, count: 40, est: false, sources: [
+        { text: 'エンジニアブログ「LayerX全体で人数は40人から180人に（バクラク事業以外含む）」←2021年初が40名', method: 'コーポレートブログ', type: 'note' }
+      ]},
+      { year: 2022, count: 56, est: false, sources: [
+        { text: '日本銀行フォーラム登壇資料PDF「従業員数 56名」', method: 'カルチャーデック', type: 'press' },
+        { text: 'エンジニアブログ「2021年初の40名から2023年6月の180名」との整合', method: 'コーポレートブログ', type: 'note' }
+      ]},
+      { year: 2023, count: 220, est: false, sources: [
+        { text: '公式note「はたらきかた2023〜2024」「従業員数は220名。直近1年で85名の増員です」', method: '公式note', type: 'note' },
+        { text: 'エンジニアブログ（2023年6月）「40人から180人に」←6月時点180名', method: 'コーポレートブログ', type: 'note' },
+        { text: 'ダイヤモンド（2023年2月）シリーズA記事「現在（約160人）」', method: 'メディア記事', type: 'default' }
+      ]},
+      { year: 2024, count: 385, est: false, sources: [
+        { text: 'CEO note（2024年6月）「社員数はとうとう300名を超えました」', method: '公式note', type: 'note' },
+        { text: '採用媒体（2024年10月末日時点）「従業員数 385名」', method: 'コーポレートサイト', type: 'wayback' }
+      ]},
+      { year: 2025, count: 390, est: false, sources: [
+        { text: '公式note「はたらきかた2025」「従業員（正社員）は...390名（2025年1月時点）」', method: '公式note', type: 'note' }
+      ]},
+      { year: 2026, count: 582, est: false, sources: [
+        { text: '公式note「はたらきかた2026」「従業員数（正社員）は...582名（2026年1月時点）」', method: '公式note', type: 'note' }
+      ]},
+    ]
+  },
+  {
+    name: 'Ubie',
+    sub: '設立 2017年5月 · 医療AIプラットフォーム · 東京都中央区',
+    sector: 'HealthTech',
+    founding_year: 2017,
+    color: '#5b8fcc',
+    colorDim: 'rgba(91,143,204,0.1)',
+    funding: [
+      { year: 2018, round: 'Seed',     amount: 0.6,  note: 'D4Vから6000万円' },
+      { year: 2020, round: 'Series B', amount: 20,   note: 'DCMベンチャーズ等（総額約20億円）' },
+      { year: 2022, round: 'Series C', amount: 62.6, note: 'インパクトファイナンス含む累計' },
+      { year: 2024, round: 'Impact',   amount: 35,   note: 'インパクトファイナンス（35億円）' },
+    ],
+    events: [
+      { year: 2017, type: 'org',       title: '医師×エンジニアで創業', desc: '医師・阿部吉倫氏とエンジニア・久保恒太氏（高校同級生）が共同創業。AIを核とした医療プラットフォームを志向。', url: '' },
+      { year: 2018, type: 'product',   title: 'ユビーAI問診ローンチ・初社員入社', desc: '医療機関向けAI問診サービスをローンチ。D4Vから6000万円調達。初の社員が入社し組織としての歩みを開始。', url: '' },
+      { year: 2019, type: 'org',       title: 'ホラクラシー型組織の採用・評価制度なし宣言', desc: '役職・ヒエラルキーを持たないホラクラシー型組織を採用。「人事評価なし・業績連動型給与」という先進的制度が注目を集める。', url: '' },
+      { year: 2020, type: 'interview', title: '「2020年振り返り」：31名→86名、3倍成長', desc: '公式noteで1年間を数字で振り返り。コロナ禍でのオンライン診療需要増を追い風に組織を急拡大した軌跡。', url: 'https://note.com/ubie/n/n99cba7c28837' },
+      { year: 2020, type: 'award',     title: '日本サービス大賞「厚生労働大臣賞」受賞', desc: 'ユビーAI問診が日本サービス大賞で厚生労働大臣賞と審査員特別賞をW受賞。社会的認知が一気に拡大。', url: '' },
+      { year: 2021, type: 'interview', title: '採用人事不在でリファラル70%超を実現', desc: '専任採用担当者を置かないまま100名超の組織に。「全社員が採用担当者」という当事者意識の醸成プロセスを語る。', url: 'https://blog.allstarsaas.com/posts/ubie-recruitment' },
+      { year: 2021, type: 'product',   title: 'J-Startup選出・生活者向け「ユビー」をリリース', desc: 'J-Startupに選出。医療機関向けに加え生活者向けサービス「症状検索エンジン・ユビー」をリリース。月間利用者100万人超へ。', url: '' },
+      { year: 2022, type: 'org',       title: '米国・シンガポール進出・グローバル展開開始', desc: 'シンガポール支社に続き米国現地法人を設立。グローバルな医療プラットフォームを目指し海外展開を本格化。', url: '' },
+      { year: 2022, type: 'interview', title: '「部族から村ステージへ」組織の成長痛を語る', desc: '100名→200名への移行期に起きた5つの成長痛と対処法。スタートアップの組織設計者に広く読まれた記事。', url: '' },
+      { year: 2023, type: 'interview', title: '代表note「250名超でもSO全員配布の理由」', desc: '「レイターフェーズでも全正社員へストックオプションを付与」。その理由と哲学を代表・阿部氏が語る。累計調達100億円到達。', url: 'https://note.com/abeyoshinori/n/nae128c0fd087' },
+      { year: 2023, type: 'product',   title: 'ユビーfor Pharma開始・月間700万人突破', desc: '製薬企業向けソリューション「Ubie for Pharma」を本格展開。症状検索エンジン月間利用者が700万人を突破。', url: '' },
+      { year: 2024, type: 'org',       title: '海外事業再編・組織スリム化', desc: '米国事業の選択と集中に伴う組織再編。300名規模から240名へ調整。事業の「とてつもなく深いPMF」を確認し国内展開に集中。', url: '' },
+      { year: 2024, type: 'award',     title: '生成AI大賞2024 特別賞・優秀賞W受賞', desc: '生成AIを活用した「ユビー生成AI」が生成AI大賞で特別賞と優秀賞をダブル受賞。', url: '' },
+      { year: 2025, type: 'interview', title: '月間利用者1,200万人・セブン-イレブンと提携', desc: 'セブン-イレブン・ジャパンと資本業務提携。「いつでも、どこでも、誰もが」医療にアクセスできる社会インフラ構築へ。', url: '' },
+    ],
+    data: [
+      { year: 2017, count: 2, est: false, sources: [
+        { text: '創業', method: '—', type: 'default' }
+      ]},
+      { year: 2018, count: 5, est: false, sources: [
+        { text: 'Wikipedia「医療機関向け「ユビーAI問診」をローンチ。初めての社員が入社」', method: 'Wikipedia', type: 'default' }
+      ]},
+      { year: 2019, count: 31, est: false, sources: [
+        { text: '公式note「2020年振り返り」「2019年12月には31名でしたが」', method: '公式note', type: 'note' },
+        { text: 'ALL STAR SAAS FUND記事「2019年、Ubieの社員数は約20名弱でした」←業務委託含む可能性あり', method: 'メディア記事', type: 'default' }
+      ]},
+      { year: 2020, count: 86, est: false, sources: [
+        { text: '公式note「2020年振り返り」「2020年12月には86名となり、約3倍に」', method: '公式note', type: 'note' },
+        { text: 'ALL STAR SAAS FUND記事「2020年には40名」←時点が異なる可能性', method: 'メディア記事', type: 'default' }
+      ]},
+      { year: 2021, count: 114, est: false, sources: [
+        { text: 'PM Career求人サイト（2021年6月現在）「従業員数 114名」', method: 'コーポレートサイト', type: 'wayback' },
+        { text: 'ALL STAR SAAS FUND記事「2021年には100名と拡大」', method: 'メディア記事', type: 'default' },
+        { text: 'ALL STAR SAAS FUND別記事「社員約120名が働く」（記事公開時期より2021年末と推定）', method: 'メディア記事', type: 'default' }
+      ]},
+      { year: 2022, count: 200, est: false, sources: [
+        { text: 'コンサル転職サイト「2022年4月現在で200名の従業員を擁する」', method: 'コーポレートサイト', type: 'wayback' }
+      ]},
+      { year: 2023, count: 300, est: false, sources: [
+        { text: '代表note（2023年春）「Ubieも総勢250名を超えて来ました」', method: '公式note', type: 'note' },
+        { text: '公式note「会社紹介資料刷新」（2023年末）「社員数は300人に届く規模」', method: '公式note', type: 'note' }
+      ]},
+      { year: 2024, count: 260, est: true, sources: [
+        { text: '海外撤退・組織再編期の記述から文脈推算（2023年末300名→2025年4月240名）', method: '推算', type: 'default' }
+      ]},
+      { year: 2025, count: 240, est: false, sources: [
+        { text: '採用媒体（2025年4月現在）「従業員数 240名」', method: 'コーポレートサイト', type: 'wayback' },
+        { text: 'Wikipedia「2025年5月現在の従業員数は240名」', method: 'Wikipedia', type: 'default' }
+      ]},
+    ]
+  }
+];
+
+const EVENTS = {
+  SmartHR: [
+    { year: 2015, type: 'product',
+      source: 'TechCrunch Japan', date: '2015年11月',
+      title: 'TechCrunch Tokyo 2015 スタートアップバトル優勝',
+      quote: '「SmartHR」は社会保険や労働保険の手続きをオンライン化するクラウドサービス',
+      quoteAttr: 'TechCrunch Japan, 2015年11月',
+      desc: 'グランプリ受賞で一気に知名度拡大。サービスリリース直後の快挙。',
+      url: 'https://jp.techcrunch.com/2015/11/19/techcrunch-tokyo-2015-startup-battle/' },
+    { year: 2017, type: 'media',
+      source: 'officee magazine', date: '2021年3月（回顧）',
+      title: '初のテレビCM放映・社名変更・5,000社突破',
+      quote: '「従業員が40名以上になり、入居からわずか9ヶ月というタイミングで移転」',
+      quoteAttr: 'officee magazine（オフィス移転記録）',
+      desc: '株式会社KUFU → SmartHRに社名変更。CM開始でB2B認知が急拡大。',
+      url: '' },
+    { year: 2018, type: 'interview',
+      source: 'ALL STAR SAAS FUND', date: '2023年（回顧）',
+      title: '「社員数60人から800人規模まで」VP-HR薮田氏が語る組織設計',
+      quote: '「私が入社した2018年当時は、マニュアルやプロセスがなく、戸惑ったものです」',
+      quoteAttr: 'VP-HR 薮田孝仁氏（ALL STAR SAAS FUND掲載）',
+      desc: '60名規模で入社したVP-HRが2年半かけてオンボーディング体制を構築した軌跡。',
+      url: 'https://blog.allstarsaas.com/posts/tackle-org-impediments' },
+    { year: 2019, type: 'org',
+      source: 'officee magazine', date: '2021年3月（回顧）',
+      title: '100名超で六本木グランドタワーへ移転・Series C 61.5億円調達',
+      quote: '「入居から1年3ヶ月が過ぎる頃には、従業員数が100名を超え、想定よりも早く移転することになりました」',
+      quoteAttr: 'officee magazine（オフィス移転記録）',
+      desc: 'Sequoia・WiL等から61.5億円調達。採用・マーケ費に大型投資し、急拡大フェーズへ。',
+      url: '' },
+    { year: 2020, type: 'product',
+      source: 'SmartHR公式', date: '2020年9月',
+      title: '「ラクラク分析レポート」機能公開 ― HRデータ活用元年',
+      quote: '「社員数推移や平均年齢、平均勤続年数など従業員や組織の状態を、簡単に可視化する」',
+      quoteAttr: 'SmartHR公式プレスリリース, 2020年9月',
+      desc: 'タレントマネジメント機能群の展開を開始。労務管理からHR戦略プラットフォームへの転換点。',
+      url: '' },
+    { year: 2021, type: 'org',
+      source: 'INITIAL（スピーダ）', date: '2021年6月',
+      title: 'Series D 156億円調達・国内10社目のユニコーンに',
+      quote: '「Light Street Capitalが主導し、評価額は約1,700億円に達した」',
+      quoteAttr: 'INITIAL, 2021年6月',
+      desc: 'Sequoia・Light Street等海外VC主導の大型ラウンド。未上場のまま評価額1,700億円超を達成。',
+      url: '' },
+    { year: 2022, type: 'org',
+      source: 'Wikipedia / 公式', date: '2022年',
+      title: '創業者宮田昇始氏CEO退任 ― 芹澤雅人氏に経営バトン',
+      quote: '',
+      quoteAttr: '',
+      desc: 'ミッションを「well-working」に改定。スケールアップ期に向けた経営体制・事業戦略を刷新。',
+      url: '' },
+    { year: 2022, type: 'interview',
+      source: 'ALL STAR SAAS FUND', date: '2023年3月',
+      title: '「300人・1000人の壁」同時突破 ― VP-HRが語る組織成長の実態',
+      quote: '「SmartHRでは2020年から2022年にかけて、年間におおよそ200名ずつ増えていきました」',
+      quoteAttr: 'VP-HR 薮田孝仁氏（ALL STAR SAAS FUND, 2023年3月）',
+      desc: '権限委譲・オンボーディング・ミドルマネジメント構築など、急拡大期の組織課題と対策を詳述。',
+      url: 'https://blog.allstarsaas.com/posts/tackle-org-impediments' },
+    { year: 2023, type: 'product',
+      source: 'SmartHR公式', date: '2024年2月',
+      title: 'ARR 150億円突破・前年比150%成長 ― マルチプロダクト戦略が奏功',
+      quote: '「従業員数は2024年3月時点で1,100名の従業員が在籍しています」',
+      quoteAttr: 'SmartHR公式プレスリリース, 2024年2月',
+      desc: '人事評価・スキル管理・配置シミュレーションなど23機能を展開。タレントマネジメント利用率30%へ。',
+      url: 'https://smarthr.co.jp/news/info/26682/' },
+    { year: 2024, type: 'interview',
+      source: 'SmartHR公式note', date: '2024年12月',
+      title: 'CFO森雄志「29歳でCFO就任・214億円調達をリードした軌跡」',
+      quote: '「僕がSmartHRに入社した頃の従業員数は200人ほどでした」',
+      quoteAttr: 'CFO 森雄志氏（SmartHR公式note, 2024年12月）',
+      desc: '「国内SaaSが経験したことのない山」を目指す2030年戦略と、29歳CFOが語る組織の本音。',
+      url: 'https://note.com/smarthr_co/n/n083af858a652' },
+    { year: 2025, type: 'product',
+      source: 'SmartHR公式Webサイト', date: '2025年',
+      title: 'サービス10周年・7万社突破・人的資本情報を初公開',
+      quote: '「従業員数 1,320名（2024年12月時点）」「eNPS：91.7%の従業員がYesと回答」',
+      quoteAttr: 'SmartHR人的資本ページ, 2025年',
+      desc: '労務管理クラウド7年連続シェアNo.1。人的資本の定量指標をWebで開示し、透明性を強化。',
+      url: 'https://smarthr.co.jp/sustainability/human-capital/' },
+    { year: 2026, type: 'org',
+      source: 'Speaker Deck（公式会社紹介資料）', date: '2026年1月',
+      title: '1,593名体制・「スケールアップ企業」宣言',
+      quote: '「1,593名（うち正社員1,505名 / 2026年1月1日時点）」',
+      quoteAttr: 'SmartHR会社紹介資料（Speaker Deck）, 2026年1月',
+      desc: '「スタートアップにも大企業にもなれない」スケールアップ企業として2030年売上1,000億円を目指す。',
+      url: 'https://speakerdeck.com/smarthr_pr/smarthr-company-introduction1' },
+  ],
+  LayerX: [
+    { year: 2018, type: 'org',
+      source: '日経COMPASS / 公式', date: '2018年8月',
+      title: 'Gunosy・AnyPay合弁で創業 ― ブロックチェーン事業からスタート',
+      quote: '',
+      quoteAttr: '',
+      desc: 'CEO福島良典・CTO松本勇気体制で発足。DLT・ブロックチェーン技術のビジネス実装を主軸に。',
+      url: '' },
+    { year: 2019, type: 'org',
+      source: '日経COMPASS', date: '2019年10月',
+      title: 'MBOによりGunosyから独立 ― 事業ピボットへの転換点',
+      quote: '',
+      quoteAttr: '',
+      desc: '福島氏がMBOで独立。ブロックチェーン事業からSaaS・Fintechへのピボットを模索し始める。',
+      url: '' },
+    { year: 2021, type: 'product',
+      source: 'LayerXエンジニアブログ', date: '2023年7月（回顧）',
+      title: '「バクラク請求書」ローンチ ― 社員40名からの急拡大開始',
+      quote: '「バクラクは2021年1月にサービス公開し...LayerX全体で人数は40人から180人に」',
+      quoteAttr: 'LayerXエンジニアブログ, 2023年7月',
+      desc: '電帳法・インボイス制度の追い風を受けて急拡大。1プロダクトから6プロダクト体制へ。',
+      url: 'https://tech.layerx.co.jp/entry/bakuraku-data-management-2023' },
+    { year: 2022, type: 'interview',
+      source: '日本銀行フォーラム登壇資料', date: '2022年',
+      title: '「コンパウンドスタートアップ」戦略・LayerX羅針盤を公開',
+      quote: '「従業員数 56名 / 資本金 31億円（資本準備金含）」',
+      quoteAttr: '日本銀行フォーラム登壇資料（PDF）, 2022年',
+      desc: '複数事業を同時展開するコンパウンド戦略を宣言。羅針盤（行動指針）が累計91万Viewを記録。',
+      url: '' },
+    { year: 2023, type: 'org',
+      source: 'LayerX公式note', date: '2023年10月',
+      title: '「はたらきかた2023〜2024」公開 ― 組織データをフルオープンに',
+      quote: '「従業員数は220名。直近1年で85名の増員です」',
+      quoteAttr: 'LayerX公式note「はたらきかた2023〜2024」, 2023年10月',
+      desc: 'eNPS・リモート比率・育休取得数など組織KPIを全公開。採用広報の先進事例として注目を集める。',
+      url: 'https://note.layerx.co.jp/n/n1af100ddc022' },
+    { year: 2023, type: 'product',
+      source: 'Diamond Online', date: '2023年2月',
+      title: 'シリーズA 55億円調達・「2025年に500人体制」を表明',
+      quote: '「2025年度に現在（約160人）の3倍強にあたる従業員500人体制を目指す計画だ」',
+      quoteAttr: 'ダイヤモンド・オンライン, 2023年2月',
+      desc: 'AI・LLM事業部も新設し、コーポレートDX×AI活用の複合事業体として拡大を加速。',
+      url: 'https://diamond.jp/articles/-/334042' },
+    { year: 2024, type: 'interview',
+      source: 'CEO note（福島良典）', date: '2024年6月',
+      title: '「今LayerXに入るべき理由（2024年版）」― 300名超のリアル',
+      quote: '「社員数はとうとう300名を超えました。今期も200名以上を採用する計画です」',
+      quoteAttr: 'CEO 福島良典氏（note）, 2024年6月',
+      desc: '300名超のフェーズでもスタートアップ感を保てる理由と、事業の急成長ぶりを語る。',
+      url: 'https://note.com/fukkyy/n/nfee7c476287e' },
+    { year: 2025, type: 'org',
+      source: 'LayerX公式note', date: '2025年2月',
+      title: '「はたらきかた2025」公開 ― 390名・eNPS改善の軌跡',
+      quote: '「従業員（正社員）は...390名（2025年1月時点）から582名（2026年1月時点）になりました」',
+      quoteAttr: 'LayerX公式note「はたらきかた2026」, 2026年3月（2025年値の言及）',
+      desc: 'フルリモート社員3割・育休延べ40名超。急拡大と社員エンゲージメント両立の施策を公開。',
+      url: 'https://note.layerx.co.jp/n/n8edcdec6410c' },
+    { year: 2026, type: 'org',
+      source: 'LayerX公式note', date: '2026年3月',
+      title: '「はたらきかた2026」公開 ― 582名・eNPS 20pt以上改善',
+      quote: '「従業員数（正社員）は、この1年で390名（2025年1月時点）から582名（2026年1月時点）になりました」',
+      quoteAttr: 'LayerX公式note「はたらきかた2026」, 2026年3月',
+      desc: 'HR Enabling部を新設しデータ・AI活用による人事オペレーションを本格化。急拡大しながらeNPSが大幅改善。',
+      url: 'https://note.layerx.co.jp/n/n4ca3a768c9bf' },
+  ],
+  Ubie: [
+    { year: 2017, type: 'product',
+      source: 'Wikipedia', date: '2017年5月',
+      title: '医師×エンジニアが共同創業 ― AIで医療案内を目指す',
+      quote: '',
+      quoteAttr: '',
+      desc: '医師・阿部吉倫氏とエンジニア・久保恒太氏（高校同級生）が創業。AI問診の研究を事業化。',
+      url: '' },
+    { year: 2018, type: 'product',
+      source: 'Wikipedia', date: '2018年',
+      title: '「ユビーAI問診」医療機関向けにローンチ・初社員入社',
+      quote: '「医療機関向け「ユビーAI問診」をローンチ。初めての社員が入社」',
+      quoteAttr: 'Wikipedia「Ubie」',
+      desc: 'D4Vから6000万円調達。タブレット問診でカルテ記載時間の大幅短縮を実現。',
+      url: 'https://ja.wikipedia.org/wiki/Ubie' },
+    { year: 2019, type: 'org',
+      source: 'ALL STAR SAAS FUND', date: '2021年（回顧）',
+      title: 'ホラクラシー型組織・評価制度なし宣言',
+      quote: '「業務委託として関わり始めた2019年、Ubieの社員数は約20名弱でした」',
+      quoteAttr: 'Ubie組織開発メンバー（ALL STAR SAAS FUND掲載）',
+      desc: '役職・ヒエラルキーなし、業績連動型報酬という先進的な組織設計を採用。',
+      url: 'https://blog.allstarsaas.com/posts/ubie-recruitment' },
+    { year: 2020, type: 'interview',
+      source: 'Ubie公式note', date: '2020年12月',
+      title: '「2020年振り返り」― 31名→86名、約3倍成長の記録',
+      quote: '「2019年12月には31名でしたが、2020年12月には86名となり、約3倍になりました」',
+      quoteAttr: 'Ubie公式note, 2020年12月',
+      desc: 'コロナ禍でのオンライン診療需要増を追い風に急拡大。50名の壁を突破した1年。',
+      url: 'https://note.com/ubie/n/n99cba7c28837' },
+    { year: 2020, type: 'award',
+      source: '日本サービス大賞', date: '2020年',
+      title: '日本サービス大賞「厚生労働大臣賞」「審査員特別賞」W受賞',
+      quote: '',
+      quoteAttr: '',
+      desc: 'ユビーAI問診の社会的価値が評価される。医療系スタートアップとして全国的な認知を獲得。',
+      url: '' },
+    { year: 2021, type: 'interview',
+      source: 'ALL STAR SAAS FUND', date: '2021年',
+      title: '「採用人事不在でリファラル70%超を実現」― 全社員採用文化の仕組み',
+      quote: '「社員約120名が働く...2019年からの2年間で社員数5倍以上と急成長を遂げています」',
+      quoteAttr: 'Ubie組織開発メンバー（ALL STAR SAAS FUND）',
+      desc: '採用専任者を置かず、全社員が採用担当という文化で100名超の組織を構築した方法論。',
+      url: 'https://blog.allstarsaas.com/posts/ubie-recruitment' },
+    { year: 2021, type: 'product',
+      source: 'Ubie公式 / PM Career', date: '2021年6月',
+      title: 'J-Startup選出・114名体制・生活者向け「ユビー」をリリース',
+      quote: '「従業員数 114名」',
+      quoteAttr: 'PM Career求人サイト（2021年6月現在）',
+      desc: '医療機関向けに加え生活者向けサービスを開始。J-Startupにも選出され注目が集まる。',
+      url: '' },
+    { year: 2022, type: 'org',
+      source: 'コンサル転職サイト', date: '2022年4月',
+      title: 'Series C 62.6億円調達・200名体制・米国展開本格化',
+      quote: '「2022年4月現在で200名の従業員を擁する」',
+      quoteAttr: 'コンサル転職サイト（時点明示）, 2022年4月',
+      desc: 'インパクトファイナンスを活用した大型調達。米国現地法人を設立しグローバル展開へ。',
+      url: '' },
+    { year: 2023, type: 'interview',
+      source: '代表 阿部吉倫氏 note', date: '2023年4月',
+      title: '「250名超でも全正社員にSOを配る理由」― 代表が語る報酬哲学',
+      quote: '「Ubieも総勢250名を超えて来ました」',
+      quoteAttr: '代表 阿部吉倫氏（note）, 2023年4月',
+      desc: '創業以来の「全正社員へのSO付与」方針を大規模化後も維持する哲学と、その設計理由を公開。',
+      url: 'https://note.com/abeyoshinori/n/nae128c0fd087' },
+    { year: 2023, type: 'product',
+      source: 'Ubie公式note', date: '2023年11月',
+      title: '会社紹介資料を3年ぶり刷新 ― 「300人規模」の採用戦略を語る',
+      quote: '「Ubieの社員数は300人に届く規模となりましたが、非連続な成長にはさらなる人材が必要不可欠」',
+      quoteAttr: 'Ubie公式note, 2023年11月',
+      desc: '「成長可能性・勢い」を前面に打ち出した採用向け資料に改訂。300名規模での採用強化の一手。',
+      url: 'https://note.com/ubie/n/n41b8a3a9a2b6' },
+    { year: 2024, type: 'org',
+      source: 'ビズリーチ / Wikipedia', date: '2025年4〜5月',
+      title: '海外事業再編・240名体制へスリム化',
+      quote: '「2025年5月現在の従業員数は240名」',
+      quoteAttr: 'Wikipedia「Ubie」, 2025年5月',
+      desc: '米国・海外事業を縮小し日本市場の製薬企業向けプラットフォームに集中。選択と集中を断行。',
+      url: 'https://ja.wikipedia.org/wiki/Ubie' },
+    { year: 2025, type: 'product',
+      source: '各種公開情報', date: '2025年',
+      title: '月間利用者1,200万人・セブン-イレブンと資本業務提携',
+      quote: '',
+      quoteAttr: '',
+      desc: '「いつでも、どこでも、誰もが」医療にアクセスできる社会インフラを目指した提携戦略。',
+      url: '' },
+  ],
+};
+
+let currentCompany = 0;
+let currentRange = '5y';
+let showFunding = true;
+let mainChart = null;
+const sparkCharts = [];
+
+function toggleFunding() {
+  showFunding = !showFunding;
+  const btn = document.getElementById('fundingToggle');
+  btn.classList.toggle('active', showFunding);
+  buildMainChart(COMPANIES[currentCompany], currentRange);
+}
+
+function renderEventsStrip(company) {
+  const strip = document.getElementById('eventsStrip');
+  const events = EVENTS[company.name] || [];
+  if (!events.length) {
+    strip.innerHTML = '<div class="events-empty">この企業のトピックデータはまだありません</div>';
+    return;
+  }
+  const byYear = {};
+  events.forEach(e => {
+    if (!byYear[e.year]) byYear[e.year] = [];
+    byYear[e.year].push(e);
+  });
+  const years = Object.keys(byYear).map(Number).sort((a,b) => a - b);
+  const typeLabel = { interview: 'インタビュー', product: 'プロダクト', org: '組織', award: '受賞', media: 'メディア' };
+
+  strip.innerHTML = years.map(yr => {
+    const cards = byYear[yr].map(e => {
+      const hasUrl = !!e.url;
+      const quoteHTML = e.quote
+        ? `<div class="event-card-quote">${e.quote}${e.quoteAttr ? `<span class="quote-attr">― ${e.quoteAttr}</span>` : ''}</div>`
+        : '';
+      const linkHTML = hasUrl
+        ? `<a class="event-card-link" href="${e.url}" target="_blank" rel="noopener">一次情報を読む →</a>`
+        : `<span class="event-card-no-url">一次URLなし（要補完）</span>`;
+      return `
+        <div class="event-card ${e.type}${hasUrl ? ' has-url' : ''}" data-year="${yr}">
+          <div class="event-card-header">
+            <span class="event-card-type ${e.type}">${typeLabel[e.type] || e.type}</span>
+            <span class="event-card-source${hasUrl ? ' verified' : ''}">${e.source || '出典不明'}</span>
+            ${e.date ? `<span class="event-card-date">${e.date}</span>` : ''}
+          </div>
+          <div class="event-card-title">${e.title}</div>
+          ${quoteHTML}
+          <div class="event-card-desc">${e.desc}</div>
+          ${linkHTML}
+        </div>`;
+    }).join('');
+    return `
+      <div class="event-year-col" data-year="${yr}">
+        <div class="event-year-label">${yr}</div>
+      </div>
+      <div class="event-cards-col" data-year="${yr}">${cards}</div>`;
+  }).join('');
+}
+
+function highlightEventYear(year) {
+  const strip = document.getElementById('eventsStrip');
+  document.querySelectorAll('#eventsStrip [data-year]').forEach(el => {
+    const match = parseInt(el.dataset.year) === year;
+    if (el.classList.contains('event-year-col')) el.classList.toggle('highlighted', match);
+    if (el.classList.contains('event-cards-col')) {
+      el.querySelectorAll('.event-card').forEach(c => c.classList.toggle('highlighted', match));
+      if (match) {
+        // 親のscrollable containerに対してscrollIntoView相当を手動実行
+        const parent = strip;
+        const elLeft = el.offsetLeft;
+        parent.scrollTo({ left: elLeft - 40, behavior: 'smooth' });
+      }
+    }
+  });
+}
+
+// Color helper
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `${r},${g},${b}`;
+}
+
+function buildSparklines() {
+  COMPANIES.forEach((c, i) => {
+    const canvas = document.getElementById(`spark${i}`);
+    if (!canvas) return;
+    const years = c.data.map(d => d.year);
+    const counts = c.data.map(d => d.count);
+    const chart = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: years,
+        datasets: [{
+          data: counts,
+          borderColor: c.color,
+          borderWidth: 1.5,
+          pointRadius: 0,
+          tension: 0.3,
+          fill: true,
+          backgroundColor: c.colorDim,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: { x: { display: false }, y: { display: false } },
+        animation: false,
+      }
+    });
+    sparkCharts.push(chart);
+  });
+}
+
+function getFilteredData(company, range) {
+  const data = company.data;
+  const latestYear = data[data.length - 1].year;
+  if (range === 'all') return data;
+  const cutoff = range === '5y' ? latestYear - 5 : latestYear - 3;
+  return data.filter(d => d.year >= cutoff);
+}
+
+function buildMainChart(company, range) {
+  const filtered = getFilteredData(company, range);
+  const allYears = filtered.map(d => d.year);
+  const rgb = hexToRgb(company.color);
+
+  // 表示期間内の資金調達データ
+  const minYear = allYears[0], maxYear = allYears[allYears.length - 1];
+  const fundingInRange = (company.funding || []).filter(f => f.year >= minYear && f.year <= maxYear);
+
+  // 全年を包括したラベル（資金調達年も含める）
+  const allX = [...new Set([...allYears, ...fundingInRange.map(f => f.year)])].sort((a,b)=>a-b);
+
+  // ── 在職者数データセット ──
+  const datasets = [
+    {
+      label: '在職者数（確認済み）',
+      data: filtered.map(d => ({ x: d.year, y: d.est ? null : d.count })),
+      yAxisID: 'yHead',
+      borderColor: company.color,
+      backgroundColor: `rgba(${rgb},0.12)`,
+      borderWidth: 2,
+      pointRadius: filtered.map(d => d.est ? 0 : 5),
+      pointBackgroundColor: company.color,
+      pointBorderColor: '#ffffff',
+      pointBorderWidth: 2,
+      tension: 0.25,
+      fill: false,
+      spanGaps: false,
+      order: 2,
+    },
+    {
+      label: '在職者数（推定）',
+      data: filtered.map(d => ({ x: d.year, y: d.count })),
+      yAxisID: 'yHead',
+      borderColor: `rgba(${rgb},0.35)`,
+      borderDash: [4,4],
+      borderWidth: 1.5,
+      pointRadius: filtered.map(d => d.est ? 4 : 0),
+      pointBackgroundColor: `rgba(${rgb},0.4)`,
+      pointBorderColor: '#ffffff',
+      pointBorderWidth: 1,
+      tension: 0.25,
+      fill: { target: 'origin', above: `rgba(${rgb},0.05)` },
+      spanGaps: true,
+      order: 2,
+    }
+  ];
+
+  // ── 資金調達バーデータセット ──
+  if (showFunding && fundingInRange.length > 0) {
+    datasets.push({
+      type: 'bar',
+      label: '資金調達額（億円）',
+      data: allX.map(x => {
+        const f = fundingInRange.find(f => f.year === x);
+        return { x, y: f ? f.amount : null };
+      }),
+      yAxisID: 'yFund',
+      backgroundColor: allX.map(x => {
+        const f = fundingInRange.find(f => f.year === x);
+        return f ? 'rgba(176,106,219,0.45)' : 'transparent';
+      }),
+      borderColor: allX.map(x => {
+        const f = fundingInRange.find(f => f.year === x);
+        return f ? 'rgba(176,106,219,0.8)' : 'transparent';
+      }),
+      borderWidth: 1,
+      borderRadius: 3,
+      barPercentage: 0.35,
+      order: 3,
+    });
+  }
+
+  if (mainChart) mainChart.destroy();
+
+  // 資金調達の最大値（右軸スケール用）
+  const maxFund = fundingInRange.length > 0 ? Math.max(...fundingInRange.map(f => f.amount)) : 100;
+
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  mainChart = new Chart(ctx, {
+    type: 'line',
+    data: { datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a1e28',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          titleColor: '#8a8780',
+          bodyColor: '#e8e4da',
+          titleFont: { family: "'JetBrains Mono', monospace", size: 10 },
+          bodyFont: { family: "'JetBrains Mono', monospace", size: 12 },
+          padding: 12,
+          callbacks: {
+            title: (items) => items[0].parsed.x + '年',
+            label: (item) => {
+              if (item.parsed.y === null || item.parsed.y === 0) return null;
+              if (item.dataset.yAxisID === 'yFund') {
+                const f = fundingInRange.find(f => f.year === item.parsed.x);
+                const note = f ? ` (${f.round}${f.note ? ' · ' + f.note : ''})` : '';
+                return ` 調達 ${item.parsed.y}億円${note}`;
+              }
+              return ` 在職者数 ${item.parsed.y.toLocaleString()} 名`;
+            },
+            labelColor: (item) => {
+              if (item.dataset.yAxisID === 'yFund') return { borderColor: '#b06adb', backgroundColor: 'rgba(176,106,219,0.6)' };
+              return { borderColor: company.color, backgroundColor: company.color };
+            }
+          }
+        }
+      },
+      onHover: (evt, elements) => {
+        if (!elements || elements.length === 0) return;
+        try {
+          const ds = mainChart.data.datasets[elements[0].datasetIndex];
+          if (!ds || !ds.data) return;
+          const pt = ds.data[elements[0].index];
+          if (pt && typeof pt.x === 'number') {
+            highlightEventYear(Math.round(pt.x));
+          }
+        } catch (e) { /* ignore hover errors */ }
+      },
+      scales: {
+        x: {
+          type: 'linear',
+          min: minYear - 0.3,
+          max: maxYear + 0.3,
+          ticks: {
+            color: '#4a4845',
+            font: { family: "'JetBrains Mono', monospace", size: 10 },
+            stepSize: 1,
+            callback: v => Number.isInteger(v) ? v : '',
+          },
+          grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+          border: { color: 'rgba(255,255,255,0.07)' },
+        },
+        yHead: {
+          type: 'linear',
+          position: 'left',
+          ticks: {
+            color: '#4a4845',
+            font: { family: "'JetBrains Mono', monospace", size: 10 },
+            callback: v => v >= 1000 ? (v/1000).toFixed(1) + 'k' : v,
+          },
+          grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+          border: { color: 'rgba(255,255,255,0.07)' },
+        },
+        yFund: {
+          type: 'linear',
+          position: 'right',
+          display: showFunding && fundingInRange.length > 0,
+          max: maxFund * 2.2,
+          ticks: {
+            color: 'rgba(176,106,219,0.6)',
+            font: { family: "'JetBrains Mono', monospace", size: 9 },
+            callback: v => v > 0 ? v + '億' : '',
+            maxTicksLimit: 5,
+          },
+          grid: { display: false },
+          border: { color: 'rgba(176,106,219,0.2)', dash: [4,4] },
+        }
+      },
+      animation: { duration: 400, easing: 'easeInOutQuart' },
+    }
+  });
+}
+
+const TYPE_LABEL = { interview: '記事', org: '組織', product: 'プロダクト', award: '受賞', media: 'メディア' };
+
+function renderEventsStrip(company) {
+  const strip = document.getElementById('eventsStrip');
+  const events = company.events || [];
+  if (!events.length) {
+    strip.innerHTML = '<div class="events-empty">トピックデータなし</div>';
+    return;
+  }
+
+  // 年ごとにグループ化
+  const byYear = {};
+  events.forEach(e => {
+    if (!byYear[e.year]) byYear[e.year] = [];
+    byYear[e.year].push(e);
+  });
+
+  const years = Object.keys(byYear).map(Number).sort((a, b) => a - b);
+  const color = company.color;
+
+  strip.innerHTML = years.map(year => {
+    const cards = byYear[year].map(e => {
+      const linkHTML = e.url
+        ? `<a class="event-card-link" href="${e.url}" target="_blank" rel="noopener">記事を読む →</a>`
+        : '';
+      return `
+        <div class="event-card" data-year="${year}">
+          <span class="event-card-type ${e.type}">${TYPE_LABEL[e.type] || e.type}</span>
+          <div class="event-card-title">${e.title}</div>
+          <div class="event-card-desc">${e.desc}</div>
+          ${linkHTML}
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="event-year-col" id="evtYear${year}">
+        <div class="event-year-label" style="--company-color:${color}">${year}</div>
+      </div>
+      <div class="event-cards-col">${cards}</div>`;
+  }).join('');
+}
+
+function highlightEventYear(year) {
+  document.querySelectorAll('.event-year-col').forEach(el => {
+    el.classList.toggle('highlighted', el.id === `evtYear${year}`);
+  });
+  document.querySelectorAll('.event-card').forEach(el => {
+    el.classList.toggle('highlighted', parseInt(el.dataset.year) === year);
+  });
+  // ハイライト年のカラムが見えるようスクロール
+  const target = document.getElementById(`evtYear${year}`);
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+function methodClass(type) {
+  if (type === 'wayback') return 'wayback';
+  if (type === 'note') return 'note';
+  if (type === 'press') return 'press';
+  return '';
+}
+
+function methodLabel(type, method) {
+  return method;
+}
+
+function updateTable(company) {
+  const tbody = document.getElementById('data-tbody');
+  const rows = [...company.data].reverse();
+
+  tbody.innerHTML = rows.map(d => {
+    const isMulti = d.sources.length > 1;
+    const confClass = d.est ? 'var(--text3)' : 'var(--teal)';
+    const confLabel = d.est ? '低' : '高';
+    const counts = d.sources.map(s => s.count).filter(Boolean);
+    const hasConflict = counts.length > 1 && (Math.max(...counts) - Math.min(...counts)) > 20;
+
+    const multiBadge = isMulti
+      ? `<span class="multi-badge"><span class="dot"></span>${d.sources.length}件</span>`
+      : '';
+    const conflictIcon = hasConflict ? `<span class="conflict-icon" title="ソース間で数値に差異あり">⚠</span>` : '';
+
+    const countCell = `
+      <td class="count">
+        ${d.count.toLocaleString()}
+        ${d.est ? '<span class="est-tag">推定</span>' : '<span class="verified-tag">確認</span>'}
+        ${conflictIcon}
+      </td>`;
+
+    // 資金調達セル
+    const fundings = (company.funding || []).filter(f => f.year === d.year);
+    const fundingCell = fundings.length > 0
+      ? fundings.map(f => `
+          <div class="funding-round" style="margin-bottom:3px">
+            <span class="round-label">${f.round}</span>
+            <span class="round-amount">${f.amount < 1 ? (f.amount * 100).toFixed(0) + '千万' : f.amount + '億'}</span>
+            <span class="round-unit">円</span>
+          </div>
+          ${f.note ? `<div style="font-family:var(--font-mono);font-size:9px;color:var(--text3);margin-top:2px;line-height:1.4">${f.note}</div>` : ''}
+        `).join('')
+      : `<span class="funding-none">—</span>`;
+
+    const srcLines = d.sources.map((s, idx) => {
+      const linkHtml = s.url
+        ? `<a href="${s.url}" target="_blank" rel="noopener" class="src-link">↗</a>`
+        : '';
+      return `
+        <div class="src-line ${idx === 0 && isMulti ? 'primary' : ''}">
+          ${isMulti ? `<span class="src-bullet">${idx + 1}</span>` : ''}
+          <span class="src-text">${s.text}</span>
+          <span class="src-method-tag ${methodClass(s.type)}">${s.method}</span>
+          ${linkHtml}
+        </div>`;
+    }).join('');
+
+    return `
+      <tr>
+        <td class="year">${d.year}</td>
+        ${countCell}
+        <td class="funding-cell" style="padding-top:6px;padding-bottom:6px;vertical-align:top">${fundingCell}</td>
+        <td style="font-family:var(--font-mono);font-size:10px;color:${confClass};width:56px">${confLabel}</td>
+        <td class="src" style="padding-top:6px;padding-bottom:6px">
+          <div style="display:flex;align-items:center;margin-bottom:${isMulti ? 6 : 0}px">
+            ${isMulti ? `<span style="font-family:var(--font-mono);font-size:9px;color:var(--text3);letter-spacing:0.06em">複数ソース</span>${multiBadge}` : ''}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px">${srcLines}</div>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function updateMetrics(company) {
+  const data = company.data;
+  const latest = data[data.length - 1];
+  const prev = data.length >= 2 ? data[data.length - 2] : null;
+  const peak = data.reduce((a,b) => b.count > a.count ? b : a, data[0]);
+  const change = prev ? Math.round((latest.count - prev.count) / prev.count * 100) : null;
+
+  document.getElementById('main-title').textContent = company.name;
+  document.getElementById('main-sub').textContent = company.sub;
+  document.getElementById('metric-current').textContent = latest.count.toLocaleString();
+  const COLOR_MAP2 = { 'SmartHR':'var(--smarthr)','LayerX':'var(--layerx)','Ubie':'var(--ubie)' };
+  const companyColor = COLOR_MAP2[company.name] || 'var(--slate-dark)';
+  document.getElementById('metric-current').style.color = companyColor;
+  document.getElementById('metric-peak').textContent = peak.count.toLocaleString();
+  document.getElementById('metric-peak-year').textContent = peak.year + '年';
+  if (change !== null) {
+    const el = document.getElementById('metric-change');
+    el.textContent = (change >= 0 ? '+' : '') + change + '% (前年比)';
+    el.className = 'metric-change' + (change < 0 ? ' neg' : '');
+  }
+
+  // 資金調達サマリー
+  const fundings = company.funding || [];
+  const totalRaised = fundings.reduce((sum, f) => sum + f.amount, 0);
+  const raisedEl = document.getElementById('metric-raised');
+  const roundsEl = document.getElementById('metric-rounds');
+  if (totalRaised > 0) {
+    raisedEl.textContent = '約' + (totalRaised >= 100 ? Math.round(totalRaised) : totalRaised.toFixed(1)) + '億円';
+    roundsEl.textContent = fundings.length + 'ラウンド';
+  } else {
+    raisedEl.textContent = '—';
+    roundsEl.textContent = 'データなし';
+  }
+}
+
+function selectCompany(idx) {
+  currentCompany = idx;
+  document.querySelectorAll('.company-card').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
+  const company = COMPANIES[idx];
+  updateMetrics(company);
+  buildMainChart(company, currentRange);
+  updateTable(company);
+  renderEventsStrip(company);
+}
+
+function setRange(range, btn) {
+  currentRange = range;
+  document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  buildMainChart(COMPANIES[currentCompany], range);
+}
+
+// ══════════════════════════════════════════════════════
+// ★ ここだけ設定してください ★
+// ══════════════════════════════════════════════════════
+// GoogleスプレッドシートのURLから「/d/」と「/edit」の間の文字列をコピーして貼り付ける
+// 例: https://docs.google.com/spreadsheets/d/【ここをコピー】/edit
+const SHEET_ID = '1e8nkbh_PogCIXYccOhu7AcnEu4EibNFC';
+
+// ══════════════════════════════════════════════════════
+// Google Sheets CSV 読み込み
+// ══════════════════════════════════════════════════════
+
+function sheetUrl(sheetName) {
+  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+}
+
+// CSVテキスト → 行の配列に変換
+function parseCsv(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
+  return lines.slice(1).map(line => {
+    // カンマ区切り（ダブルクォート内のカンマを無視）
+    const values = [];
+    let current = '', inQuote = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') { inQuote = !inQuote; continue; }
+      if (ch === ',' && !inQuote) { values.push(current.trim()); current = ''; continue; }
+      current += ch;
+    }
+    values.push(current.trim());
+    return Object.fromEntries(headers.map((h, i) => [h, values[i] ?? '']));
+  }).filter(row => Object.values(row).some(v => v !== ''));
+}
+
+async function loadSiteData() {
+  // SHEET_ID が未設定の場合はスキップ
+  if (SHEET_ID === 'YOUR_SHEET_ID_HERE') {
+    console.info('[Sheets] SHEET_ID が未設定のため手動データを使用します');
+    showDataBadge('手動入力データ', 'fallback');
+    return;
+  }
+
+  try {
+    showLoadingState('スプレッドシートからデータを読み込み中...');
+
+    // 3シートを並列フェッチ
+    const [hcResp, fundResp, evtResp] = await Promise.all([
+      fetch(sheetUrl('headcount'), { cache: 'no-cache' }),
+      fetch(sheetUrl('funding'),   { cache: 'no-cache' }),
+      fetch(sheetUrl('events'),    { cache: 'no-cache' }),
+    ]);
+
+    if (!hcResp.ok) throw new Error(`headcount シートの読み込みに失敗 (HTTP ${hcResp.status})`);
+
+    const hcRows   = parseCsv(await hcResp.text());
+    const fundRows = fundResp.ok ? parseCsv(await fundResp.text()) : [];
+    const evtRows  = evtResp.ok  ? parseCsv(await evtResp.text())  : [];
+
+    if (hcRows.length === 0) throw new Error('headcount シートにデータがありません');
+
+    // ── headcount → COMPANIES[].data に変換 ──────────────
+    // シートの列: company | year | count | est | source_text | source_method | source_type
+    const byCompany = {};
+    hcRows.forEach(row => {
+      const name = row.company?.trim();
+      if (!name) return;
+      if (!byCompany[name]) byCompany[name] = [];
+      byCompany[name].push({
+        year:    parseInt(row.year) || 0,
+        count:   parseInt(row.count) || 0,
+        est:     row.est?.toLowerCase() === 'true' || row.est === '1' || row.est === 'TRUE',
+        sources: [{
+          text:   row.source_text   || '',
+          method: row.source_method || '',
+          type:   row.source_type   || 'default',
+          url:    row.source_url    || '',
+        }],
+      });
+    });
+
+    // ── funding → COMPANIES[].funding に変換 ─────────────
+    // シートの列: company | year | round | amount | note
+    const fundByCompany = {};
+    fundRows.forEach(row => {
+      const name = row.company?.trim();
+      if (!name) return;
+      if (!fundByCompany[name]) fundByCompany[name] = [];
+      fundByCompany[name].push({
+        year:   parseInt(row.year) || 0,
+        round:  row.round  || '',
+        amount: parseFloat(row.amount) || 0,
+        note:   row.note   || '',
+      });
+    });
+
+    // ── events → EVENTS に変換 ───────────────────────────
+    // シートの列: company | year | type | title | source | date | quote | quoteAttr | desc | url
+    const evtByCompany = {};
+    evtRows.forEach(row => {
+      const name = row.company?.trim();
+      if (!name) return;
+      if (!evtByCompany[name]) evtByCompany[name] = [];
+      evtByCompany[name].push({
+        year:       parseInt(row.year) || 0,
+        type:       row.type      || 'org',
+        title:      row.title     || '',
+        source:     row.source    || '',
+        date:       row.date      || '',
+        quote:      row.quote     || '',
+        quoteAttr:  row.quoteAttr || '',
+        desc:       row.desc      || '',
+        url:        row.url       || '',
+      });
+    });
+
+    // ── COMPANIES に反映 ─────────────────────────────────
+    let mergedCount = 0;
+    COMPANIES.forEach(company => {
+      const name = company.name;
+
+      if (byCompany[name] && byCompany[name].length > 0) {
+        company.data    = byCompany[name].sort((a, b) => a.year - b.year);
+        company.funding = fundByCompany[name] || company.funding || [];
+        mergedCount++;
+      }
+
+      // EVENTS も上書き（eventsシートがある場合のみ）
+      if (evtByCompany[name] && evtByCompany[name].length > 0) {
+        EVENTS[name] = evtByCompany[name].sort((a, b) => a.year - b.year);
+      }
+    });
+
+    // スプレッドシートにない企業名があれば新規追加
+    Object.keys(byCompany).forEach(name => {
+      if (!COMPANIES.find(c => c.name === name)) {
+        COMPANIES.push({
+          name,
+          sub:          '',
+          sector:       '',
+          color:        '#888780',
+          colorDim:     'rgba(136,135,128,0.15)',
+          founding_year: byCompany[name][0]?.year,
+          data:          byCompany[name].sort((a, b) => a.year - b.year),
+          funding:       fundByCompany[name] || [],
+        });
+        EVENTS[name] = evtByCompany[name] || [];
+        mergedCount++;
+      }
+    });
+
+    // ヘッダーに更新日を表示
+    const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' });
+    const metaEl = document.querySelector('.header-meta');
+    if (metaEl) {
+      const companyCount = Object.keys(byCompany).length;
+      metaEl.innerHTML = `<strong>${companyCount}</strong> 企業 &nbsp;·&nbsp; スプレッドシートより &nbsp;·&nbsp; 更新: <strong>${today}</strong>`;
+    }
+
+    showDataBadge('スプレッドシート連携', 'loaded');
+    console.log(`[Sheets] ${mergedCount}社のデータを読み込みました`);
+
+  } catch (e) {
+    console.warn('[Sheets] 読み込みに失敗しました（手動データを使用）:', e.message);
+    showLoadingState('');
+    showDataBadge('手動入力データ（フォールバック）', 'fallback');
+  }
+}
+
+function showLoadingState(msg) {
+  const eventsStrip = document.getElementById('eventsStrip');
+  if (eventsStrip && msg) {
+    eventsStrip.innerHTML = `<div class="events-empty">${msg}</div>`;
+  }
+}
+
+function showDataBadge(label, mode) {
+  const badge = document.querySelector('.source-badge');
+  if (!badge) return;
+  const color = mode === 'loaded' ? 'var(--teal)' : 'var(--text3)';
+  badge.innerHTML = `<span style="color:${color}">●</span> ${label}`;
+}
+
+// ══════════════════════════════════════════════════════
+// サイドバーを企業リストから動的生成
+// ══════════════════════════════════════════════════════
+
+function renderSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  if (!sidebar) return;
+
+  const COLOR_MAP = { 'SmartHR':'smarthr','LayerX':'layerx','Ubie':'ubie' };
+  const cards = COMPANIES.map((c, idx) => {
+    const latest = c.data[c.data.length - 1];
+    const latestStr = latest ? latest.count.toLocaleString() : '—';
+    const latestYear = latest ? `${latest.year}年` : '';
+    const colorKey = COLOR_MAP[c.name] || 'slate';
+    return `
+      <div class="company-card${idx === 0 ? ' active' : ''}" data-color="${colorKey}" onclick="selectCompany(${idx})">
+        <div class="company-name">
+          ${c.name}
+          <span class="company-badge">${c.sector || ''}</span>
+        </div>
+        <div class="company-stats">
+          <div class="stat">
+            <div class="stat-val">${latestStr}</div>
+            <div class="stat-label">${latestYear} 現在</div>
+          </div>
+          <div class="stat">
+            <div class="stat-val">${c.founding_year || c.data[0]?.year || '—'}</div>
+            <div class="stat-label">創業年</div>
+          </div>
+        </div>
+        <div class="sparkline-wrap">
+          <canvas class="spark" id="spark${idx}"></canvas>
+        </div>
+      </div>`;
+  }).join('<div class="sidebar-divider" style="margin:0"></div>');
+
+  sidebar.innerHTML = `
+    <div class="sidebar-label">企業一覧</div>
+    ${cards}
+    <div class="sidebar-divider"></div>
+    <div class="add-btn">
+      <div class="add-icon">+</div>
+      企業を追加する
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════
+// 初期化
+// ══════════════════════════════════════════════════════
+
+window.addEventListener('DOMContentLoaded', async () => {
+  // ① site_data.json を非同期で読み込む（失敗しても続行）
+  await loadSiteData();
+
+  // ② サイドバーを動的生成（データ確定後）
+  renderSidebar();
+
+  // ③ スパークラインとメインチャートを描画
+  buildSparklines();
+  selectCompany(0);
+});
+</script>
+</body>
+</html>
