@@ -1728,7 +1728,7 @@ function setRange(range, btn) {
 // ══════════════════════════════════════════════════════
 // GoogleスプレッドシートのURLから「/d/」と「/edit」の間の文字列をコピーして貼り付ける
 // 例: https://docs.google.com/spreadsheets/d/【ここをコピー】/edit
-const SHEET_ID = '1e8nkbh_PogCIXYccOhu7AcnEu4EibNFC';
+const SHEET_ID = '1ewHmPAqbWpalU7he2UbwpNHbsrmLlGzDKPRJ1G7rIZA';
 
 // ══════════════════════════════════════════════════════
 // Google Sheets CSV 読み込み
@@ -1811,18 +1811,11 @@ async function loadSiteData() {
       const name = row.company?.trim();
       if (!name) return;
       if (!fundByCompany[name]) fundByCompany[name] = [];
-      // 列名が「amount（億円）」等でも対応できるよう全キーを検索
-      const vals = Object.values(row);
-      const keys = Object.keys(row);
-      const amountKey = keys.find(k => k.includes('amount') || k.includes('Amount'));
-      const noteKey   = keys.find(k => k.includes('note')   || k.includes('Note'));
-      const amountVal = amountKey ? row[amountKey] : vals[2];
-      const noteVal   = noteKey   ? row[noteKey]   : vals[4];
       fundByCompany[name].push({
         year:   parseInt(row.year) || 0,
         round:  row.round  || '',
-        amount: parseFloat(String(amountVal).replace(/[^0-9.]/g, '')) || 0,
-        note:   noteVal || '',
+        amount: parseFloat(row.amount) || 0,
+        note:   row.note   || '',
       });
     });
 
