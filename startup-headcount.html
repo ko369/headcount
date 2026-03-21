@@ -85,23 +85,23 @@ body {
   gap: 32px;
 }
 .logo {
-  font-family: var(--font-serif);
-  font-size: 15px;
-  font-weight: 300;
-  letter-spacing: 0.12em;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   color: var(--slate-dark);
 }
 .logo span { color: var(--text3); font-size: 11px; letter-spacing: 0.06em; display: block; margin-top: 1px; }
 .logo-icon { width:26px; height:26px; background:var(--slate-dark); border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-right:8px; }
 .logo-icon span { color:#fff; font-size:9px; font-weight:500; letter-spacing:0.02em; display:block; margin:0; }
 .header-divider { width: 1px; height: 24px; background: var(--line2); }
-.header-meta { font-family: var(--font-mono); font-size: 10px; color: var(--text3); letter-spacing: 0.04em; }
+.header-meta { font-family: 'Noto Sans JP', sans-serif; font-size: 10px; color: var(--text3); letter-spacing: 0.02em; }
 .header-meta strong { color: var(--text2); font-weight: 400; }
 .header-right { margin-left: auto; display: flex; align-items: center; gap: 20px; }
 .source-badge {
-  font-family: var(--font-mono);
+  font-family: 'Noto Sans JP', sans-serif;
   font-size: 9px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.02em;
   color: var(--text3);
   border: 1px solid var(--slate-mid);
   padding: 3px 10px;
@@ -125,13 +125,12 @@ body {
 .sidebar::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 2px; }
 
 .sidebar-label {
-  font-family: var(--font-mono);
+  font-family: 'Noto Sans JP', sans-serif;
   font-size: 9px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text3);
   padding: 0 20px 12px;
-  letter-spacing: 0.1em;
 }
 
 .company-card {
@@ -151,7 +150,8 @@ body {
 .company-card.active[data-color='ubie']    { background:var(--ubie-light);    border-left-color:var(--ubie);    }
 .company-name {
   font-size: 13px;
-  font-weight: 400;
+  font-weight: 500;
+  font-family: 'Noto Sans JP', sans-serif;
   color: var(--text);
   margin-bottom: 4px;
   display: flex;
@@ -174,7 +174,7 @@ body {
   gap: 16px;
   margin-top: 6px;
 }
-.stat { font-family: var(--font-mono); font-size: 10px; color: var(--text3); }
+.stat { font-family: 'Noto Sans JP', sans-serif; font-size: 10px; color: var(--text3); }
 .stat-val { color: var(--slate-dark); font-size: 11px; }
 .stat-label { font-size: 9px; color: var(--text3); margin-top: 1px; }
 .sparkline-wrap { margin-top: 8px; height: 24px; }
@@ -188,12 +188,12 @@ body {
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  font-family: var(--font-mono);
+  font-family: 'Noto Sans JP', sans-serif;
   font-size: 10px;
   color: var(--text3);
   cursor: pointer;
   transition: color 0.15s;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
 }
 .add-btn:hover { color: var(--amber); }
 .add-icon { width: 14px; height: 14px; border: 1px solid currentColor; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 12px; line-height: 1; }
@@ -210,18 +210,17 @@ body {
   flex-shrink: 0;
 }
 .company-title {
-  font-family: var(--font-serif);
-  font-size: 26px;
-  font-weight: 300;
-  font-style: italic;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
   color: var(--text);
   line-height: 1.2;
 }
 .company-subtitle {
-  font-family: var(--font-mono);
+  font-family: 'Noto Sans JP', sans-serif;
   font-size: 10px;
   color: var(--text3);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.02em;
   margin-top: 4px;
 }
 .metric-row {
@@ -231,21 +230,21 @@ body {
 }
 .metric-block { text-align: right; }
 .metric-val {
-  font-family: var(--font-mono);
-  font-size: 28px;
-  font-weight: 300;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 26px;
+  font-weight: 500;
   color: var(--slate-dark);
   line-height: 1;
 }
 .metric-label {
-  font-family: var(--font-mono);
+  font-family: 'Noto Sans JP', sans-serif;
   font-size: 9px;
   color: var(--text3);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.02em;
   margin-top: 4px;
 }
 .metric-change {
-  font-family: var(--font-mono);
+  font-family: 'Noto Sans JP', sans-serif;
   font-size: 11px;
   color: var(--teal);
   margin-top: 2px;
@@ -277,7 +276,7 @@ body {
   border-bottom: 1px solid var(--line);
 }
 .range-btn {
-  font-family: var(--font-mono);
+  font-family: 'Noto Sans JP', sans-serif;
   font-size: 9px;
   padding: 4px 12px;
   border: 1px solid var(--line);
@@ -304,18 +303,19 @@ body {
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-family: var(--font-mono);
+  font-family: 'Noto Sans JP', sans-serif;
   font-size: 11px;
 }
 .data-table th {
   font-size: 9px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text3);
   text-align: left;
   padding: 10px 0 8px;
   border-bottom: 1.5px solid var(--slate-mid);
   font-weight: 500;
+  font-family: 'Noto Sans JP', sans-serif;
   position: sticky;
   top: 0;
   background: var(--bg2);
@@ -473,10 +473,10 @@ body {
   gap: 24px;
   flex-shrink: 0;
 }
-.bottom-note { font-family: var(--font-mono); font-size: 9px; color: var(--text3); letter-spacing: 0.04em; }
+.bottom-note { font-family: 'Noto Sans JP', sans-serif; font-size: 9px; color: var(--text3); letter-spacing: 0.02em; }
 .bottom-note strong { color: var(--text2); font-weight: 400; }
 .legend { display: flex; gap: 16px; margin-left: auto; align-items: center; }
-.legend-item { display: flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 9px; color: var(--text3); letter-spacing: 0.04em; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-family: 'Noto Sans JP', sans-serif; font-size: 9px; color: var(--text3); letter-spacing: 0.02em; }
 .legend-line { width: 16px; height: 2px; }
 .legend-dash { width: 16px; height: 1px; border-top: 1px dashed var(--text3); }
 
@@ -603,14 +603,13 @@ body {
   font-size: 11px;
   color: var(--text);
   line-height: 1.35;
-  font-family: 'Noto Serif JP', serif;
+  font-family: 'Noto Sans JP', sans-serif;
   font-weight: 400;
   margin-bottom: 4px;
 }
 /* 引用 */
 .event-card-quote {
-  font-family: var(--font-serif);
-  font-style: italic;
+  font-family: 'Noto Sans JP', sans-serif;
   font-size: 9.5px;
   color: var(--text2);
   line-height: 1.5;
