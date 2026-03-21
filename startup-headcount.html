@@ -1814,8 +1814,8 @@ async function loadSiteData() {
       fundByCompany[name].push({
         year:   parseInt(row.year) || 0,
         round:  row.round  || '',
-        amount: parseFloat(row.amount) || 0,
-        note:   row.note   || '',
+        amount: parseFloat(row['amount（億円）'] || row.amount) || 0,
+        note:   row['note（投資家等）'] || row.note || '',
       });
     });
 
