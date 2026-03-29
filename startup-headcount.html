@@ -2310,172 +2310,74 @@ function setRange(range, btn) {
 }
 
 // ══════════════════════════════════════════════════════
-// ★ ここだけ設定してください ★
+// ★ API連携設定 ★
 // ══════════════════════════════════════════════════════
-// GoogleスプレッドシートのURLから「/d/」と「/edit」の間の文字列をコピーして貼り付ける
-// 例: https://docs.google.com/spreadsheets/d/【ここをコピー】/edit
-const SHEET_ID = '1ewHmPAqbWpalU7he2UbwpNHbsrmLlGzDKPRJ1G7rIZA';
-
-// ══════════════════════════════════════════════════════
-// Google Sheets CSV 読み込み
-// ══════════════════════════════════════════════════════
-
-function sheetUrl(sheetName) {
-  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-}
-
-// CSVテキスト → 行の配列に変換（skipRows: 先頭からスキップする行数）
-function parseCsv(text, skipRows = 0) {
-  const lines = text.trim().split('\n').slice(skipRows);
-  if (lines.length < 2) return [];
-  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
-  return lines.slice(1).map(line => {
-    // カンマ区切り（ダブルクォート内のカンマを無視）
-    const values = [];
-    let current = '', inQuote = false;
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (ch === '"') { inQuote = !inQuote; continue; }
-      if (ch === ',' && !inQuote) { values.push(current.trim()); current = ''; continue; }
-      current += ch;
-    }
-    values.push(current.trim());
-    return Object.fromEntries(headers.map((h, i) => [h, values[i] ?? '']));
-  }).filter(row => Object.values(row).some(v => v !== ''));
-}
+const API_URL = 'https://script.google.com/macros/s/AKfycbw_F6CZ5z9BuhvS4UEUFZMCu0TExhYxOIqBfvzCfSVGFDEj9GxdQ0O74uA8DoGEAMGy7g/exec';
 
 async function loadSiteData() {
-  // SHEET_ID が未設定の場合はスキップ
-  if (SHEET_ID === 'YOUR_SHEET_ID_HERE') {
-    console.info('[Sheets] SHEET_ID が未設定のため手動データを使用します');
-    showDataBadge('手動入力データ', 'fallback');
-    return;
-  }
-
   try {
-    showLoadingState('スプレッドシートからデータを読み込み中...');
+    showLoadingState('JSON APIからデータを読み込み中...');
 
-    // 3シートを並列フェッチ
-    const [hcResp, fundResp, evtResp] = await Promise.all([
-      fetch(sheetUrl('社員数'),     { cache: 'no-cache' }),
-      fetch(sheetUrl('資金調達'),   { cache: 'no-cache' }),
-      fetch(sheetUrl('トピックス'), { cache: 'no-cache' }),
-    ]);
-
-    if (!hcResp.ok) throw new Error(`社員数 シートの読み込みに失敗 (HTTP ${hcResp.status})`);
-
-    const hcRows   = parseCsv(await hcResp.text(),   1);
-    const fundRows = fundResp.ok ? parseCsv(await fundResp.text(), 1) : [];
-    const evtRows  = evtResp.ok  ? parseCsv(await evtResp.text(),  1) : [];
-
-    if (hcRows.length === 0) throw new Error('社員数 シートにデータがありません');
-
-    // ── 社員数 → COMPANIES[].data に変換 ──────────────
-    // シートの列: company | year | count | source_text | source_method | source_type | source_url
-    const byCompany = {};
-    hcRows.forEach(row => {
-      const name = row.company?.trim();
-      if (!name) return;
-      if (!byCompany[name]) byCompany[name] = [];
-      byCompany[name].push({
-        year:    parseInt(row.year) || 0,
-        count:   parseInt(row.count) || 0,
-        est:     false,
-        sources: [{
-          text:   row.source_text   || '',
-          method: row.source_method || '',
-          type:   row.source_type   || 'default',
-          url:    row.source_url    || '',
-        }],
-      });
+    const res = await fetch(`${API_URL}?t=${Date.now()}`, {
+      cache: 'no-store'
     });
 
-    // ── 資金調達 → COMPANIES[].funding に変換 ─────────────
-    // シートの列: company | year | round | amount（億円） | note（投資家等）
-    const fundByCompany = {};
-    fundRows.forEach(row => {
-      const name = row.company?.trim();
-      if (!name) return;
-      if (!fundByCompany[name]) fundByCompany[name] = [];
-      fundByCompany[name].push({
-        year:   parseInt(row.year) || 0,
-        round:  row.round  || '',
-        amount: parseFloat(row.amount) || 0,
-        note:   row.note   || '',
-      });
-    });
-
-    // ── events → EVENTS に変換 ───────────────────────────
-    // シートの列: company | year | type | title | source | date | quote | quoteAttr | desc | url
-    const evtByCompany = {};
-    evtRows.forEach(row => {
-      const name = row.company?.trim();
-      if (!name) return;
-      if (!evtByCompany[name]) evtByCompany[name] = [];
-      evtByCompany[name].push({
-        year:       parseInt(row.year) || 0,
-        type:       row.type      || 'org',
-        title:      row.title     || '',
-        source:     row.source    || '',
-        date:       row.date      || '',
-        quote:      row.quote     || '',
-        quoteAttr:  row.quoteAttr || '',
-        desc:       row.desc      || '',
-        url:        row.url       || '',
-      });
-    });
-
-    // ── COMPANIES に反映 ─────────────────────────────────
-    let mergedCount = 0;
-    COMPANIES.forEach(company => {
-      const name = company.name;
-
-      if (byCompany[name] && byCompany[name].length > 0) {
-        company.data    = byCompany[name].sort((a, b) => a.year - b.year);
-        company.funding = fundByCompany[name] || company.funding || [];
-        mergedCount++;
-      }
-
-      // EVENTS も上書き（eventsシートがある場合のみ）
-      if (evtByCompany[name] && evtByCompany[name].length > 0) {
-        EVENTS[name] = evtByCompany[name].sort((a, b) => a.year - b.year);
-      }
-    });
-
-    // スプレッドシートにない企業名があれば新規追加
-    Object.keys(byCompany).forEach(name => {
-      if (!COMPANIES.find(c => c.name === name)) {
-        COMPANIES.push({
-          name,
-          sub:          '',
-          sector:       '',
-          color:        '#888780',
-          colorDim:     'rgba(136,135,128,0.15)',
-          founding_year: byCompany[name][0]?.year,
-          data:          byCompany[name].sort((a, b) => a.year - b.year),
-          funding:       fundByCompany[name] || [],
-        });
-        EVENTS[name] = evtByCompany[name] || [];
-        mergedCount++;
-      }
-    });
-
-    // ヘッダーに更新日を表示
-    const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' });
-    const metaEl = document.querySelector('.header-meta');
-    if (metaEl) {
-      const companyCount = Object.keys(byCompany).length;
-      metaEl.innerHTML = `<strong>${companyCount}</strong> 企業 &nbsp;·&nbsp; スプレッドシートより &nbsp;·&nbsp; 更新: <strong>${today}</strong>`;
+    if (!res.ok) {
+      throw new Error(`APIの読み込みに失敗 (HTTP ${res.status})`);
     }
 
-    showDataBadge('スプレッドシート連携', 'loaded');
-    console.log(`[Sheets] ${mergedCount}社のデータを読み込みました`);
+    const payload = await res.json();
+    applyHeadcountApiData(payload);
 
+    const metaEl = document.querySelector('.header-meta');
+    if (metaEl && payload.meta) {
+      const updated = new Date(payload.meta.generatedAt).toLocaleDateString('ja-JP', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+      metaEl.innerHTML = `<strong>${payload.meta.companyCount}</strong> 企業 &nbsp;·&nbsp; JSON API連携 &nbsp;·&nbsp; 更新: <strong>${updated}</strong>`;
+    }
+
+    showDataBadge('JSON API連携', 'loaded');
+    showLoadingState('');
   } catch (e) {
-    console.warn('[Sheets] 読み込みに失敗しました（手動データを使用）:', e.message);
+    console.warn('[API] 読み込みに失敗しました:', e.message);
     showLoadingState('');
     showDataBadge('手動入力データ（フォールバック）', 'fallback');
   }
+}
+
+function applyHeadcountApiData(payload) {
+  const apiByName = Object.fromEntries(
+    (payload.companies || []).map(c => [c.name, c])
+  );
+
+  let mergedCount = 0;
+
+  COMPANIES.forEach(company => {
+    const api = apiByName[company.name];
+    if (!api || !Array.isArray(api.headcounts) || api.headcounts.length === 0) return;
+
+    company.data = api.headcounts
+      .map(d => ({
+        year: Number(d.year) || 0,
+        count: Number(d.count) || 0,
+        est: (d.source_method || '') === '推算',
+        sources: [{
+          text: d.source_text || '',
+          method: d.source_method || '',
+          type: d.source_type || 'default',
+          url: d.source_url || ''
+        }]
+      }))
+      .filter(d => d.year)
+      .sort((a, b) => a.year - b.year);
+
+    mergedCount++;
+  });
+
+  console.log(`[API] ${mergedCount}社の社員数データを反映しました`);
 }
 
 function showLoadingState(msg) {
