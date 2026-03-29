@@ -64,12 +64,16 @@ body {
   font-family: 'Noto Sans JP', 'Noto Serif JP', sans-serif;
   line-height: 1.6;
   overflow: auto;
+  --sidebar-w: 160px;
+}
+body.sidebar-collapsed {
+  --sidebar-w: 44px;
 }
 
 /* Layout */
 .app {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: var(--sidebar-w) 1fr;
   grid-template-rows: auto auto;
   min-height: 100vh;
   width: 100%;
@@ -112,9 +116,9 @@ body {
   max-width: 720px;
 }
 .company-summary-line {
-  margin-top: 6px;
+  margin-top: 4px;
   font-family: 'Noto Sans JP', sans-serif;
-  font-size: 10px;
+  font-size: 9px;
   color: var(--text3);
   letter-spacing: 0.01em;
 }
@@ -124,13 +128,46 @@ body {
 /* Sidebar */
 .sidebar {
   border-right: 1px solid var(--line);
-  padding: 24px 0;
+  padding: 12px 0;
   background: #fff;
   position: sticky;
   top: 56px;
   height: calc(100vh - 56px);
   overflow-y: auto;
   align-self: start;
+  transition: width .18s ease, padding .18s ease;
+}
+.sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 12px 10px;
+}
+.sidebar-body {
+  display: block;
+}
+.sidebar-toggle {
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--line2);
+  background: #fff;
+  border-radius: 6px;
+  color: var(--text2);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+.sidebar-toggle:hover { background: var(--bg3); }
+body.sidebar-collapsed .sidebar-head {
+  justify-content: center;
+  padding: 0 0 8px;
+}
+body.sidebar-collapsed .sidebar-label {
+  display: none;
+}
+body.sidebar-collapsed .sidebar-body {
+  display: none;
 }
 .sidebar::-webkit-scrollbar { width: 4px; }
 .sidebar::-webkit-scrollbar-track { background: transparent; }
@@ -142,11 +179,10 @@ body {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text3);
-  padding: 0 20px 12px;
 }
 
 .company-card {
-  padding: 14px 20px;
+  padding: 10px 12px;
   cursor: pointer;
   border-left: 2px solid transparent;
   transition: all 0.18s;
@@ -161,7 +197,7 @@ body {
 .company-card.active[data-color='layerx']  { background:var(--layerx-light);  border-left-color:var(--layerx);  }
 .company-card.active[data-color='ubie']    { background:var(--ubie-light);    border-left-color:var(--ubie);    }
 .company-name {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   font-family: 'Noto Sans JP', sans-serif;
   color: var(--text);
@@ -189,10 +225,10 @@ body {
 .stat { font-family: 'Noto Sans JP', sans-serif; font-size: 10px; color: var(--text3); }
 .stat-val { color: var(--slate-dark); font-size: 11px; }
 .stat-label { font-size: 9px; color: var(--text3); margin-top: 1px; }
-.sparkline-wrap { margin-top: 8px; height: 24px; }
+.sparkline-wrap { margin-top: 6px; height: 16px; }
 
 /* mini sparkline canvas */
-.spark { width: 100%; height: 24px; opacity: 0.7; }
+.spark { width: 100%; height: 16px; opacity: 0.7; }
 
 .sidebar-divider { height: 1px; background: var(--line); margin: 16px 0; }
 .add-btn {
@@ -1030,7 +1066,7 @@ canvas { transition: opacity 0.3s; }
   line-height: 1.5;
   word-break: keep-all;
 }
-.jsal-cell { min-width: 160px; }
+.jsal-cell { min-width: 124px; text-align: left; }
 .jsal-nums {
   font-size: 11px;
   font-weight: 500;
@@ -2525,13 +2561,32 @@ function renderSidebar() {
   }).join('<div class="sidebar-divider" style="margin:0"></div>');
 
   sidebar.innerHTML = `
-    <div class="sidebar-label">企業一覧</div>
-    ${cards}
-    <div class="sidebar-divider"></div>
-    <div class="add-btn">
-      <div class="add-icon">+</div>
-      企業を追加する
+    <div class="sidebar-head">
+      <div class="sidebar-label">企業一覧</div>
+      <button class="sidebar-toggle" type="button" onclick="toggleSidebar()" aria-label="企業一覧の開閉">◀</button>
+    </div>
+    <div class="sidebar-body">
+      ${cards}
+      <div class="sidebar-divider"></div>
+      <div class="add-btn">
+        <div class="add-icon">+</div>
+        企業を追加する
+      </div>
     </div>`;
+  updateSidebarToggle();
+}
+
+function updateSidebarToggle() {
+  const btn = document.querySelector('.sidebar-toggle');
+  if (!btn) return;
+  const collapsed = document.body.classList.contains('sidebar-collapsed');
+  btn.textContent = collapsed ? '▶' : '◀';
+  btn.setAttribute('aria-label', collapsed ? '企業一覧を開く' : '企業一覧を閉じる');
+}
+
+function toggleSidebar() {
+  document.body.classList.toggle('sidebar-collapsed');
+  updateSidebarToggle();
 }
 
 // ══════════════════════════════════════════════════════
@@ -2910,8 +2965,8 @@ function buildJobsSection(api) {
         <th style="text-align:left;padding:8px 6px;color:var(--text3);font-weight:500">ポジション</th>
         <th style="text-align:left;padding:8px 6px;color:var(--text3);font-weight:500">レイヤー</th>
         <th style="text-align:left;padding:8px 6px;color:var(--text3);font-weight:500">概要</th>
-        <th style="width:96px;text-align:right;padding:8px 6px;color:var(--text3);font-weight:500">年収</th>
-        <th style="width:92px;text-align:left;padding:8px 6px;color:var(--text3);font-weight:500">参照元</th>
+        <th style="width:124px;text-align:left;padding:8px 6px;color:var(--text3);font-weight:500">年収</th>
+        <th style="width:112px;text-align:left;padding:8px 6px;color:var(--text3);font-weight:500">参照元</th>
       </tr>
     </thead>
     <tbody>
@@ -2927,7 +2982,7 @@ function buildJobsSection(api) {
         const left = maxSalary > 0 ? (min / maxSalary) * 100 : 0;
         const width = maxSalary > 0 ? Math.max(((Math.max(max, min) - min) / maxSalary) * 100, 4) : 0;
         const salaryViz = salary !== '—'
-          ? `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><div>${salary}</div><div style="position:relative;width:72px;height:6px;background:var(--bg3);border-radius:999px;overflow:hidden"><div style="position:absolute;left:${left}%;width:${width}%;height:100%;background:${color};border-radius:999px;opacity:0.82"></div></div></div>`
+          ? `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px"><div style="white-space:nowrap">${salary}</div><div style="position:relative;width:88px;height:6px;background:var(--bg3);border-radius:999px;overflow:hidden"><div style="position:absolute;left:${left}%;width:${width}%;height:100%;background:${color};border-radius:999px;opacity:0.82"></div></div></div>`
           : '—';
         const refLabel = getSiteLabelFromUrl(job.jobUrl);
         const ref = job.jobUrl
@@ -2939,8 +2994,8 @@ function buildJobsSection(api) {
             <td style="padding:10px 6px">${pos}</td>
             <td style="padding:10px 6px;color:var(--text2)">${escapeHtml(job.layer || '—')}</td>
             <td style="padding:10px 6px;color:var(--text2);line-height:1.6">${escapeHtml(job.description || '')}</td>
-            <td style="width:96px;padding:10px 6px;text-align:right;font-family:var(--font-mono)">${salaryViz}</td>
-            <td style="width:92px;padding:10px 6px">${ref}</td>
+            <td style="width:124px;padding:10px 6px;text-align:left;font-family:var(--font-mono)">${salaryViz}</td>
+            <td style="width:112px;padding:10px 6px">${ref}</td>
           </tr>`;
       }).join('')}
     </tbody>`;
@@ -3288,8 +3343,8 @@ function _renderJobTable(el, jobs, maxSal, secLabel, srcLabel, srcUrl) {
       '<th style="width:175px">ポジション</th>' +
       '<th style="width:80px">レイヤー</th>' +
       '<th style="width:195px">概要</th>' +
-      '<th style="width:96px">給与帯</th>' +
-      '<th style="width:92px">参照元</th>' +
+      '<th style="width:124px">給与帯</th>' +
+      '<th style="width:112px">参照元</th>' +
     '</tr></thead>';
   var tbody = document.createElement('tbody');
   jobs.forEach(function(j) {
@@ -3298,8 +3353,8 @@ function _renderJobTable(el, jobs, maxSal, secLabel, srcLabel, srcUrl) {
     var fillWidth = hasSal ? ((j.salMax-j.salMin)/maxSal*100).toFixed(1) : 0;
     var col = barCol[j.cat] || '#5A6A80';
     var salHtml = hasSal
-      ? '<div class="jsal-nums">'+j.salMin+'〜'+j.salMax+'万円</div>' +
-        '<div class="jsal-track" style="width:72px"><div class="jsal-fill" style="left:'+fillLeft+'%;width:'+fillWidth+'%;background:'+col+';opacity:0.75"></div></div>'
+      ? '<div class="jsal-nums" style="white-space:nowrap">'+j.salMin+'〜'+j.salMax+'万円</div>' +
+        '<div class="jsal-track" style="width:88px"><div class="jsal-fill" style="left:'+fillLeft+'%;width:'+fillWidth+'%;background:'+col+';opacity:0.75"></div></div>'
       : '<div class="jsal-nums">非公開</div>';
     var refLabel = getSiteLabelFromUrl(j.url);
     var tr = document.createElement('tr');
@@ -3308,8 +3363,8 @@ function _renderJobTable(el, jobs, maxSal, secLabel, srcLabel, srcUrl) {
       '<td style="font-size:11px;color:var(--text);font-weight:500;font-family:Noto Sans JP,sans-serif">'+j.pos+'</td>' +
       '<td><span class="jlv-badge">'+j.lv+'</span></td>' +
       '<td class="jdesc-cell">'+j.desc+'</td>' +
-      '<td class="jsal-cell" style="width:96px">'+salHtml+'</td>' +
-      '<td style="width:92px"><a class="jlink" href="'+j.url+'" target="_blank">'+refLabel+'↗</a></td>';
+      '<td class="jsal-cell" style="width:124px">'+salHtml+'</td>' +
+      '<td style="width:112px"><a class="jlink" href="'+j.url+'" target="_blank">'+refLabel+'↗</a></td>';
     tbody.appendChild(tr);
   });
   table.appendChild(tbody);
