@@ -2091,6 +2091,12 @@ function buildMainChart(company, range) {
                 const note = f ? ` (${f.round}${f.note ? ' · ' + f.note : ''})` : '';
                 return ` 調達 ${item.parsed.y}億円${note}`;
               }
+              // 「推定」系列（index=1）は、「確認済み」系列（index=0）に値がある年は非表示
+              if (item.datasetIndex === 1) {
+                const confirmedDataset = item.chart.data.datasets[0];
+                const confirmedPoint = confirmedDataset.data[item.dataIndex];
+                if (confirmedPoint && confirmedPoint.y !== null) return null;
+              }
               return ` 在職者数 ${item.parsed.y.toLocaleString()} 名`;
             },
             labelColor: (item) => {
