@@ -2192,25 +2192,30 @@ function updateTable(company) {
   const rows = [...company.data].reverse();
 
   tbody.innerHTML = rows.map(d => {
-    const isMulti = d.sources.length > 1;
-    const confClass = d.est ? 'var(--text3)' : 'var(--teal)';
-    const confLabel = d.est ? '低' : '高';
-    const counts = d.sources.map(s => s.count).filter(Boolean);
-    const hasConflict = counts.length > 1 && (Math.max(...counts) - Math.min(...counts)) > 20;
-
+    const fundings = (company.funding || []).filter(f => f.year === d.year);
+    const headcountSources = Array.isArray(d.sources)
+      ? d.sources.map(s => ({ ...s, category: '社員数' }))
+      : [];
+    const fundingSources = fundings.flatMap(f =>
+      Array.isArray(f.sources)
+        ? f.sources.map(s => ({
+            ...s,
+            category: f.round ? `資金調達 / ${f.round}` : '資金調達'
+          }))
+        : []
+    );
+    const sourceEntries = uniqBy(
+      [...headcountSources, ...fundingSources].filter(s => s && (s.text || s.method || s.url)),
+      s => [s.category || '', s.text || '', s.method || '', s.type || '', s.url || ''].join('|')
+    );
+    const isMulti = sourceEntries.length > 1;
     const multiBadge = isMulti
-      ? `<span class="multi-badge"><span class="dot"></span>${d.sources.length}件</span>`
+      ? `<span class="multi-badge"><span class="dot"></span>${sourceEntries.length}件</span>`
       : '';
-    const conflictIcon = hasConflict ? `<span class="conflict-icon" title="ソース間で数値に差異あり">⚠</span>` : '';
 
     const countCell = `
-      <td class="count">
-        ${d.count.toLocaleString()}
-        ${conflictIcon}
-      </td>`;
+      <td class="count">${d.count.toLocaleString()}</td>`;
 
-    // 資金調達セル
-    const fundings = (company.funding || []).filter(f => f.year === d.year);
     const fundingCell = fundings.length > 0
       ? fundings.map(f => `
           <div class="funding-round" style="margin-bottom:3px">
@@ -2222,17 +2227,26 @@ function updateTable(company) {
         `).join('')
       : `<span class="funding-none">—</span>`;
 
-    const srcLines = d.sources.map((s, idx) => {
-      const srcText = s.url
-        ? `<a href="${s.url}" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${s.text} ↗</a>`
-        : s.text;
-      return `
-        <div class="src-line ${idx === 0 && isMulti ? 'primary' : ''}">
-          ${isMulti ? `<span class="src-bullet">${idx + 1}</span>` : ''}
-          <span class="src-text">${srcText}</span>
-          <span class="src-method-tag ${methodClass(s.type)}">${s.method}</span>
-        </div>`;
-    }).join('');
+    const srcLines = sourceEntries.length > 0
+      ? sourceEntries.map((s, idx) => {
+          const rawLabel = s.text || s.url || '出典未入力';
+          const srcText = s.url
+            ? `<a href="${s.url}" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${escapeHtml(rawLabel)} ↗</a>`
+            : escapeHtml(rawLabel);
+          const categoryTag = s.category
+            ? `<span class="src-method-tag" style="margin-right:6px">${escapeHtml(s.category)}</span>`
+            : '';
+          const methodTag = s.method
+            ? `<span class="src-method-tag ${methodClass(s.type)}">${escapeHtml(s.method)}</span>`
+            : '';
+          return `
+            <div class="src-line ${idx === 0 && isMulti ? 'primary' : ''}">
+              ${isMulti ? `<span class="src-bullet">${idx + 1}</span>` : ''}
+              <span class="src-text">${categoryTag}${srcText}</span>
+              ${methodTag}
+            </div>`;
+        }).join('')
+      : `<div class="src-line"><span class="src-text" style="color:var(--text3)">—</span></div>`;
 
     return `
       <tr>
@@ -2433,7 +2447,15 @@ function normalizeFunding(items) {
     year: Number(f.year) || 0,
     round: f.round || '',
     amount: Number(f.amount) || 0,
-    note: f.note || ''
+    note: f.note || '',
+    sources: Array.isArray(f.sources) && f.sources.length > 0
+      ? f.sources.map(s => ({
+          text: s.text || '',
+          method: s.method || '',
+          type: s.type || 'default',
+          url: s.url || ''
+        }))
+      : []
   })).filter(f => f.year).sort((a, b) => a.year - b.year);
 }
 
