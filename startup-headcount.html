@@ -2362,13 +2362,13 @@ async function loadSiteData() {
       fetch(sheetUrl('トピックス'), { cache: 'no-cache' }),
     ]);
 
-    if (!hcResp.ok) throw new Error(`headcount シートの読み込みに失敗 (HTTP ${hcResp.status})`);
+    if (!hcResp.ok) throw new Error(`社員数 シートの読み込みに失敗 (HTTP ${hcResp.status})`);
 
     const hcRows   = parseCsv(await hcResp.text(),   1);
     const fundRows = fundResp.ok ? parseCsv(await fundResp.text(), 1) : [];
     const evtRows  = evtResp.ok  ? parseCsv(await evtResp.text(),  1) : [];
 
-    if (hcRows.length === 0) throw new Error('headcount シートにデータがありません');
+    if (hcRows.length === 0) throw new Error('社員数 シートにデータがありません');
 
     // ── 社員数 → COMPANIES[].data に変換 ──────────────
     // シートの列: company | year | count | source_text | source_method | source_type | source_url
