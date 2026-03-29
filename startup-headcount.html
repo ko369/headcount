@@ -691,6 +691,567 @@ body {
 /* Transition */
 .company-card { transition: background 0.15s, border-color 0.15s; }
 canvas { transition: opacity 0.3s; }
+
+/* ══════════════════════════════════════
+   タブナビゲーション
+══════════════════════════════════════ */
+.tab-nav {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg2);
+  padding: 0 32px;
+  flex-shrink: 0;
+  gap: 0;
+}
+.tab-nav-btn {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 11px;
+  padding: 10px 16px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  letter-spacing: .02em;
+  transition: all .15s;
+  margin-bottom: -1px;
+  white-space: nowrap;
+}
+.tab-nav-btn.active { color: var(--slate-dark); border-bottom-color: var(--slate-dark); }
+.tab-nav-btn:hover:not(.active) { color: var(--text2); }
+.tab-new-badge {
+  font-size: 7px;
+  padding: 1px 4px;
+  border-radius: 20px;
+  background: var(--tag-ok-bg);
+  color: var(--tag-ok-c);
+  border: 1px solid var(--tag-ok-b);
+  margin-left: 4px;
+  vertical-align: middle;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+
+/* タブコンテンツ切り替え */
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ══════════════════════════════════════
+   給与・評価・求人タブ（v3）
+══════════════════════════════════════ */
+.people-tab-wrap {
+  padding: 24px 32px 40px;
+  overflow-y: auto;
+}
+
+/* セクション共通 */
+.pt-sec { margin-bottom: 32px; }
+.pt-sec-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  background: var(--bg3);
+  border-radius: 6px;
+  border-left: 3px solid var(--slate-dark);
+  border-bottom: none;
+}
+.pt-sec-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .02em;
+  text-transform: none;
+  color: var(--slate-dark);
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.pt-src-pill {
+  font-size: 9px;
+  padding: 1px 8px;
+  border-radius: 20px;
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  color: var(--text3);
+  font-family: var(--font-mono);
+}
+.pt-src-pill a { color: var(--blue); text-decoration: none; }
+.pt-src-pill a:hover { text-decoration: underline; }
+
+/* ── 給与グラフ ── */
+.salary-chart-wrap {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px 22px 14px;
+  margin-bottom: 8px;
+}
+.salary-chart-legend {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.salary-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 9px;
+  color: var(--text3);
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.salary-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.salary-chart-canvas-wrap {
+  position: relative;
+  height: 260px;
+  padding-left: 58px;
+  padding-bottom: 30px;
+}
+
+/* ── 評価制度ビジュアル ── */
+.eval-visual-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-bottom: 8px;
+}
+.eval-visual-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.eval-cycle-badge {
+  font-size: 9px;
+  padding: 2px 9px;
+  border-radius: 20px;
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  color: var(--text3);
+  font-family: var(--font-mono);
+}
+.eval-flow-strip {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 16px;
+}
+.eval-flow-step {
+  flex: 1;
+  background: var(--bg3);
+  padding: 9px 11px;
+}
+.eval-flow-step:first-child { border-radius: 6px 0 0 6px; }
+.eval-flow-step:last-child { border-radius: 0 6px 6px 0; }
+.eval-flow-arrow {
+  width: 0;
+  height: 0;
+  border-top: 17px solid transparent;
+  border-bottom: 17px solid transparent;
+  align-self: center;
+  flex-shrink: 0;
+  z-index: 1;
+}
+.eval-step-num {
+  font-size: 9px;
+  color: var(--text3);
+  margin-bottom: 2px;
+  font-family: var(--font-mono);
+}
+.eval-step-title {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.eval-step-sub {
+  font-size: 9px;
+  color: var(--text3);
+  margin-top: 2px;
+  line-height: 1.4;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.eval-axes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.eval-axis-card {
+  padding: 10px 12px;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+}
+.eval-axis-title {
+  font-size: 11px;
+  font-weight: 500;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.eval-axis-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.eval-axis-body {
+  font-size: 10px;
+  line-height: 1.6;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.eval-grade-strip {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+.eval-grade-cell {
+  flex: 1;
+  background: var(--bg3);
+  border-radius: 5px;
+  padding: 8px 6px;
+  text-align: center;
+  border: 1px solid var(--line);
+}
+.eval-grade-cell.g-mid {
+  background: rgba(91,138,204,.08);
+  border-color: rgba(91,138,204,.3);
+}
+.eval-grade-num {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.eval-grade-cell.g-mid .eval-grade-num { color: #3a5e8a; }
+.eval-grade-lbl {
+  font-size: 9px;
+  color: var(--text3);
+  margin-top: 3px;
+  line-height: 1.3;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.eval-matrix-title {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text2);
+  margin-bottom: 7px;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.eval-matrix {
+  display: grid;
+  grid-template-columns: 72px repeat(3, 1fr);
+  gap: 3px;
+}
+.eval-matrix-cell {
+  padding: 7px 9px;
+  border-radius: 4px;
+  font-size: 9px;
+  text-align: center;
+  line-height: 1.4;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.em-header { background: var(--bg3); color: var(--text3); font-weight: 500; }
+.em-label { background: var(--bg3); color: var(--text3); font-weight: 500; display: flex; align-items: center; justify-content: center; }
+.em-body { background: #fff; border: 1px solid var(--line); color: var(--text2); }
+.em-hi { background: rgba(91,138,204,.1); border: 1px solid rgba(91,138,204,.3); color: #3a5e8a; }
+
+/* ── 求人票テーブル ── */
+.job-table-outer { overflow-x: auto; }
+.job-table-v3 {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  table-layout: fixed;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.job-table-v3 th {
+  font-size: 9px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text3);
+  text-align: left;
+  padding: 7px 10px;
+  border-bottom: 1.5px solid var(--slate-mid);
+  font-weight: 500;
+  background: var(--bg2);
+  white-space: nowrap;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.job-table-v3 td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+  color: var(--text2);
+}
+.job-table-v3 tr:last-child td { border-bottom: none; }
+.job-table-v3 tr:hover td { background: var(--bg3); }
+.jcat-badge {
+  display: inline-block;
+  font-size: 8px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+}
+.jcat-eng { background: rgba(91,138,204,.1); color: #3a5e8a; border: 1px solid rgba(91,138,204,.3); }
+.jcat-biz { background: var(--tag-ok-bg); color: var(--tag-ok-c); border: 1px solid var(--tag-ok-b); }
+.jcat-prd { background: rgba(130,70,180,.08); color: #6040a0; border: 1px solid rgba(130,70,180,.2); }
+.jcat-dat { background: var(--bg3); color: var(--slate); border: 1px solid var(--line2); }
+.jlv-badge {
+  font-size: 8px;
+  padding: 1px 6px;
+  border-radius: 20px;
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  color: var(--text3);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+.jdesc-cell {
+  font-size: 10px;
+  color: var(--text2);
+  line-height: 1.5;
+  word-break: keep-all;
+}
+.jsal-cell { min-width: 160px; }
+.jsal-nums {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  margin-bottom: 3px;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.jsal-track {
+  height: 5px;
+  background: var(--bg3);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+.jsal-fill {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 3px;
+}
+.jlink {
+  font-size: 9px;
+  color: var(--blue);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+.jlink:hover { color: var(--amber); text-decoration: underline; }
+.pt-footnote {
+  margin-top: 10px;
+  padding: 9px 13px;
+  background: var(--bg3);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text3);
+  line-height: 1.6;
+}
+.pt-footnote strong { color: var(--text2); }
+
+/* ── 参照元行 ── */
+.info-source-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+.info-source-lbl {
+  color: var(--text3);
+  flex-shrink: 0;
+}
+.info-source-link {
+  color: var(--blue);
+  text-decoration: none;
+}
+.info-source-link:hover { text-decoration: underline; color: var(--amber); }
+.info-source-links {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* ── 情報カードリスト ── */
+.info-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.info-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 13px 16px;
+  border-left: 3px solid var(--slate-mid);
+  border-radius: 0 8px 8px 0;
+}
+.info-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  flex-wrap: wrap;
+}
+.info-card-tag {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  padding: 1px 7px;
+  border-radius: 20px;
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  color: var(--slate);
+  flex-shrink: 0;
+}
+.info-card-link {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--blue);
+  text-decoration: none;
+}
+.info-card-link:hover { text-decoration: underline; color: var(--amber); }
+.info-card-title {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 5px;
+  font-family: 'Noto Sans JP', sans-serif;
+  line-height: 1.4;
+}
+.info-card-body {
+  font-size: 10px;
+  color: var(--text2);
+  line-height: 1.65;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+/* ── 等級定義グリッド ── */
+.grade-def-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.grade-def-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 11px 13px;
+  border-top: 3px solid var(--line2);
+}
+.grade-def-card.g-active { border-top-color: var(--blue); }
+.grade-def-id {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--slate-dark);
+  font-family: 'Noto Sans JP', sans-serif;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+.grade-def-card.g-active .grade-def-id { color: #3a5e8a; }
+.grade-def-theme {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 7px;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.grade-def-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.grade-def-items li {
+  font-size: 10px;
+  color: var(--text2);
+  line-height: 1.55;
+  padding-left: 10px;
+  position: relative;
+  font-family: 'Noto Sans JP', sans-serif;
+  margin-bottom: 3px;
+}
+.grade-def-items li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  color: var(--text3);
+}
+
+/* ── 昇給率グラフ ── */
+.raise-chart-wrap {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px 20px 10px;
+}
+.raise-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 120px;
+  padding-bottom: 24px;
+  position: relative;
+  border-bottom: 0.5px solid var(--line2);
+}
+.raise-bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.raise-bar-col {
+  width: 100%;
+  max-width: 48px;
+  border-radius: 3px 3px 0 0;
+  position: relative;
+}
+.raise-bar-pct {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--slate-dark);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+.raise-bar-label {
+  font-size: 9px;
+  color: var(--text3);
+  font-family: var(--font-mono);
+  text-align: center;
+  margin-top: 4px;
+  white-space: nowrap;
+}
+.raise-chart-legend {
+  margin-top: 8px;
+  text-align: right;
+}
+
+
 </style>
 </head>
 <body>
@@ -742,6 +1303,14 @@ canvas { transition: opacity 0.3s; }
       </div>
     </div>
 
+    <!-- タブナビゲーション -->
+    <div class="tab-nav">
+      <button class="tab-nav-btn active" onclick="switchMainTab('headcount', this)">在職者数</button>
+      <button class="tab-nav-btn" onclick="switchMainTab('people', this)">給与・評価・求人 <span class="tab-new-badge">NEW</span></button>
+    </div>
+
+    <!-- 在職者数タブ -->
+    <div class="tab-pane active" id="pane-headcount">
     <div class="range-bar">
       <button class="range-btn" onclick="setRange('all',this)">全期間</button>
       <button class="range-btn active" onclick="setRange('5y',this)">5年</button>
@@ -794,6 +1363,15 @@ canvas { transition: opacity 0.3s; }
         <div class="legend-item"><span class="event-card-type product" style="margin-bottom:0">プロダクト</span></div>
       </div>
     </div>
+    </div><!-- /pane-headcount -->
+
+    <!-- 給与・評価・求人タブ -->
+    <div class="tab-pane" id="pane-people">
+      <div class="people-tab-wrap" id="people-content">
+        <!-- JS で動的生成 -->
+      </div>
+    </div>
+
   </main>
 
 </div>
@@ -1704,7 +2282,13 @@ function updateMetrics(company) {
   }
 }
 
+let currentCompanyIndex = 0;
+
 function selectCompany(idx) {
+  currentCompanyIndex = idx;
+  currentJobFilter = '全職種';
+  const pane = document.getElementById('pane-people');
+  if (pane && pane.classList.contains('active')) renderPeopleTab(idx);
   currentCompany = idx;
   document.querySelectorAll('.company-card').forEach((el, i) => {
     el.classList.toggle('active', i === idx);
@@ -1967,6 +2551,734 @@ window.addEventListener('DOMContentLoaded', async () => {
   buildSparklines();
   selectCompany(0);
 });
+
+// ══════════════════════════════════════════════════════
+// タブ切り替え
+// ══════════════════════════════════════════════════════
+function switchMainTab(id, btn) {
+  document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('pane-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'people') renderPeopleTab(currentCompanyIndex);
+}
+
+// ══════════════════════════════════════════════════════
+// 給与・評価・求人データ
+// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// 給与・評価・求人タブのレンダリング
+// ══════════════════════════════════════════════════════
+
+function renderPeopleTab(idx) {
+  const company = COMPANIES[idx];
+  const el = document.getElementById('people-content');
+  if (!el) return;
+
+  if (company.name === 'LayerX') { renderLayerX(el); return; }
+  if (company.name === 'Ubie')   { renderUbie(el);   return; }
+  if (company.name !== 'SmartHR') {
+    el.innerHTML = '<div style="padding:40px 32px;font-size:11px;color:var(--text3);font-family:var(--font-mono)">このデータはまだ収集中です</div>';
+    return;
+  }
+
+  /* ── データ定義 ── */
+  const GRADES = [
+    { id:'G1', lbl:'ポテンシャル', hi:{min:330,max:402},  std:{min:330,max:402}  },
+    { id:'G2', lbl:'独立実行',     hi:{min:402,max:504},  std:{min:348,max:456}  },
+    { id:'G3', lbl:'巻き込む',     hi:{min:456,max:708},  std:{min:402,max:600}, cnt:101 },
+    { id:'G4', lbl:'組織リード',   hi:{min:600,max:1008}, std:{min:504,max:804}, cnt:233 },
+    { id:'G5', lbl:'事業牽引',     hi:{min:804,max:1500}, std:{min:708,max:1474},cnt:100 },
+    { id:'G6', lbl:'経営レベル',   hi:{min:1200,max:2546},std:{min:1008,max:2090},cnt:4  },
+  ];
+
+  const GRADE_DEFS = [
+    { id:'G3', theme:'方針を理解して自律駆動できる人', active:false, items:[
+      '担当プロダクトのPRDを自ら作成できる',
+      'ヒアリング・データから改善策を提案できる',
+      '複数課題の優先度を判断・提案できる',
+      '開発チームと自律的に連携できる',
+    ]},
+    { id:'G4', theme:'周囲を巻き込んで成果を出せる人', active:true, items:[
+      '半年以上のロードマップ・OKRを策定できる',
+      '高い顧客解像度で要件をスコープ調整できる',
+      'プロジェクトのゴール設定と予実管理ができる',
+      '部署・プロダクト横断の取り組みを主導できる',
+      '開発した機能の仮説検証・定量分析ができる',
+    ]},
+    { id:'G5', theme:'周囲の模範となり専門領域を牽引できる人', active:true, items:[
+      '1年以上のビジョン・OKRを策定できる',
+      'プロダクト・領域・職能を越えた変革を推進',
+      'ビジネス観点でBizと適切に議論できる',
+      '以下いずれかの専門性: 汎用スキル / 専門スキル / マネジメントスキル',
+    ]},
+  ];
+
+  const RAISE_DATA = [
+    { label:'2022上期', rate:4.4, avg:29.5, mid:null,  note:'公式note',    col:'#5B8FCC' },
+    { label:'2024下期', rate:3.1, avg:20.4, mid:12.0,  note:'doda求人票',  col:'#3BAA90' },
+    { label:'2025上期', rate:2.9, avg:13.2, mid:null,  note:'会社紹介資料',col:'#5B8FCC' },
+  ];
+
+  const JOBS = [
+    { cat:'eng', lbl:'エンジニア', pos:'シニアWebバックエンドエンジニア（労務領域）', lv:'シニア',
+      desc:'SmartHR基本機能のコア開発。LeSSフレームワークによる大規模チーム。Ruby/Rails/PostgreSQL',
+      salMin:858, salMax:1260, url:'https://doda.jp/DodaFront/View/CompanyJobs/j_id__10128408747/-oc__03L/' },
+    { cat:'eng', lbl:'エンジニア', pos:'SREエンジニア', lv:'ミドル〜シニア',
+      desc:'プロダクト群の信頼性・可用性向上。インフラ最適化・運用自動化。フルリモート可',
+      salMin:742, salMax:1484, url:'https://doda.jp/DodaFront/View/CompanyJobs/j_id__10128408747/' },
+    { cat:'eng', lbl:'エンジニア', pos:'QAエンジニア（レバレッジ推進ユニット）', lv:'ミドル〜',
+      desc:'組織横断の品質保証施策を遂行。品質標準化・自動化推進。フルリモート可',
+      salMin:770, salMax:1540, url:'https://doda.jp/DodaFront/View/CompanyJobs/j_id__10128408747/' },
+    { cat:'eng', lbl:'エンジニア', pos:'エンジニアリングマネージャー候補', lv:'MGR候補',
+      desc:'プロダクトエンジニアリング組織のマネジメント。採用・育成・チームビルディング',
+      salMin:864, salMax:1344, url:'https://doda.jp/DodaFront/View/CompanyJobs/j_id__10128408747/' },
+    { cat:'prd', lbl:'プロダクト',  pos:'AIプロダクトマネージャー', lv:'ミドル〜シニア',
+      desc:'LLM/ML活用プロダクトの実験〜本番実装を主導。AIインテグレーションユニット所属',
+      salMin:null, salMax:null, url:'https://doda.jp/DodaFront/View/CompanyJobs/j_id__10128408747/-oc__03L/' },
+    { cat:'biz', lbl:'セールス',   pos:'フィールドセールス（グロースマーケット）', lv:'メンバー',
+      desc:'従業員51〜500名規模の新規顧客開拓。月20〜25商談想定。在宅可・フルフレックス',
+      salMin:450, salMax:650, url:'https://doda.jp/DodaFront/View/CompanyJobs/j_id__10128408747/-oc__01L/' },
+    { cat:'biz', lbl:'セールス',   pos:'カスタマーサクセスマネージャー（EP）', lv:'ミドル〜',
+      desc:'従業員500名以上の大手企業向けCS。導入支援・活用拡大・更新管理。在宅可',
+      salMin:600, salMax:900, url:'https://doda.jp/DodaFront/View/CompanyJobs/j_id__10128408747/' },
+    { cat:'dat', lbl:'データ/ML',  pos:'データ基盤 / MLOpsエンジニア', lv:'シニア',
+      desc:'学習パイプライン・データ基盤整備。GCP / BigQuery / Airflow中心。原則リモート',
+      salMin:660, salMax:1320, url:'https://doda.jp/DodaFront/View/CompanyJobs/j_id__10128408747/' },
+  ];
+
+  const catStyle = {eng:'jcat-eng',biz:'jcat-biz',prd:'jcat-prd',dat:'jcat-dat'};
+  const barCol   = {eng:'#5B8FCC',biz:'#3BAA90',prd:'#8246b4',dat:'#5A6A80'};
+  const maxSal   = 1540;
+
+  /* ── HTML組み立て（テンプレートリテラル外でDOMを生成） ── */
+  const sec = function(label, inner) {
+    var d = document.createElement('div');
+    d.className = 'pt-sec';
+    d.innerHTML = '<div class="pt-sec-head"><span class="pt-sec-label">'+label+'</span></div>';
+    var body = document.createElement('div');
+    body.innerHTML = inner;
+    d.appendChild(body);
+    return d;
+  };
+
+  el.innerHTML = '';
+
+  /* ════════════════════════════
+     給与レンジ
+  ════════════════════════════ */
+  var secSalary = document.createElement('div');
+  secSalary.className = 'pt-sec';
+  secSalary.innerHTML =
+    '<div class="pt-sec-head"><span class="pt-sec-label">給与レンジ</span></div>' +
+    '<div class="salary-chart-wrap">' +
+      '<div class="salary-chart-legend">' +
+        '<div class="salary-legend-item"><div class="salary-legend-dot" style="background:#5B8FCC"></div>給与レンジタイプ：ハイ（エンジニア・デザイナー等）</div>' +
+        '<div class="salary-legend-item"><div class="salary-legend-dot" style="background:#3BAA90"></div>給与レンジタイプ：スタンダード（セールス・PM・コーポレート等）</div>' +
+      '</div>' +
+      '<div class="salary-chart-canvas-wrap" id="salaryChartArea"></div>' +
+    '</div>' +
+    '<div class="pt-footnote">各バーは等級ごとの年収レンジ（下限〜上限）を示す。数値はすべて<strong>成果給込みの年収想定</strong>（月給×12＋成果給）。G1=ポテンシャル / G2=独立実行 / G3=巻き込む（101名）/ G4=組織リード（233名）/ G5=事業牽引（100名）/ G6=経営レベル（4名）</div>' +
+    '<div class="info-source-row"><span class="info-source-lbl">参照元</span><div class="info-source-links"><a class="info-source-link" href="https://speakerdeck.com/smarthr_pr/smarthr-company-introduction1" target="_blank">会社紹介資料 p.56（2026年2月）↗</a><a class="info-source-link" href="https://recruit.smarthr.co.jp/" target="_blank">SmartHR採用サイト 給与レンジ公開ページ ↗</a></div></div>';
+  el.appendChild(secSalary);
+
+  /* ════════════════════════════
+     補足情報カード
+  ════════════════════════════ */
+  var secInfo = document.createElement('div');
+  secInfo.className = 'pt-sec';
+  var infoHead = document.createElement('div');
+  infoHead.className = 'pt-sec-head';
+  infoHead.innerHTML = '<span class="pt-sec-label">給与・評価制度に対する考え</span>';
+  secInfo.appendChild(infoHead);
+
+  var infoCardsData = [
+    { borderCol:'var(--amber)',
+      tagStyle:'background:var(--smarthr-light);color:#9A6800;border-color:var(--smarthr-mid)',
+      tag:'オファー交渉',
+      link:'https://note.com/smarthr_co/n/n7cafa14347a2',
+      linkLabel:'VPoHR 薮田氏 note「採用プロセスにおける現年収ポリシー見直し」（2024年9月）↗',
+      title:'「現年収を聞かない」ポリシーを2024年9月に見直し',
+      body:'ポジションによっては現年収を参考にした上で報酬を提示する方式へ移行（2024年9月変更）。<strong>現年収が低くても市場水準でオファーされる可能性は維持されているが、現年収が高い場合は参考にされる可能性がある点に留意</strong>。'
+    },
+    { borderCol:'var(--blue)',
+      tag:'制度の読み方',
+      link:'https://speakerdeck.com/smarthr_pr/smarthr-company-introduction1',
+      linkLabel:'会社紹介資料 p.50–52（2026年2月）↗',
+      title:'職種によって「昇給型」か「成果給型」かが異なる',
+      body:'エンジニア・デザイナーは「レンジ：ハイ × 成果給：スタンダード」= ベースが高く昇給で上がるモデル。EPセールスは「レンジ：スタンダード × 成果給：ハイ」= ベースは標準的だが成果給の振れ幅が特に大きいモデル。<strong>オファー年収だけでなく制度タイプも確認することが重要</strong>。'
+    },
+    { borderCol:'var(--teal)',
+      tagStyle:'background:var(--tag-ok-bg);color:var(--tag-ok-c);border-color:var(--tag-ok-b)',
+      tag:'昇格',
+      link:'https://mag.smarthr.jp/hr-management/evaluation/talentmanagement_genzaichi_02/',
+      linkLabel:'SmartHR Mag.「スケールアップに合わせた人事制度」（2024年9月）↗',
+      title:'2024年改定前は「G5が実質の天井」だった構造を解消',
+      body:'2024年1月改定前は「G5が実質的な天井」と見られていたが、7段階への改定で等級定義を再整備。<strong>2024年上期にG6への昇格者が初めて出始め、天井感が解消されつつある</strong>。'
+    },
+    { borderCol:'var(--slate)',
+      tag:'成果給',
+      link:'https://note.com/smarthr_co/n/n39d56ffe6453',
+      linkLabel:'SmartHR公式note「人事制度改定の全容」（2024年3月）↗',
+      title:'成果給は「全社業績 × 個人評価 × 等級」の3変数で決まる',
+      body:'成果給（半期1回）は全社業績・個人評価・等級の組み合わせで算出。EPセールスは振れ幅が特に大きい。<strong>職種・等級・評価・会社業績の組み合わせによって個人の実額は大きく異なる</strong>。'
+    },
+    { borderCol:'var(--blue)',
+      tag:'等級要件の使い方',
+      link:'https://tech.smarthr.jp/entry/2025/01/23/090000',
+      linkLabel:'SmartHR Tech Blog「PMの等級要件をアップデートしました」（2025年1月）↗',
+      title:'等級要件は「入学要件」 — 転職者が自分の位置を確認するための地図',
+      body:'等級は昇格時に「すべての要件の再現性が確認されて初めて認定」される入学要件型。G3=自律遂行 / G4=プロジェクト横断でリード / G5=事業牽引＋専門スキルまたはマネジメントの選択性。転職検討時に自分の現在地を判断する指標になる。'
+    },
+  ];
+  infoCardsData.forEach(function(c) {
+    var card = document.createElement('div');
+    card.className = 'info-card';
+    card.style.cssText = 'border-left-color:'+c.borderCol+';margin-bottom:8px';
+    card.innerHTML =
+      '<div class="info-card-meta">' +
+        '<span class="info-card-tag"' + (c.tagStyle ? ' style="'+c.tagStyle+'"' : '') + '>'+c.tag+'</span>' +
+        '<a class="info-card-link" href="'+c.link+'" target="_blank">'+c.linkLabel+'</a>' +
+      '</div>' +
+      '<div class="info-card-title">'+c.title+'</div>' +
+      '<div class="info-card-body">'+c.body+'</div>';
+    secInfo.appendChild(card);
+  });
+  el.appendChild(secInfo);
+
+  /* ════════════════════════════
+     求人票
+  ════════════════════════════ */
+  var sec3 = document.createElement('div');
+  sec3.className = 'pt-sec';
+  var s3head = document.createElement('div');
+  s3head.className = 'pt-sec-head';
+  s3head.innerHTML =
+    '<span class="pt-sec-label">求人票</span>' +
+    '<span class="pt-src-pill">出典: <a href="https://doda.jp/DodaFront/View/CompanyJobs/j_id__10128408747/" target="_blank">doda（2026年3月）</a> / <a href="https://recruit.smarthr.co.jp/career/" target="_blank">SmartHR採用サイト</a></span>';
+  sec3.appendChild(s3head);
+
+  var tableWrap = document.createElement('div');
+  tableWrap.className = 'job-table-outer';
+  var table = document.createElement('table');
+  table.className = 'job-table-v3';
+  table.innerHTML =
+    '<thead><tr>' +
+      '<th style="width:68px">大枠</th>' +
+      '<th style="width:175px">ポジション</th>' +
+      '<th style="width:80px">レイヤー</th>' +
+      '<th style="width:195px">概要</th>' +
+      '<th style="width:180px">給与帯</th>' +
+      '<th style="width:48px">求人</th>' +
+    '</tr></thead>';
+  var tbody = document.createElement('tbody');
+  JOBS.forEach(function(j) {
+    var tr = document.createElement('tr');
+    var hasSal = j.salMin !== null;
+    var fillLeft  = hasSal ? (j.salMin / maxSal * 100).toFixed(1) : 0;
+    var fillWidth = hasSal ? ((j.salMax - j.salMin) / maxSal * 100).toFixed(1) : 0;
+    var col = barCol[j.cat];
+    var salHtml = hasSal
+      ? '<div class="jsal-nums">'+j.salMin.toLocaleString()+'〜'+j.salMax.toLocaleString()+'万円</div>' +
+        '<div class="jsal-track"><div class="jsal-fill" style="left:'+fillLeft+'%;width:'+fillWidth+'%;background:'+col+';opacity:0.75"></div></div>' +
+        '<div style="font-size:9px;color:var(--text3);margin-top:2px;font-family:var(--font-mono)">max '+maxSal+'万=100%</div>'
+      : '<div class="jsal-nums">非公開</div>';
+    tr.innerHTML =
+      '<td><span class="jcat-badge '+catStyle[j.cat]+'">'+j.lbl+'</span></td>' +
+      '<td style="font-size:11px;color:var(--text);font-weight:500;font-family:Noto Sans JP,sans-serif">'+j.pos+'</td>' +
+      '<td><span class="jlv-badge">'+j.lv+'</span></td>' +
+      '<td class="jdesc-cell">'+j.desc+'</td>' +
+      '<td class="jsal-cell">'+salHtml+'</td>' +
+      '<td><a class="jlink" href="'+j.url+'" target="_blank">doda ↗</a></td>';
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  tableWrap.appendChild(table);
+  sec3.appendChild(tableWrap);
+
+  el.appendChild(sec3);
+
+  /* ════════════════════════════
+     給与グラフ描画（ピクセルベース）
+  ════════════════════════════ */
+  var area = document.getElementById('salaryChartArea');
+  if (!area) return;
+
+  var CHART_H = 220;   // グラフ描画高さ(px)
+  var CHART_XPAD = 62; // 左余白(Y軸ラベル用)
+  var XPAD_BOT = 28;   // 下余白(X軸ラベル用)
+  var maxY = 2600;
+  var yTicks = [0,500,1000,1500,2000,2500];
+
+  // コンテナ設定
+  area.style.cssText = 'position:relative;height:'+(CHART_H+XPAD_BOT)+'px;padding-left:'+CHART_XPAD+'px;overflow:visible';
+
+  // プロットエリア（ボーダー付き）
+  var plot = document.createElement('div');
+  plot.style.cssText = [
+    'position:absolute',
+    'left:'+CHART_XPAD+'px',
+    'top:0',
+    'right:0',
+    'height:'+CHART_H+'px',
+    'border-left:0.5px solid var(--line2)',
+    'border-bottom:0.5px solid var(--line2)',
+    'overflow:visible',
+  ].join(';');
+  area.appendChild(plot);
+
+  // グリッド線
+  yTicks.forEach(function(v) {
+    var px = CHART_H - Math.round(v / maxY * CHART_H);
+    var g = document.createElement('div');
+    g.style.cssText = 'position:absolute;left:0;right:0;top:'+px+'px;border-top:0.5px dashed var(--line);pointer-events:none';
+    plot.appendChild(g);
+  });
+
+  // Y軸ラベル
+  yTicks.forEach(function(v) {
+    var px = CHART_H - Math.round(v / maxY * CHART_H);
+    var t = document.createElement('div');
+    t.style.cssText = 'position:absolute;right:100%;padding-right:6px;top:'+(px-7)+'px;font-size:9px;color:var(--text3);font-family:var(--font-mono);line-height:1;white-space:nowrap';
+    t.textContent = v === 0 ? '0' : (v >= 1000 ? (v/1000).toFixed(0)+'000' : v+'');
+    plot.appendChild(t);
+  });
+
+  // Y軸単位ラベル
+  var yu = document.createElement('div');
+  yu.style.cssText = 'position:absolute;right:100%;padding-right:6px;top:-14px;font-size:9px;color:var(--text3);font-family:var(--font-mono)';
+  yu.textContent = '万円';
+  plot.appendChild(yu);
+
+  // バー描画
+  var nG = GRADES.length;
+  var plotW = area.clientWidth - CHART_XPAD || 500; // 初回推定値
+  GRADES.forEach(function(g, i) {
+    var slotW = 1 / nG;
+    var leftPct = (i / nG + slotW * 0.08) * 100;
+    var widthPct = slotW * 0.84 * 100;
+
+    var grp = document.createElement('div');
+    grp.style.cssText = [
+      'position:absolute',
+      'bottom:0',
+      'left:'+leftPct.toFixed(2)+'%',
+      'width:'+widthPct.toFixed(2)+'%',
+      'height:'+CHART_H+'px',
+      'display:flex',
+      'gap:2px',
+      'align-items:flex-end',
+      'overflow:visible',
+    ].join(';');
+
+    [{d:g.hi,col:'#5B8FCC'},{d:g.std,col:'#3BAA90'}].forEach(function(item) {
+      var barBottom = Math.round(item.d.min / maxY * CHART_H);
+      var barH      = Math.round((item.d.max - item.d.min) / maxY * CHART_H);
+      if (barH < 1) barH = 1;
+
+      var bar = document.createElement('div');
+      bar.style.cssText = [
+        'flex:1',
+        'border-radius:2px 2px 0 0',
+        'background:'+item.col,
+        'opacity:0.85',
+        'position:absolute',
+        'bottom:'+barBottom+'px',
+        'height:'+barH+'px',
+        'width:calc(50% - 1px)',
+        'min-width:8px',
+      ].join(';');
+      // ハイとスタンダードを左右に並べる
+      if (item.col === '#5B8FCC') bar.style.left = '0';
+      else bar.style.right = '0';
+
+      bar.title = item.d.min+'〜'+item.d.max+'万円';
+
+      // 上限ラベル（上に）
+      var lbl = document.createElement('div');
+      lbl.style.cssText = 'position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:8px;color:var(--text3);font-family:var(--font-mono);white-space:nowrap';
+      lbl.textContent = item.d.max >= 2000 ? (item.d.max/100).toFixed(0)+'0〜' : item.d.max;
+      bar.appendChild(lbl);
+      grp.appendChild(bar);
+    });
+
+    // X軸ラベル
+    var xl = document.createElement('div');
+    xl.style.cssText = 'position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--text2);font-family:var(--font-mono);white-space:nowrap';
+    xl.textContent = g.id;
+    grp.appendChild(xl);
+
+    plot.appendChild(grp);
+  });
+}
+
+
+/* ══════════════════════════════════════
+   LayerX 給与・評価タブ
+══════════════════════════════════════ */
+function renderLayerX(el) {
+  el.innerHTML = '';
+
+  /* ── 共通ヘルパ ── */
+  function makeSecHead(label) {
+    var h = document.createElement('div');
+    h.className = 'pt-sec-head';
+    h.innerHTML = '<span class="pt-sec-label">'+label+'</span>';
+    return h;
+  }
+  function makeCard(borderCol, tagStyle, tag, link, linkLabel, title, body) {
+    var c = document.createElement('div');
+    c.className = 'info-card';
+    c.style.cssText = 'border-left-color:'+borderCol+';margin-bottom:8px';
+    c.innerHTML =
+      '<div class="info-card-meta">' +
+        '<span class="info-card-tag"'+(tagStyle?' style="'+tagStyle+'"':'')+'>'+tag+'</span>' +
+        '<a class="info-card-link" href="'+link+'" target="_blank">'+linkLabel+'</a>' +
+      '</div>' +
+      '<div class="info-card-title">'+title+'</div>' +
+      '<div class="info-card-body">'+body+'</div>';
+    return c;
+  }
+
+  /* ── 給与レンジ ── */
+  var GRADES_LX = [
+    { id:'PG1', lbl:'エントリー',   hi:{min:350,max:450}  },
+    { id:'PG2', lbl:'ミドル下',     hi:{min:600,max:750}  },
+    { id:'PG3', lbl:'ミドル',       hi:{min:700,max:1100} },
+    { id:'PG4', lbl:'シニア',       hi:{min:900,max:1300} },
+    { id:'PG5', lbl:'リード/MGR',   hi:{min:1000,max:1800}},
+  ];
+
+  var secSalary = document.createElement('div');
+  secSalary.className = 'pt-sec';
+  secSalary.appendChild(makeSecHead('給与レンジ'));
+
+  var chartWrap = document.createElement('div');
+  chartWrap.className = 'salary-chart-wrap';
+  chartWrap.innerHTML =
+    '<div class="salary-chart-legend">' +
+      '<div class="salary-legend-item"><div class="salary-legend-dot" style="background:#3BAA90"></div>年収レンジ（CompanyDeck / ONE CAREER PLUS調査ベース）</div>' +
+    '</div>' +
+    '<div class="salary-chart-canvas-wrap" id="lxChartArea"></div>';
+  secSalary.appendChild(chartWrap);
+
+  var note = document.createElement('div');
+  note.className = 'pt-footnote';
+  note.textContent = 'PG1=新卒・エントリー。中途入社はPG2以上からスタート。PG3がボリュームゾーン（多くの中途入社者）。PG5はリード・マネージャー相当。2025年10月より賞与制度を新設（最大月給6ヶ月分）。';
+  secSalary.appendChild(note);
+
+  var srcRow = document.createElement('div');
+  srcRow.className = 'info-source-row';
+  srcRow.innerHTML =
+    '<span class="info-source-lbl">参照元</span>' +
+    '<div class="info-source-links">' +
+      '<a class="info-source-link" href="https://speakerdeck.com/layerx/company-deck" target="_blank">LayerX CompanyDeck（Speaker Deck）↗</a>' +
+      '<a class="info-source-link" href="https://layerx.co.jp/news/20251001/" target="_blank">新報酬制度発表 プレスリリース（2025年10月）↗</a>' +
+    '</div>';
+  secSalary.appendChild(srcRow);
+  el.appendChild(secSalary);
+
+  /* グラフ描画 */
+  var area = document.getElementById('lxChartArea');
+  if (area) {
+    var CHART_H=220, CHART_XPAD=62, maxY=2000;
+    area.style.cssText='position:relative;height:'+(CHART_H+28)+'px;padding-left:'+CHART_XPAD+'px;overflow:visible';
+    var plot=document.createElement('div');
+    plot.style.cssText='position:absolute;left:'+CHART_XPAD+'px;top:0;right:0;height:'+CHART_H+'px;border-left:0.5px solid var(--line2);border-bottom:0.5px solid var(--line2);overflow:visible';
+    area.appendChild(plot);
+    [0,500,1000,1500,2000].forEach(function(v){
+      var px=CHART_H-Math.round(v/maxY*CHART_H);
+      var g=document.createElement('div');
+      g.style.cssText='position:absolute;left:0;right:0;top:'+px+'px;border-top:0.5px dashed var(--line)';
+      plot.appendChild(g);
+      var t=document.createElement('div');
+      t.style.cssText='position:absolute;right:100%;padding-right:6px;top:'+(px-7)+'px;font-size:9px;color:var(--text3);font-family:var(--font-mono);white-space:nowrap';
+      t.textContent=v===0?'0':(v/100).toFixed(0)+'00';
+      plot.appendChild(t);
+    });
+    var yu=document.createElement('div');
+    yu.style.cssText='position:absolute;right:100%;padding-right:6px;top:-14px;font-size:9px;color:var(--text3);font-family:var(--font-mono)';
+    yu.textContent='万円'; plot.appendChild(yu);
+    var nG=GRADES_LX.length;
+    GRADES_LX.forEach(function(g,i){
+      var slotW=1/nG;
+      var grp=document.createElement('div');
+      grp.style.cssText='position:absolute;bottom:0;left:'+((i/nG+slotW*0.15)*100).toFixed(2)+'%;width:'+(slotW*0.7*100).toFixed(2)+'%;height:'+CHART_H+'px;overflow:visible';
+      var botPx=Math.round(g.hi.min/maxY*CHART_H);
+      var hPx=Math.round((g.hi.max-g.hi.min)/maxY*CHART_H);
+      var bar=document.createElement('div');
+      bar.style.cssText='position:absolute;bottom:'+botPx+'px;height:'+hPx+'px;left:0;right:0;background:#3BAA90;opacity:0.82;border-radius:2px 2px 0 0';
+      bar.title=g.hi.min+'〜'+g.hi.max+'万円';
+      var lbl=document.createElement('div');
+      lbl.style.cssText='position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:8px;color:var(--text3);font-family:var(--font-mono);white-space:nowrap';
+      lbl.textContent=g.hi.max;
+      bar.appendChild(lbl); grp.appendChild(bar);
+      var xl=document.createElement('div');
+      xl.style.cssText='position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--text2);font-family:var(--font-mono);white-space:nowrap';
+      xl.textContent=g.id; grp.appendChild(xl);
+      plot.appendChild(grp);
+    });
+  }
+
+  /* ── 給与・評価制度に対する考え ── */
+  var secInfo = document.createElement('div');
+  secInfo.className = 'pt-sec';
+  secInfo.appendChild(makeSecHead('給与・評価制度に対する考え'));
+  [
+    { borderCol:'var(--layerx)', tag:'制度設計',
+      link:'https://layerx.co.jp/news/20251001/',
+      linkLabel:'LayerX 新報酬制度発表（2025年10月）↗',
+      title:'2025年10月：賞与制度を新設・報酬原資を最大10%拡充',
+      body:'「Pay for Performance」の原則に基づき、全社・個人のパフォーマンスを事業成果に直結。査定結果に応じて最大月給6ヶ月分の賞与を支給。AI活用による高い生産性を発揮する社員への還元が目的。それ以前は賞与なしの固定給モデルだった。'
+    },
+    { borderCol:'var(--blue)', tag:'評価制度',
+      link:'https://speakerdeck.com/layerx/company-deck',
+      linkLabel:'LayerX CompanyDeck↗',
+      title:'OKRベースの半期評価、年2回の昇格チャンス',
+      body:'OKR（目標と成果指標）に基づく成果主義評価を採用。半期ごとにグレードと給与を見直し、年2回の昇格機会がある。等級は経験年数ではなく成果と評価次第で昇格。中途入社者はPG2以上からスタートし、スキルによってはより高いグレードでのオファーも可能。'
+    },
+    { borderCol:'var(--slate)', tag:'ストックオプション',
+      link:'https://jobs.layerx.co.jp/',
+      linkLabel:'LayerX 採用情報↗',
+      title:'ストックオプション付与・企業成長との利益連動',
+      body:'従業員に対してストックオプションを付与しており、会社の成長が個人の資産形成に直結する仕組み。報酬体系は給与・賞与・ストックオプションの3層構造。成長ステージのスタートアップとして、長期的なコミットメントへのインセンティブを整備している。'
+    },
+  ].forEach(function(d){ secInfo.appendChild(makeCard(d.borderCol,'',d.tag,d.link,d.linkLabel,d.title,d.body)); });
+  el.appendChild(secInfo);
+
+  /* ── 求人票 ── */
+  var JOBS_LX = [
+    { cat:'eng', lbl:'エンジニア', pos:'バクラク プロダクト開発エンジニア', lv:'ミドル〜シニア',
+      desc:'バクラクシリーズの機能開発。少人数職能横断チーム。Ruby/Go/TypeScript',
+      salMin:700, salMax:1200, url:'https://jobs.layerx.co.jp/position/' },
+    { cat:'eng', lbl:'エンジニア', pos:'AI/LLM エンジニア（Ai Workforce）', lv:'ミドル〜シニア',
+      desc:'LLM活用のAIエージェント・ワークフロー自動化開発。GTMプロセス自動化',
+      salMin:800, salMax:1400, url:'https://jobs.layerx.co.jp/position/' },
+    { cat:'eng', lbl:'エンジニア', pos:'機械学習エンジニア（バクラクML）', lv:'ミドル〜',
+      desc:'手入力ゼロの業務処理を支えるML機能開発。推薦・NLP・継続的モデル改善',
+      salMin:700, salMax:1200, url:'https://jobs.layerx.co.jp/position/' },
+    { cat:'biz', lbl:'セールス', pos:'エンタープライズセールス（バクラク）', lv:'ミドル〜',
+      desc:'大手・中堅企業向けバクラクシリーズの新規提案。AI/DX戦略の立案・提案',
+      salMin:600, salMax:1100, url:'https://jobs.layerx.co.jp/position/' },
+    { cat:'prd', lbl:'プロダクト', pos:'プロダクトマネージャー（バクラク）', lv:'ミドル〜シニア',
+      desc:'バクラク各プロダクトのPM。インセプションデッキ・OKR・スクラム運用',
+      salMin:700, salMax:1200, url:'https://jobs.layerx.co.jp/position/' },
+    { cat:'cop', lbl:'コーポレート', pos:'コーポレートエンジニア', lv:'ミドル〜',
+      desc:'社内DX・情報基盤整備。Notion等ナレッジ構築・BCP策定・横断プロジェクト推進',
+      salMin:600, salMax:1000, url:'https://jobs.layerx.co.jp/position/' },
+  ];
+  _renderJobTable(el, JOBS_LX, 1400, '求人票', 'jobs.layerx.co.jp（2026年3月）', 'https://jobs.layerx.co.jp/position/');
+}
+
+/* ══════════════════════════════════════
+   Ubie 給与・評価タブ
+══════════════════════════════════════ */
+function renderUbie(el) {
+  el.innerHTML = '';
+
+  function makeCard(borderCol, tagStyle, tag, link, linkLabel, title, body) {
+    var c = document.createElement('div');
+    c.className = 'info-card';
+    c.style.cssText = 'border-left-color:'+borderCol+';margin-bottom:8px';
+    c.innerHTML =
+      '<div class="info-card-meta">' +
+        '<span class="info-card-tag"'+(tagStyle?' style="'+tagStyle+'"':'')+'>'+tag+'</span>' +
+        '<a class="info-card-link" href="'+link+'" target="_blank">'+linkLabel+'</a>' +
+      '</div>' +
+      '<div class="info-card-title">'+title+'</div>' +
+      '<div class="info-card-body">'+body+'</div>';
+    return c;
+  }
+
+  /* ── 給与レンジ ── */
+  var secSalary = document.createElement('div');
+  secSalary.className = 'pt-sec';
+  var sh = document.createElement('div');
+  sh.className = 'pt-sec-head';
+  sh.innerHTML = '<span class="pt-sec-label">給与レンジ</span>';
+  secSalary.appendChild(sh);
+
+  // グラフ（SmartHRと同じ構造: 凡例 → グラフエリア → フッター → 参照元）
+  var chartWrap = document.createElement('div');
+  chartWrap.className = 'salary-chart-wrap';
+  chartWrap.innerHTML =
+    '<div class="salary-chart-legend">' +
+      '<div class="salary-legend-item"><div class="salary-legend-dot" style="background:#5B8FCC"></div>Ubie Discovery（エンジニア系 / 求人票ベース）</div>' +
+      '<div class="salary-legend-item"><div class="salary-legend-dot" style="background:#3BAA90"></div>Ubie Customer Science（ビジネス系 / 求人票ベース）</div>' +
+    '</div>' +
+    '<div class="salary-chart-canvas-wrap" id="ubChartArea"></div>';
+  secSalary.appendChild(chartWrap);
+
+  var note = document.createElement('div');
+  note.className = 'pt-footnote';
+  note.textContent = 'Discovery側は役職・給与テーブルなしのため等級別レンジは非公開。掲載値は採用サイト・求人票に記載された職種別の想定年収。全正社員にストックオプション付与。';
+  secSalary.appendChild(note);
+
+  var srcRow = document.createElement('div');
+  srcRow.className = 'info-source-row';
+  srcRow.innerHTML =
+    '<span class="info-source-lbl">参照元</span>' +
+    '<div class="info-source-links">' +
+      '<a class="info-source-link" href="https://recruit.ubie.life/" target="_blank">Ubie 採用サイト↗</a>' +
+      '<a class="info-source-link" href="https://type.jp/et/feature/21608/" target="_blank">エンジニアtype 取材記事「会社成長連動報酬」↗</a>' +
+    '</div>';
+  secSalary.appendChild(srcRow);
+
+  el.appendChild(secSalary);
+
+  // グラフ描画（職種別バー）
+  var area = document.getElementById('ubChartArea');
+  if (area) {
+    var JOB_RANGES = [
+      { lbl:'ソフトウェアエンジニア', min:700, max:1200, col:'#5B8FCC' },
+      { lbl:'PM',               min:800, max:1200, col:'#5B8FCC' },
+      { lbl:'ENTセールス',   min:800, max:1500, col:'#3BAA90' },
+      { lbl:'カスタマーサクセス',  min:600, max:1000, col:'#3BAA90' },
+    ];
+    var CHART_H=220, CHART_XPAD=62, maxY=1800;
+    area.style.cssText='position:relative;height:'+(CHART_H+28)+'px;padding-left:'+CHART_XPAD+'px;overflow:visible';
+    var plot=document.createElement('div');
+    plot.style.cssText='position:absolute;left:'+CHART_XPAD+'px;top:0;right:0;height:'+CHART_H+'px;border-left:0.5px solid var(--line2);border-bottom:0.5px solid var(--line2);overflow:visible';
+    area.appendChild(plot);
+    [0,500,1000,1500].forEach(function(v){
+      var px=CHART_H-Math.round(v/maxY*CHART_H);
+      var g=document.createElement('div');
+      g.style.cssText='position:absolute;left:0;right:0;top:'+px+'px;border-top:0.5px dashed var(--line)';
+      plot.appendChild(g);
+      var t=document.createElement('div');
+      t.style.cssText='position:absolute;right:100%;padding-right:6px;top:'+(px-7)+'px;font-size:9px;color:var(--text3);font-family:var(--font-mono);white-space:nowrap';
+      t.textContent=v===0?'0':(v/100).toFixed(0)+'00';
+      plot.appendChild(t);
+    });
+    var yu=document.createElement('div');
+    yu.style.cssText='position:absolute;right:100%;padding-right:6px;top:-14px;font-size:9px;color:var(--text3);font-family:var(--font-mono)';
+    yu.textContent='万円'; plot.appendChild(yu);
+    var nG=JOB_RANGES.length;
+    JOB_RANGES.forEach(function(g,i){
+      var slotW=1/nG;
+      var grp=document.createElement('div');
+      grp.style.cssText='position:absolute;bottom:0;left:'+((i/nG+slotW*0.15)*100).toFixed(2)+'%;width:'+(slotW*0.7*100).toFixed(2)+'%;height:'+CHART_H+'px;overflow:visible';
+      var botPx=Math.round(g.min/maxY*CHART_H);
+      var hPx=Math.round((g.max-g.min)/maxY*CHART_H);
+      var bar=document.createElement('div');
+      bar.style.cssText='position:absolute;bottom:'+botPx+'px;height:'+hPx+'px;left:0;right:0;background:'+g.col+';opacity:0.82;border-radius:2px 2px 0 0';
+      bar.title=g.min+'〜'+g.max+'万円';
+      var lbl=document.createElement('div');
+      lbl.style.cssText='position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:8px;color:var(--text3);font-family:var(--font-mono);white-space:nowrap';
+      lbl.textContent=g.max;
+      bar.appendChild(lbl); grp.appendChild(bar);
+      var xl=document.createElement('div');
+      xl.style.cssText='position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--text2);font-family:var(--font-mono);text-align:center;white-space:nowrap';
+      xl.textContent=g.lbl.replace('\n','\n'); grp.appendChild(xl);
+      plot.appendChild(grp);
+    });
+  }
+
+  /* ── 評価制度に対する考え ── */
+  var secInfo = document.createElement('div');
+  secInfo.className = 'pt-sec';
+  var ih = document.createElement('div');
+  ih.className = 'pt-sec-head';
+  ih.innerHTML = '<span class="pt-sec-label">給与・評価制度に対する考え</span>';
+  secInfo.appendChild(ih);
+  [
+    { borderCol:'var(--ubie)', tag:'Discovery 制度哲学',
+      link:'https://type.jp/et/feature/21608/',
+      linkLabel:'エンジニアtype「会社成長連動報酬」↗',
+      title:'「役職・評価なし」で事業にフォーカス — Discovery組織の設計思想',
+      body:'Ubie Discoveryでは役職・給与テーブル・個人評価をすべてなくし、業績に連動して全員が一斉に昇給する「会社成長連動報酬」を採用。「役職＝権限＝評価者」のヒエラルキーをなくすことで、メンバーがヒト（上司）ではなくコト（事業の目的）に向かって働ける環境を設計。'
+    },
+    { borderCol:'var(--teal)', tag:'報酬オプション',
+      link:'https://kaneda3.com/2023/09/29/ubie社の人事制度をリサーチする/',
+      linkLabel:'kaneda blog「Ubie社の人事制度をリサーチする」↗',
+      title:'オファー時に「給与重視・SO重視・バランス型」の3択から選べる',
+      body:'入社オファー時に、給与重視／ストックオプション重視／バランス型の3パターンから報酬構成を選択できる制度。長期的な株式価値への期待度やキャッシュニーズに応じて個人が選択できる点が特徴的。全正社員に対してストックオプションが付与される。'
+    },
+    { borderCol:'var(--blue)', tag:'フィードバック',
+      link:'https://kaneda3.com/2023/09/29/ubie社の人事制度をリサーチする/',
+      linkLabel:'kaneda blog「Ubie社の人事制度をリサーチする」↗',
+      title:'評価はしないが、フィードバックは仕組みとして実施',
+      body:'「評価なし」はフィードバックなしを意味しない。OKRで目標設定しチーム目標からボトムアップで設計するプロセスの中で、定期的なフィードバックを仕組みとして運用。評価の工数をゼロにしつつ成長支援を維持するという設計思想。Customer Science側では通常のMBOベース評価が運用されている。'
+    },
+  ].forEach(function(d){ secInfo.appendChild(makeCard(d.borderCol,'',d.tag,d.link,d.linkLabel,d.title,d.body)); });
+  el.appendChild(secInfo);
+
+  /* ── 求人票 ── */
+  var JOBS_UB = [
+    { cat:'eng', lbl:'エンジニア', pos:'ソフトウェアエンジニア（Ubie Discovery）', lv:'ミドル〜シニア',
+      desc:'症状検索エンジン「ユビー」・医療機関向けプロダクト開発。少数精鋭のフルスタック志向',
+      salMin:700, salMax:1200, url:'https://recruit.ubie.life/' },
+    { cat:'eng', lbl:'エンジニア', pos:'AIエンジニア / 生成AI活用', lv:'ミドル〜シニア',
+      desc:'生成AIによる問診要約・医療情報構造化。LLM活用プロダクト開発',
+      salMin:800, salMax:1300, url:'https://recruit.ubie.life/' },
+    { cat:'prd', lbl:'プロダクト', pos:'プロダクトマネージャー', lv:'ミドル〜シニア',
+      desc:'ユビー・ユビーメディカルナビのPM。医療ドメイン知識と事業成長の両立',
+      salMin:800, salMax:1200, url:'https://recruit.ubie.life/' },
+    { cat:'biz', lbl:'セールス', pos:'エンタープライズセールス（UCS）', lv:'ミドル〜',
+      desc:'大手医療機関・製薬企業向け提案。10→100フェーズのスケール担当',
+      salMin:800, salMax:1500, url:'https://recruit.ubie.life/' },
+    { cat:'biz', lbl:'セールス', pos:'カスタマーサクセス（医療機関向け）', lv:'メンバー〜',
+      desc:'医療機関の導入支援・活用拡大。医師・看護師との協働が多い環境',
+      salMin:600, salMax:1000, url:'https://recruit.ubie.life/' },
+  ];
+  _renderJobTable(el, JOBS_UB, 1500, '求人票', 'recruit.ubie.life（2026年3月）', 'https://recruit.ubie.life/');
+}
+
+/* ══════════════════════════════════════
+   共通: 求人票テーブル描画
+══════════════════════════════════════ */
+function _renderJobTable(el, jobs, maxSal, secLabel, srcLabel, srcUrl) {
+  var catStyle = {eng:'jcat-eng',biz:'jcat-biz',prd:'jcat-prd',dat:'jcat-dat',cop:'jcat-dat'};
+  var barCol   = {eng:'#5B8FCC',biz:'#3BAA90',prd:'#8246b4',dat:'#5A6A80',cop:'#5A6A80'};
+
+  var sec = document.createElement('div');
+  sec.className = 'pt-sec';
+  var head = document.createElement('div');
+  head.className = 'pt-sec-head';
+  head.innerHTML =
+    '<span class="pt-sec-label">'+secLabel+'</span>' +
+    '<span class="pt-src-pill"><a href="'+srcUrl+'" target="_blank">'+srcLabel+'</a></span>';
+  sec.appendChild(head);
+
+  var wrap = document.createElement('div');
+  wrap.className = 'job-table-outer';
+  var table = document.createElement('table');
+  table.className = 'job-table-v3';
+  table.innerHTML =
+    '<thead><tr>' +
+      '<th style="width:68px">大枠</th>' +
+      '<th style="width:175px">ポジション</th>' +
+      '<th style="width:80px">レイヤー</th>' +
+      '<th style="width:195px">概要</th>' +
+      '<th style="width:180px">給与帯</th>' +
+      '<th style="width:48px">求人</th>' +
+    '</tr></thead>';
+  var tbody = document.createElement('tbody');
+  jobs.forEach(function(j) {
+    var hasSal = j.salMin !== null;
+    var fillLeft  = hasSal ? (j.salMin/maxSal*100).toFixed(1) : 0;
+    var fillWidth = hasSal ? ((j.salMax-j.salMin)/maxSal*100).toFixed(1) : 0;
+    var col = barCol[j.cat] || '#5A6A80';
+    var salHtml = hasSal
+      ? '<div class="jsal-nums">'+j.salMin+'〜'+j.salMax+'万円</div>' +
+        '<div class="jsal-track"><div class="jsal-fill" style="left:'+fillLeft+'%;width:'+fillWidth+'%;background:'+col+';opacity:0.75"></div></div>'
+      : '<div class="jsal-nums">非公開</div>';
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><span class="jcat-badge '+(catStyle[j.cat]||'jcat-dat')+'">'+j.lbl+'</span></td>' +
+      '<td style="font-size:11px;color:var(--text);font-weight:500;font-family:Noto Sans JP,sans-serif">'+j.pos+'</td>' +
+      '<td><span class="jlv-badge">'+j.lv+'</span></td>' +
+      '<td class="jdesc-cell">'+j.desc+'</td>' +
+      '<td class="jsal-cell">'+salHtml+'</td>' +
+      '<td><a class="jlink" href="'+j.url+'" target="_blank">↗</a></td>';
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+  sec.appendChild(wrap);
+  el.appendChild(sec);
+}
+
 </script>
 </body>
 </html>
