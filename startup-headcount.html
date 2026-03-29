@@ -103,17 +103,20 @@ body {
 .header-meta { font-family: 'Noto Sans JP', sans-serif; font-size: 10px; color: var(--text3); letter-spacing: 0.02em; }
 .header-meta strong { color: var(--text2); font-weight: 400; }
 .header-right { margin-left: auto; display: flex; align-items: center; gap: 20px; }
-.source-badge {
+.source-badge { display:none; }
+.main-mission {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text2);
+  line-height: 1.7;
+  max-width: 720px;
+}
+.company-summary-line {
+  margin-top: 6px;
   font-family: 'Noto Sans JP', sans-serif;
-  font-size: 9px;
-  letter-spacing: 0.02em;
+  font-size: 10px;
   color: var(--text3);
-  border: 1px solid var(--slate-mid);
-  padding: 3px 10px;
-  border-radius: 20px;
-  text-transform: none;
-  background: var(--slate-light);
-  color: var(--slate);
+  letter-spacing: 0.01em;
 }
 .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--slate); animation: pulse 2s ease-in-out infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
@@ -1484,6 +1487,7 @@ canvas { transition: opacity 0.3s; }
       <div>
         <div class="company-title" id="main-title">SmartHR</div>
         <div class="company-subtitle" id="main-sub">設立 2013年1月 · クラウド人事労務ソフト · 東京都港区</div>
+        <div class="main-mission" id="main-mission"></div>
       </div>
       <div class="metric-row">
         <div class="metric-block">
@@ -1521,8 +1525,8 @@ canvas { transition: opacity 0.3s; }
     </div>
 
     <div class="range-bar" style="margin-top:10px">
-      <button class="range-btn" onclick="setRange('all',this)">全期間</button>
-      <button class="range-btn active" onclick="setRange('5y',this)">5年</button>
+      <button class="range-btn active" onclick="setRange('all',this)">全期間</button>
+      <button class="range-btn" onclick="setRange('5y',this)">5年</button>
     </div>
 
     <div class="chart-area">
@@ -1559,27 +1563,14 @@ canvas { transition: opacity 0.3s; }
             <th style="width:54px">年</th>
             <th style="width:110px">社員数</th>
             <th style="width:130px" id="th-funding">資金調達</th>
-            <th>ソース（複数ある場合は全件表示）</th>
+            <th>ソース</th>
           </tr>
         </thead>
         <tbody id="data-tbody"></tbody>
       </table>
     </div>
 
-    <div class="bottom-bar">
-      <div class="bottom-note">
-        <strong>注:</strong> 推定値は公開情報・文脈からの算出。確認済みは企業公式発表・Wayback Machineアーカイブより。
-      </div>
-      <div class="legend">
-        <div class="legend-item"><div class="legend-line" style="background:var(--amber)"></div>確認済みデータ</div>
-        <div class="legend-item"><div class="legend-dash"></div>推定値</div>
-        <div class="legend-item"><div class="legend-line" style="background:#7a3fb5;opacity:0.7;height:8px;border-radius:1px"></div>資金調達</div>
-        <div style="width:1px;height:12px;background:var(--line2)"></div>
-        <div class="legend-item"><span class="event-card-type interview" style="margin-bottom:0">記事</span></div>
-        <div class="legend-item"><span class="event-card-type org" style="margin-bottom:0">組織</span></div>
-        <div class="legend-item"><span class="event-card-type product" style="margin-bottom:0">プロダクト</span></div>
-      </div>
-    </div>
+
     </div><!-- /pane-headcount -->
 
     <!-- 給与・評価・求人タブ -->
@@ -1866,7 +1857,7 @@ const EVENTS = {
 };
 
 let currentCompany = 0;
-let currentRange = '5y';
+let currentRange = 'all';
 let showFunding = true;
 let mainChart = null;
 const sparkCharts = [];
@@ -2205,13 +2196,13 @@ function updateTable(company) {
         : []
     );
     const sourceEntries = uniqBy(
-      [...headcountSources, ...fundingSources].filter(s => s && (s.text || s.method || s.url)),
-      s => [s.category || '', s.text || '', s.method || '', s.type || '', s.url || ''].join('|')
+      [...headcountSources, ...fundingSources].map(s => ({
+        ...s,
+        category: s.category && s.category.startsWith('資金調達') ? '資金調達' : s.category
+      })).filter(s => s && (s.text || s.method || s.url)),
+      s => [s.category || '', s.text || '', s.method || '', s.url || ''].join('|')
     );
     const isMulti = sourceEntries.length > 1;
-    const multiBadge = isMulti
-      ? `<span class="multi-badge"><span class="dot"></span>${sourceEntries.length}件</span>`
-      : '';
 
     const countCell = `
       <td class="count">${d.count.toLocaleString()}</td>`;
@@ -2237,7 +2228,7 @@ function updateTable(company) {
             ? `<span class="src-method-tag" style="margin-right:6px">${escapeHtml(s.category)}</span>`
             : '';
           const methodTag = s.method
-            ? `<span class="src-method-tag ${methodClass(s.type)}">${escapeHtml(s.method)}</span>`
+            ? `<span class="src-method-tag">${escapeHtml(s.method)}</span>`
             : '';
           return `
             <div class="src-line ${idx === 0 && isMulti ? 'primary' : ''}">
@@ -2254,9 +2245,6 @@ function updateTable(company) {
         ${countCell}
         <td class="funding-cell" style="padding-top:6px;padding-bottom:6px;vertical-align:top">${fundingCell}</td>
         <td class="src" style="padding-top:6px;padding-bottom:6px">
-          <div style="display:flex;align-items:center;margin-bottom:${isMulti ? 6 : 0}px">
-            ${isMulti ? `<span style="font-family:var(--font-mono);font-size:9px;color:var(--text3);letter-spacing:0.06em">複数ソース</span>${multiBadge}` : ''}
-          </div>
           <div style="display:flex;flex-direction:column;gap:5px">${srcLines}</div>
         </td>
       </tr>`;
@@ -2272,6 +2260,12 @@ function updateMetrics(company) {
 
   document.getElementById('main-title').textContent = company.name;
   document.getElementById('main-sub').textContent = company.sub;
+  const missionEl = document.getElementById('main-mission');
+  if (missionEl) {
+    const mission = company?.api?.mission || '';
+    missionEl.textContent = mission ? `MISSION: ${mission}` : '';
+    missionEl.style.display = mission ? 'block' : 'none';
+  }
   document.getElementById('metric-current').textContent = latest.count.toLocaleString();
   const COLOR_MAP2 = { 'SmartHR':'var(--smarthr)','LayerX':'var(--layerx)','Ubie':'var(--ubie)' };
   const companyColor = COLOR_MAP2[company.name] || 'var(--slate-dark)';
@@ -2350,7 +2344,7 @@ async function loadSiteData() {
         month: 'short',
         day: 'numeric'
       });
-      metaEl.innerHTML = `<strong>${payload.meta.companyCount}</strong> 企業 &nbsp;·&nbsp; JSON API連携 &nbsp;·&nbsp; 更新: <strong>${updated}</strong>`;
+      metaEl.innerHTML = `<strong>${payload.meta.companyCount}</strong> 企業 &nbsp;·&nbsp; 更新: <strong>${updated}</strong>`;
     }
 
     showDataBadge('JSON API連携', 'loaded');
@@ -2498,10 +2492,7 @@ function showLoadingState(msg) {
 }
 
 function showDataBadge(label, mode) {
-  const badge = document.querySelector('.source-badge');
-  if (!badge) return;
-  const color = mode === 'loaded' ? 'var(--teal)' : 'var(--text3)';
-  badge.innerHTML = `<span style="color:${color}">●</span> ${label}`;
+  return;
 }
 
 // ══════════════════════════════════════════════════════
@@ -2524,16 +2515,7 @@ function renderSidebar() {
           ${c.name}
           <span class="company-badge">${c.sector || ''}</span>
         </div>
-        <div class="company-stats">
-          <div class="stat">
-            <div class="stat-val">${latestStr}</div>
-            <div class="stat-label">${latestYear} 現在</div>
-          </div>
-          <div class="stat">
-            <div class="stat-val">${c.founding_year || c.data[0]?.year || '—'}</div>
-            <div class="stat-label">創業年</div>
-          </div>
-        </div>
+        <div class="company-summary-line">社員数 ${latestStr}　創業年 ${c.founding_year || c.data[0]?.year || '—'}</div>
         <div class="sparkline-wrap">
           <canvas class="spark" id="spark${idx}"></canvas>
         </div>
@@ -2633,9 +2615,6 @@ function renderPeopleTab(idx) {
   }
 
   el.innerHTML = '';
-
-  const summary = buildPeopleSummarySection(company, api);
-  if (summary) el.appendChild(summary);
 
   const salary = buildSalarySection(company, api);
   if (salary) el.appendChild(salary);
