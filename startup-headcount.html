@@ -303,7 +303,7 @@ body {
 /* Data table */
 .data-table-wrap {
   flex-shrink: 0;
-  border-top: 1px solid var(--line);
+  border-top: none;
   padding: 0 32px;
   max-height: none;
   overflow-y: visible;
@@ -494,7 +494,7 @@ body {
 /* Events timeline */
 .events-strip {
   flex-shrink: 0;
-  border-top: 1px solid var(--line);
+  border-top: none;
   padding: 0 32px;
   height: 160px;
   position: relative;
@@ -1305,25 +1305,35 @@ canvas { transition: opacity 0.3s; }
 
     <!-- タブナビゲーション -->
     <div class="tab-nav">
-      <button class="tab-nav-btn active" onclick="switchMainTab('headcount', this)">在職者数</button>
+      <button class="tab-nav-btn active" onclick="switchMainTab('headcount', this)">資金調達・社員数</button>
       <button class="tab-nav-btn" onclick="switchMainTab('people', this)">給与・評価・求人 <span class="tab-new-badge">NEW</span></button>
     </div>
 
     <!-- 在職者数タブ -->
     <div class="tab-pane active" id="pane-headcount">
-    <div class="range-bar">
+
+    <!-- 見出し：資金調達・社員数推移 -->
+    <div style="padding:14px 32px 0">
+      <div class="pt-sec-head" style="margin-bottom:0">
+        <span class="pt-sec-label">資金調達・社員数推移</span>
+      </div>
+    </div>
+
+    <div class="range-bar" style="margin-top:10px">
       <button class="range-btn" onclick="setRange('all',this)">全期間</button>
       <button class="range-btn active" onclick="setRange('5y',this)">5年</button>
-      <button class="range-btn" onclick="setRange('3y',this)">3年</button>
-      <div style="width:1px;height:16px;background:var(--line2);margin:0 8px"></div>
-      <button class="range-btn funding-toggle active" id="fundingToggle" onclick="toggleFunding()">
-        <span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#7a3fb5;margin-right:5px;vertical-align:middle;opacity:0.85"></span>資金調達を表示
-      </button>
     </div>
 
     <div class="chart-area">
       <div class="chart-wrap">
         <canvas id="mainChart"></canvas>
+      </div>
+    </div>
+
+    <!-- 見出し：トピックス -->
+    <div style="padding:14px 32px 0">
+      <div class="pt-sec-head" style="margin-bottom:0">
+        <span class="pt-sec-label">トピックス</span>
       </div>
     </div>
 
@@ -1334,14 +1344,20 @@ canvas { transition: opacity 0.3s; }
       </div>
     </div>
 
+    <!-- 見出し：参考ソース -->
+    <div style="padding:14px 32px 0">
+      <div class="pt-sec-head" style="margin-bottom:0">
+        <span class="pt-sec-label">参考ソース</span>
+      </div>
+    </div>
+
     <div class="data-table-wrap">
       <table class="data-table">
         <thead>
           <tr>
             <th style="width:54px">年</th>
-            <th style="width:110px">在職者数</th>
+            <th style="width:110px">社員数</th>
             <th style="width:130px" id="th-funding">資金調達</th>
-            <th style="width:56px">信頼度</th>
             <th>ソース（複数ある場合は全件表示）</th>
           </tr>
         </thead>
@@ -1832,8 +1848,6 @@ const sparkCharts = [];
 
 function toggleFunding() {
   showFunding = !showFunding;
-  const btn = document.getElementById('fundingToggle');
-  btn.classList.toggle('active', showFunding);
   buildMainChart(COMPANIES[currentCompany], currentRange);
 }
 
@@ -2201,7 +2215,7 @@ function updateTable(company) {
     const countCell = `
       <td class="count">
         ${d.count.toLocaleString()}
-        ${d.est ? '<span class="est-tag">推定</span>' : '<span class="verified-tag">確認</span>'}
+        ${d.est ? '<span class="est-tag">推定</span>' : ''}
         ${conflictIcon}
       </td>`;
 
@@ -2219,15 +2233,14 @@ function updateTable(company) {
       : `<span class="funding-none">—</span>`;
 
     const srcLines = d.sources.map((s, idx) => {
-      const linkHtml = s.url
-        ? `<a href="${s.url}" target="_blank" rel="noopener" class="src-link">↗</a>`
-        : '';
+      const srcText = s.url
+        ? `<a href="${s.url}" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${s.text} ↗</a>`
+        : s.text;
       return `
         <div class="src-line ${idx === 0 && isMulti ? 'primary' : ''}">
           ${isMulti ? `<span class="src-bullet">${idx + 1}</span>` : ''}
-          <span class="src-text">${s.text}</span>
+          <span class="src-text">${srcText}</span>
           <span class="src-method-tag ${methodClass(s.type)}">${s.method}</span>
-          ${linkHtml}
         </div>`;
     }).join('');
 
@@ -2236,7 +2249,6 @@ function updateTable(company) {
         <td class="year">${d.year}</td>
         ${countCell}
         <td class="funding-cell" style="padding-top:6px;padding-bottom:6px;vertical-align:top">${fundingCell}</td>
-        <td style="font-family:var(--font-mono);font-size:10px;color:${confClass};width:56px">${confLabel}</td>
         <td class="src" style="padding-top:6px;padding-bottom:6px">
           <div style="display:flex;align-items:center;margin-bottom:${isMulti ? 6 : 0}px">
             ${isMulti ? `<span style="font-family:var(--font-mono);font-size:9px;color:var(--text3);letter-spacing:0.06em">複数ソース</span>${multiBadge}` : ''}
