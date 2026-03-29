@@ -2324,9 +2324,9 @@ function sheetUrl(sheetName) {
   return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
 }
 
-// CSVテキスト → 行の配列に変換
-function parseCsv(text) {
-  const lines = text.trim().split('\n');
+// CSVテキスト → 行の配列に変換（skipRows: 先頭からスキップする行数）
+function parseCsv(text, skipRows = 0) {
+  const lines = text.trim().split('\n').slice(skipRows);
   if (lines.length < 2) return [];
   const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
   return lines.slice(1).map(line => {
@@ -2357,21 +2357,21 @@ async function loadSiteData() {
 
     // 3シートを並列フェッチ
     const [hcResp, fundResp, evtResp] = await Promise.all([
-      fetch(sheetUrl('headcount'), { cache: 'no-cache' }),
-      fetch(sheetUrl('funding'),   { cache: 'no-cache' }),
-      fetch(sheetUrl('events'),    { cache: 'no-cache' }),
+      fetch(sheetUrl('社員数'),     { cache: 'no-cache' }),
+      fetch(sheetUrl('資金調達'),   { cache: 'no-cache' }),
+      fetch(sheetUrl('トピックス'), { cache: 'no-cache' }),
     ]);
 
     if (!hcResp.ok) throw new Error(`headcount シートの読み込みに失敗 (HTTP ${hcResp.status})`);
 
-    const hcRows   = parseCsv(await hcResp.text());
-    const fundRows = fundResp.ok ? parseCsv(await fundResp.text()) : [];
-    const evtRows  = evtResp.ok  ? parseCsv(await evtResp.text())  : [];
+    const hcRows   = parseCsv(await hcResp.text(),   1);
+    const fundRows = fundResp.ok ? parseCsv(await fundResp.text(), 1) : [];
+    const evtRows  = evtResp.ok  ? parseCsv(await evtResp.text(),  1) : [];
 
     if (hcRows.length === 0) throw new Error('headcount シートにデータがありません');
 
-    // ── headcount → COMPANIES[].data に変換 ──────────────
-    // シートの列: company | year | count | est | source_text | source_method | source_type
+    // ── 社員数 → COMPANIES[].data に変換 ──────────────
+    // シートの列: company | year | count | source_text | source_method | source_type | source_url
     const byCompany = {};
     hcRows.forEach(row => {
       const name = row.company?.trim();
@@ -2380,7 +2380,7 @@ async function loadSiteData() {
       byCompany[name].push({
         year:    parseInt(row.year) || 0,
         count:   parseInt(row.count) || 0,
-        est:     row.est?.toLowerCase() === 'true' || row.est === '1' || row.est === 'TRUE',
+        est:     false,
         sources: [{
           text:   row.source_text   || '',
           method: row.source_method || '',
@@ -2390,8 +2390,8 @@ async function loadSiteData() {
       });
     });
 
-    // ── funding → COMPANIES[].funding に変換 ─────────────
-    // シートの列: company | year | round | amount | note
+    // ── 資金調達 → COMPANIES[].funding に変換 ─────────────
+    // シートの列: company | year | round | amount（億円） | note（投資家等）
     const fundByCompany = {};
     fundRows.forEach(row => {
       const name = row.company?.trim();
