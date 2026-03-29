@@ -1957,46 +1957,6 @@ function buildMainChart(company, range) {
 
 const TYPE_LABEL = { interview: '記事', org: '組織', product: 'プロダクト', award: '受賞', media: 'メディア' };
 
-function renderEventsStrip(company) {
-  const strip = document.getElementById('eventsStrip');
-  const events = company.events || [];
-  if (!events.length) {
-    strip.innerHTML = '<div class="events-empty">トピックデータなし</div>';
-    return;
-  }
-
-  // 年ごとにグループ化
-  const byYear = {};
-  events.forEach(e => {
-    if (!byYear[e.year]) byYear[e.year] = [];
-    byYear[e.year].push(e);
-  });
-
-  const years = Object.keys(byYear).map(Number).sort((a, b) => a - b);
-  const color = company.color;
-
-  strip.innerHTML = years.map(year => {
-    const cards = byYear[year].map(e => {
-      const linkHTML = e.url
-        ? `<a class="event-card-link" href="${e.url}" target="_blank" rel="noopener">記事を読む →</a>`
-        : '';
-      return `
-        <div class="event-card" data-year="${year}">
-          <span class="event-card-type ${e.type}">${TYPE_LABEL[e.type] || e.type}</span>
-          <div class="event-card-title">${e.title}</div>
-          <div class="event-card-desc">${e.desc}</div>
-          ${linkHTML}
-        </div>`;
-    }).join('');
-
-    return `
-      <div class="event-year-col" id="evtYear${year}">
-        <div class="event-year-label" style="--company-color:${color}">${year}</div>
-      </div>
-      <div class="event-cards-col">${cards}</div>`;
-  }).join('');
-}
-
 function highlightEventYear(year) {
   document.querySelectorAll('.event-year-col').forEach(el => {
     el.classList.toggle('highlighted', el.id === `evtYear${year}`);
