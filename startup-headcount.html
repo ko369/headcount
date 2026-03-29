@@ -2327,7 +2327,7 @@ async function loadSiteData() {
     }
 
     const payload = await res.json();
-    applyHeadcountApiData(payload);
+    applyApiData(payload);
 
     const metaEl = document.querySelector('.header-meta');
     if (metaEl && payload.meta) {
@@ -2348,36 +2348,124 @@ async function loadSiteData() {
   }
 }
 
-function applyHeadcountApiData(payload) {
-  const apiByName = Object.fromEntries(
-    (payload.companies || []).map(c => [c.name, c])
-  );
-
-  let mergedCount = 0;
+function applyApiData(payload) {
+  const companies = Array.isArray(payload?.companies) ? payload.companies : [];
+  const apiByName = Object.fromEntries(companies.map(c => [c.name, c]));
 
   COMPANIES.forEach(company => {
     const api = apiByName[company.name];
-    if (!api || !Array.isArray(api.headcounts) || api.headcounts.length === 0) return;
+    if (!api) return;
+    applyCompanyApiData(company, api);
+  });
 
-    company.data = api.headcounts
-      .map(d => ({
-        year: Number(d.year) || 0,
-        count: Number(d.count) || 0,
-        est: (d.source_method || '') === '推算',
-        sources: [{
+  companies.forEach(api => {
+    if (COMPANIES.find(c => c.name === api.name)) return;
+    const company = {
+      id: api.id || slugify(api.name),
+      name: api.name,
+      sub: buildCompanySub(api),
+      sector: api.sector || '',
+      founding_year: api.foundingYear || null,
+      color: api.color || '#888780',
+      colorDim: makeColorDim(api.color || '#888780'),
+      funding: normalizeFunding(api.funding || []),
+      data: normalizeHeadcounts(api.headcounts || []),
+      api: api
+    };
+    COMPANIES.push(company);
+    EVENTS[api.name] = normalizeTopics(api.topics || []);
+  });
+}
+
+function applyCompanyApiData(company, api) {
+  company.id = api.id || company.id || slugify(api.name || company.name);
+  company.name = api.name || company.name;
+  company.sector = api.sector || company.sector || '';
+  company.founding_year = api.foundingYear || company.founding_year || null;
+  company.sub = buildCompanySub(api) || company.sub || '';
+  if (api.color) {
+    company.color = api.color;
+    company.colorDim = makeColorDim(api.color);
+  }
+  if (Array.isArray(api.headcounts) && api.headcounts.length > 0) {
+    company.data = normalizeHeadcounts(api.headcounts);
+  }
+  if (Array.isArray(api.funding)) {
+    company.funding = normalizeFunding(api.funding);
+  }
+  if (Array.isArray(api.topics)) {
+    EVENTS[company.name] = normalizeTopics(api.topics);
+  }
+  company.api = api;
+}
+
+function buildCompanySub(api) {
+  const bits = [];
+  if (api.foundingYear) bits.push(`設立 ${api.foundingYear}年`);
+  if (api.sector) bits.push(api.sector);
+  if (api.location) bits.push(api.location);
+  return bits.join(' · ');
+}
+
+function normalizeHeadcounts(items) {
+  return (items || []).map(d => ({
+    year: Number(d.year) || 0,
+    count: Number(d.count) || 0,
+    est: !!d.est || (d.source_method || '') === '推算',
+    sources: Array.isArray(d.sources) && d.sources.length > 0
+      ? d.sources.map(s => ({
+          text: s.text || '',
+          method: s.method || '',
+          type: s.type || 'default',
+          url: s.url || ''
+        }))
+      : [{
           text: d.source_text || '',
           method: d.source_method || '',
           type: d.source_type || 'default',
           url: d.source_url || ''
         }]
-      }))
-      .filter(d => d.year)
-      .sort((a, b) => a.year - b.year);
+  })).filter(d => d.year).sort((a, b) => a.year - b.year);
+}
 
-    mergedCount++;
-  });
+function normalizeFunding(items) {
+  return (items || []).map(f => ({
+    year: Number(f.year) || 0,
+    round: f.round || '',
+    amount: Number(f.amount) || 0,
+    note: f.note || ''
+  })).filter(f => f.year).sort((a, b) => a.year - b.year);
+}
 
-  console.log(`[API] ${mergedCount}社の社員数データを反映しました`);
+function normalizeTopics(items) {
+  return (items || []).map(t => ({
+    year: Number(t.year) || 0,
+    type: t.type || 'org',
+    title: t.title || '',
+    source: t.source || '',
+    date: t.date || '',
+    quote: t.quote || '',
+    quoteAttr: t.quoteAttr || '',
+    desc: t.desc || '',
+    url: t.url || ''
+  })).filter(t => t.year).sort((a, b) => a.year - b.year);
+}
+
+function makeColorDim(hex) {
+  const m = String(hex || '').trim().match(/^#?([0-9a-fA-F]{6})$/);
+  if (!m) return 'rgba(136,135,128,0.15)';
+  const v = m[1];
+  const r = parseInt(v.slice(0,2), 16);
+  const g = parseInt(v.slice(2,4), 16);
+  const b = parseInt(v.slice(4,6), 16);
+  return `rgba(${r},${g},${b},0.15)`;
+}
+
+function slugify(str) {
+  return String(str || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'company';
 }
 
 function showLoadingState(msg) {
@@ -2474,352 +2562,376 @@ function switchMainTab(id, btn) {
 // 給与・評価・求人タブのレンダリング
 // ══════════════════════════════════════════════════════
 
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatManYen(v) {
+  if (v === null || v === undefined || v === '' || Number.isNaN(Number(v))) return '—';
+  return `${Number(v).toLocaleString('ja-JP')}万円`;
+}
+
+function formatPeopleCount(v) {
+  if (v === null || v === undefined || v === '' || Number.isNaN(Number(v))) return '—';
+  return `${Number(v).toLocaleString('ja-JP')}名`;
+}
+
+function uniqBy(items, keyFn) {
+  const seen = new Set();
+  return items.filter(item => {
+    const key = keyFn(item);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function renderPeopleTab(idx) {
   const company = COMPANIES[idx];
   const el = document.getElementById('people-content');
   if (!el) return;
 
-  if (company.name === 'LayerX') { renderLayerX(el); return; }
-  if (company.name === 'Ubie')   { renderUbie(el);   return; }
-  if (company.name !== 'SmartHR') {
+  const api = company.api || {};
+  const hasApiPeopleData = (api.salaryRanges?.length || 0) > 0 || (api.infoCards?.length || 0) > 0 || (api.jobs?.length || 0) > 0;
+
+  if (!hasApiPeopleData) {
+    if (company.name === 'LayerX') { renderLayerX(el); return; }
+    if (company.name === 'Ubie')   { renderUbie(el);   return; }
+    if (company.name === 'SmartHR') {
+      el.innerHTML = '<div style="padding:40px 32px;font-size:11px;color:var(--text3);font-family:var(--font-mono)">APIデータ読込前のため、従来表示を利用してください。</div>';
+      return;
+    }
     el.innerHTML = '<div style="padding:40px 32px;font-size:11px;color:var(--text3);font-family:var(--font-mono)">このデータはまだ収集中です</div>';
     return;
   }
 
-  /* ── データ定義 ── */
-  const GRADES = [
-    { id:'G1', lbl:'ポテンシャル', hi:{min:330,max:402},  std:{min:330,max:402}  },
-    { id:'G2', lbl:'独立実行',     hi:{min:402,max:504},  std:{min:348,max:456}  },
-    { id:'G3', lbl:'巻き込む',     hi:{min:456,max:708},  std:{min:402,max:600}, cnt:101 },
-    { id:'G4', lbl:'組織リード',   hi:{min:600,max:1008}, std:{min:504,max:804}, cnt:233 },
-    { id:'G5', lbl:'事業牽引',     hi:{min:804,max:1500}, std:{min:708,max:1474},cnt:100 },
-    { id:'G6', lbl:'経営レベル',   hi:{min:1200,max:2546},std:{min:1008,max:2090},cnt:4  },
-  ];
-
-  const GRADE_DEFS = [
-    { id:'G3', theme:'方針を理解して自律駆動できる人', active:false, items:[
-      '担当プロダクトのPRDを自ら作成できる',
-      'ヒアリング・データから改善策を提案できる',
-      '複数課題の優先度を判断・提案できる',
-      '開発チームと自律的に連携できる',
-    ]},
-    { id:'G4', theme:'周囲を巻き込んで成果を出せる人', active:true, items:[
-      '半年以上のロードマップ・OKRを策定できる',
-      '高い顧客解像度で要件をスコープ調整できる',
-      'プロジェクトのゴール設定と予実管理ができる',
-      '部署・プロダクト横断の取り組みを主導できる',
-      '開発した機能の仮説検証・定量分析ができる',
-    ]},
-    { id:'G5', theme:'周囲の模範となり専門領域を牽引できる人', active:true, items:[
-      '1年以上のビジョン・OKRを策定できる',
-      'プロダクト・領域・職能を越えた変革を推進',
-      'ビジネス観点でBizと適切に議論できる',
-      '以下いずれかの専門性: 汎用スキル / 専門スキル / マネジメントスキル',
-    ]},
-  ];
-
-  const RAISE_DATA = [
-    { label:'2022上期', rate:4.4, avg:29.5, mid:null,  note:'公式note',    col:'#5B8FCC' },
-    { label:'2024下期', rate:3.1, avg:20.4, mid:12.0,  note:'doda求人票',  col:'#3BAA90' },
-    { label:'2025上期', rate:2.9, avg:13.2, mid:null,  note:'会社紹介資料',col:'#5B8FCC' },
-  ];
-
-  const JOBS = [
-    { cat:'eng', lbl:'エンジニア', pos:'シニアWebバックエンドエンジニア（労務領域）', lv:'シニア',
-      desc:'SmartHR基本機能のコア開発。LeSSフレームワークによる大規模チーム。Ruby/Rails/PostgreSQL',
-      salMin:858, salMax:1260, url:'https://doda.jp/DodaFront/View/CompanyJobs/j_id__10128408747/-oc__03L/' },
-    { cat:'eng', lbl:'エンジニア', pos:'SREエンジニア', lv:'ミドル〜シニア',
-      desc:'プロダクト群の信頼性・可用性向上。インフラ最適化・運用自動化。フルリモート可',
-      salMin:742, salMax:1484, url:'https://doda.jp/DodaFront/View/CompanyJobs/j_id__10128408747/' },
-    { cat:'eng', lbl:'エンジニア', pos:'QAエンジニア（レバレッジ推進ユニット）', lv:'ミドル〜',
-      desc:'組織横断の品質保証施策を遂行。品質標準化・自動化推進。フルリモート可',
-      salMin:770, salMax:1540, url:'https://doda.jp/DodaFront/View/CompanyJobs/j_id__10128408747/' },
-    { cat:'eng', lbl:'エンジニア', pos:'エンジニアリングマネージャー候補', lv:'MGR候補',
-      desc:'プロダクトエンジニアリング組織のマネジメント。採用・育成・チームビルディング',
-      salMin:864, salMax:1344, url:'https://doda.jp/DodaFront/View/CompanyJobs/j_id__10128408747/' },
-    { cat:'prd', lbl:'プロダクト',  pos:'AIプロダクトマネージャー', lv:'ミドル〜シニア',
-      desc:'LLM/ML活用プロダクトの実験〜本番実装を主導。AIインテグレーションユニット所属',
-      salMin:null, salMax:null, url:'https://doda.jp/DodaFront/View/CompanyJobs/j_id__10128408747/-oc__03L/' },
-    { cat:'biz', lbl:'セールス',   pos:'フィールドセールス（グロースマーケット）', lv:'メンバー',
-      desc:'従業員51〜500名規模の新規顧客開拓。月20〜25商談想定。在宅可・フルフレックス',
-      salMin:450, salMax:650, url:'https://doda.jp/DodaFront/View/CompanyJobs/j_id__10128408747/-oc__01L/' },
-    { cat:'biz', lbl:'セールス',   pos:'カスタマーサクセスマネージャー（EP）', lv:'ミドル〜',
-      desc:'従業員500名以上の大手企業向けCS。導入支援・活用拡大・更新管理。在宅可',
-      salMin:600, salMax:900, url:'https://doda.jp/DodaFront/View/CompanyJobs/j_id__10128408747/' },
-    { cat:'dat', lbl:'データ/ML',  pos:'データ基盤 / MLOpsエンジニア', lv:'シニア',
-      desc:'学習パイプライン・データ基盤整備。GCP / BigQuery / Airflow中心。原則リモート',
-      salMin:660, salMax:1320, url:'https://doda.jp/DodaFront/View/CompanyJobs/j_id__10128408747/' },
-  ];
-
-  const catStyle = {eng:'jcat-eng',biz:'jcat-biz',prd:'jcat-prd',dat:'jcat-dat'};
-  const barCol   = {eng:'#5B8FCC',biz:'#3BAA90',prd:'#8246b4',dat:'#5A6A80'};
-  const maxSal   = 1540;
-
-  /* ── HTML組み立て（テンプレートリテラル外でDOMを生成） ── */
-  const sec = function(label, inner) {
-    var d = document.createElement('div');
-    d.className = 'pt-sec';
-    d.innerHTML = '<div class="pt-sec-head"><span class="pt-sec-label">'+label+'</span></div>';
-    var body = document.createElement('div');
-    body.innerHTML = inner;
-    d.appendChild(body);
-    return d;
-  };
-
   el.innerHTML = '';
 
-  /* ════════════════════════════
-     給与レンジ
-  ════════════════════════════ */
-  var secSalary = document.createElement('div');
-  secSalary.className = 'pt-sec';
-  secSalary.innerHTML =
-    '<div class="pt-sec-head"><span class="pt-sec-label">給与レンジ</span></div>' +
-    '<div class="salary-chart-wrap">' +
-      '<div class="salary-chart-legend">' +
-        '<div class="salary-legend-item"><div class="salary-legend-dot" style="background:#5B8FCC"></div>給与レンジタイプ：ハイ（エンジニア・デザイナー等）</div>' +
-        '<div class="salary-legend-item"><div class="salary-legend-dot" style="background:#3BAA90"></div>給与レンジタイプ：スタンダード（セールス・PM・コーポレート等）</div>' +
-      '</div>' +
-      '<div class="salary-chart-canvas-wrap" id="salaryChartArea"></div>' +
-    '</div>' +
-    '<div class="pt-footnote">各バーは等級ごとの年収レンジ（下限〜上限）を示す。数値はすべて<strong>成果給込みの年収想定</strong>（月給×12＋成果給）。G1=ポテンシャル / G2=独立実行 / G3=巻き込む（101名）/ G4=組織リード（233名）/ G5=事業牽引（100名）/ G6=経営レベル（4名）</div>' +
-    '<div class="info-source-row"><span class="info-source-lbl">参照元</span><div class="info-source-links"><a class="info-source-link" href="https://speakerdeck.com/smarthr_pr/smarthr-company-introduction1" target="_blank">会社紹介資料 p.56（2026年2月）↗</a><a class="info-source-link" href="https://recruit.smarthr.co.jp/" target="_blank">SmartHR採用サイト 給与レンジ公開ページ ↗</a></div></div>';
-  el.appendChild(secSalary);
+  const summary = buildPeopleSummarySection(company, api);
+  if (summary) el.appendChild(summary);
 
-  /* ════════════════════════════
-     補足情報カード
-  ════════════════════════════ */
-  var secInfo = document.createElement('div');
-  secInfo.className = 'pt-sec';
-  var infoHead = document.createElement('div');
-  infoHead.className = 'pt-sec-head';
-  infoHead.innerHTML = '<span class="pt-sec-label">給与・評価制度に対する考え</span>';
-  secInfo.appendChild(infoHead);
+  const salary = buildSalarySection(company, api);
+  if (salary) el.appendChild(salary);
 
-  var infoCardsData = [
-    { borderCol:'var(--amber)',
-      tagStyle:'background:var(--smarthr-light);color:#9A6800;border-color:var(--smarthr-mid)',
-      tag:'オファー交渉',
-      link:'https://note.com/smarthr_co/n/n7cafa14347a2',
-      linkLabel:'VPoHR 薮田氏 note「採用プロセスにおける現年収ポリシー見直し」（2024年9月）↗',
-      title:'「現年収を聞かない」ポリシーを2024年9月に見直し',
-      body:'ポジションによっては現年収を参考にした上で報酬を提示する方式へ移行（2024年9月変更）。<strong>現年収が低くても市場水準でオファーされる可能性は維持されているが、現年収が高い場合は参考にされる可能性がある点に留意</strong>。'
-    },
-    { borderCol:'var(--blue)',
-      tag:'制度の読み方',
-      link:'https://speakerdeck.com/smarthr_pr/smarthr-company-introduction1',
-      linkLabel:'会社紹介資料 p.50–52（2026年2月）↗',
-      title:'職種によって「昇給型」か「成果給型」かが異なる',
-      body:'エンジニア・デザイナーは「レンジ：ハイ × 成果給：スタンダード」= ベースが高く昇給で上がるモデル。EPセールスは「レンジ：スタンダード × 成果給：ハイ」= ベースは標準的だが成果給の振れ幅が特に大きいモデル。<strong>オファー年収だけでなく制度タイプも確認することが重要</strong>。'
-    },
-    { borderCol:'var(--teal)',
-      tagStyle:'background:var(--tag-ok-bg);color:var(--tag-ok-c);border-color:var(--tag-ok-b)',
-      tag:'昇格',
-      link:'https://mag.smarthr.jp/hr-management/evaluation/talentmanagement_genzaichi_02/',
-      linkLabel:'SmartHR Mag.「スケールアップに合わせた人事制度」（2024年9月）↗',
-      title:'2024年改定前は「G5が実質の天井」だった構造を解消',
-      body:'2024年1月改定前は「G5が実質的な天井」と見られていたが、7段階への改定で等級定義を再整備。<strong>2024年上期にG6への昇格者が初めて出始め、天井感が解消されつつある</strong>。'
-    },
-    { borderCol:'var(--slate)',
-      tag:'成果給',
-      link:'https://note.com/smarthr_co/n/n39d56ffe6453',
-      linkLabel:'SmartHR公式note「人事制度改定の全容」（2024年3月）↗',
-      title:'成果給は「全社業績 × 個人評価 × 等級」の3変数で決まる',
-      body:'成果給（半期1回）は全社業績・個人評価・等級の組み合わせで算出。EPセールスは振れ幅が特に大きい。<strong>職種・等級・評価・会社業績の組み合わせによって個人の実額は大きく異なる</strong>。'
-    },
-    { borderCol:'var(--blue)',
-      tag:'等級要件の使い方',
-      link:'https://tech.smarthr.jp/entry/2025/01/23/090000',
-      linkLabel:'SmartHR Tech Blog「PMの等級要件をアップデートしました」（2025年1月）↗',
-      title:'等級要件は「入学要件」 — 転職者が自分の位置を確認するための地図',
-      body:'等級は昇格時に「すべての要件の再現性が確認されて初めて認定」される入学要件型。G3=自律遂行 / G4=プロジェクト横断でリード / G5=事業牽引＋専門スキルまたはマネジメントの選択性。転職検討時に自分の現在地を判断する指標になる。'
-    },
+  const info = buildInfoCardsSection(api);
+  if (info) el.appendChild(info);
+
+  const jobs = buildJobsSection(api);
+  if (jobs) el.appendChild(jobs);
+}
+
+function buildPeopleSummarySection(company, api) {
+  const hasAny = api.mission || api.location || api.sector || api.foundingYear;
+  if (!hasAny) return null;
+
+  const sec = document.createElement('div');
+  sec.className = 'pt-sec';
+  sec.innerHTML = '<div class="pt-sec-head"><span class="pt-sec-label">企業マスタ</span></div>';
+
+  const body = document.createElement('div');
+  body.style.cssText = 'padding:14px 16px 2px';
+
+  const top = document.createElement('div');
+  top.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:12px';
+
+  const cards = [
+    ['企業名', company.name],
+    ['設立年', api.foundingYear ? `${api.foundingYear}年` : '—'],
+    ['セクター', api.sector || '—'],
+    ['所在地', api.location || '—']
   ];
-  infoCardsData.forEach(function(c) {
-    var card = document.createElement('div');
-    card.className = 'info-card';
-    card.style.cssText = 'border-left-color:'+c.borderCol+';margin-bottom:8px';
-    card.innerHTML =
-      '<div class="info-card-meta">' +
-        '<span class="info-card-tag"' + (c.tagStyle ? ' style="'+c.tagStyle+'"' : '') + '>'+c.tag+'</span>' +
-        '<a class="info-card-link" href="'+c.link+'" target="_blank">'+c.linkLabel+'</a>' +
-      '</div>' +
-      '<div class="info-card-title">'+c.title+'</div>' +
-      '<div class="info-card-body">'+c.body+'</div>';
-    secInfo.appendChild(card);
-  });
-  el.appendChild(secInfo);
 
-  /* ════════════════════════════
-     求人票
-  ════════════════════════════ */
-  var sec3 = document.createElement('div');
-  sec3.className = 'pt-sec';
-  var s3head = document.createElement('div');
-  s3head.className = 'pt-sec-head';
-  s3head.innerHTML =
-    '<span class="pt-sec-label">求人票</span>' +
-    '<span class="pt-src-pill">出典: <a href="https://doda.jp/DodaFront/View/CompanyJobs/j_id__10128408747/" target="_blank">doda（2026年3月）</a> / <a href="https://recruit.smarthr.co.jp/career/" target="_blank">SmartHR採用サイト</a></span>';
-  sec3.appendChild(s3head);
-
-  var tableWrap = document.createElement('div');
-  tableWrap.className = 'job-table-outer';
-  var table = document.createElement('table');
-  table.className = 'job-table-v3';
-  table.innerHTML =
-    '<thead><tr>' +
-      '<th style="width:68px">大枠</th>' +
-      '<th style="width:175px">ポジション</th>' +
-      '<th style="width:80px">レイヤー</th>' +
-      '<th style="width:195px">概要</th>' +
-      '<th style="width:180px">給与帯</th>' +
-      '<th style="width:48px">求人</th>' +
-    '</tr></thead>';
-  var tbody = document.createElement('tbody');
-  JOBS.forEach(function(j) {
-    var tr = document.createElement('tr');
-    var hasSal = j.salMin !== null;
-    var fillLeft  = hasSal ? (j.salMin / maxSal * 100).toFixed(1) : 0;
-    var fillWidth = hasSal ? ((j.salMax - j.salMin) / maxSal * 100).toFixed(1) : 0;
-    var col = barCol[j.cat];
-    var salHtml = hasSal
-      ? '<div class="jsal-nums">'+j.salMin.toLocaleString()+'〜'+j.salMax.toLocaleString()+'万円</div>' +
-        '<div class="jsal-track"><div class="jsal-fill" style="left:'+fillLeft+'%;width:'+fillWidth+'%;background:'+col+';opacity:0.75"></div></div>' +
-        '<div style="font-size:9px;color:var(--text3);margin-top:2px;font-family:var(--font-mono)">max '+maxSal+'万=100%</div>'
-      : '<div class="jsal-nums">非公開</div>';
-    tr.innerHTML =
-      '<td><span class="jcat-badge '+catStyle[j.cat]+'">'+j.lbl+'</span></td>' +
-      '<td style="font-size:11px;color:var(--text);font-weight:500;font-family:Noto Sans JP,sans-serif">'+j.pos+'</td>' +
-      '<td><span class="jlv-badge">'+j.lv+'</span></td>' +
-      '<td class="jdesc-cell">'+j.desc+'</td>' +
-      '<td class="jsal-cell">'+salHtml+'</td>' +
-      '<td><a class="jlink" href="'+j.url+'" target="_blank">doda ↗</a></td>';
-    tbody.appendChild(tr);
+  cards.forEach(([label, value]) => {
+    const item = document.createElement('div');
+    item.style.cssText = 'border:1px solid var(--line);background:var(--bg2);padding:10px 12px;border-radius:8px';
+    item.innerHTML = `<div style="font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-bottom:4px">${escapeHtml(label)}</div><div style="font-size:12px;color:var(--text);line-height:1.6">${escapeHtml(value)}</div>`;
+    top.appendChild(item);
   });
-  table.appendChild(tbody);
+
+  body.appendChild(top);
+
+  if (api.mission) {
+    const mission = document.createElement('div');
+    mission.style.cssText = 'border:1px solid var(--line);padding:12px 14px;border-radius:8px;background:#fff;margin-bottom:12px';
+    mission.innerHTML = `<div style="font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-bottom:6px">MISSION</div><div style="font-size:12px;color:var(--text);line-height:1.8">${escapeHtml(api.mission)}</div>`;
+    body.appendChild(mission);
+  }
+
+  sec.appendChild(body);
+  return sec;
+}
+
+function buildSalarySection(company, api) {
+  const rows = Array.isArray(api.salaryRanges) ? api.salaryRanges : [];
+  if (rows.length === 0) return null;
+
+  const sec = document.createElement('div');
+  sec.className = 'pt-sec';
+  sec.innerHTML = '<div class="pt-sec-head"><span class="pt-sec-label">給与レンジ</span></div>';
+
+  const legendItems = uniqBy(rows.map(r => ({series:r.series || 'single', color:r.color || company.color || '#5A6A80'})), x => `${x.series}|${x.color}`);
+  const legendLabelMap = {
+    hi: 'ハイ',
+    std: 'スタンダード',
+    single: '年収レンジ',
+    Discovery: 'Discovery',
+    UCS: 'UCS'
+  };
+
+  const wrap = document.createElement('div');
+  wrap.className = 'salary-chart-wrap';
+
+  const legend = document.createElement('div');
+  legend.className = 'salary-chart-legend';
+  legend.innerHTML = legendItems.map(item =>
+    `<div class="salary-legend-item"><div class="salary-legend-dot" style="background:${escapeHtml(item.color)}"></div>${escapeHtml(legendLabelMap[item.series] || item.series)}</div>`
+  ).join('');
+  wrap.appendChild(legend);
+
+  const chartArea = document.createElement('div');
+  chartArea.className = 'salary-chart-canvas-wrap';
+  chartArea.style.cssText = 'position:relative;height:278px;margin-bottom:8px';
+  wrap.appendChild(chartArea);
+  sec.appendChild(wrap);
+
+  renderDynamicSalaryChart(chartArea, rows);
+
+  const modelType = rows[0]?.modelType || '';
+  const notes = [];
+  if (modelType) notes.push(`給与モデル: ${modelType}`);
+  const headcountIncluded = rows.filter(r => r.memberCount).length;
+  if (headcountIncluded) notes.push(`在籍人数入りレンジ: ${headcountIncluded}件`);
+  if (notes.length > 0) {
+    const note = document.createElement('div');
+    note.className = 'pt-footnote';
+    note.textContent = notes.join(' / ');
+    sec.appendChild(note);
+  }
+
+  const srcs = uniqBy(rows.filter(r => r.sourceLabel || r.sourceUrl), r => `${r.sourceLabel}|${r.sourceUrl}`);
+  if (srcs.length > 0) {
+    const srcRow = document.createElement('div');
+    srcRow.className = 'info-source-row';
+    srcRow.innerHTML = '<span class="info-source-lbl">参照元</span><div class="info-source-links">' + srcs.map(s => {
+      const label = escapeHtml(s.sourceLabel || s.sourceUrl || '参照元');
+      return s.sourceUrl
+        ? `<a class="info-source-link" href="${escapeHtml(s.sourceUrl)}" target="_blank">${label}</a>`
+        : `<span class="info-source-link">${label}</span>`;
+    }).join('') + '</div>';
+    sec.appendChild(srcRow);
+  }
+
+  const tableWrap = document.createElement('div');
+  tableWrap.style.cssText = 'padding:0 16px 16px';
+  const table = document.createElement('table');
+  table.style.cssText = 'width:100%;border-collapse:collapse;font-size:11px';
+  table.innerHTML = `
+    <thead>
+      <tr style="border-bottom:1px solid var(--line)">
+        <th style="text-align:left;padding:8px 6px;color:var(--text3);font-weight:500">等級/職種</th>
+        <th style="text-align:left;padding:8px 6px;color:var(--text3);font-weight:500">系列</th>
+        <th style="text-align:right;padding:8px 6px;color:var(--text3);font-weight:500">下限</th>
+        <th style="text-align:right;padding:8px 6px;color:var(--text3);font-weight:500">上限</th>
+        <th style="text-align:right;padding:8px 6px;color:var(--text3);font-weight:500">在籍人数</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows.map(r => `
+        <tr style="border-bottom:1px solid var(--line)">
+          <td style="padding:9px 6px">${escapeHtml(r.gradeId || '')}<span style="color:var(--text3)"> ${escapeHtml(r.gradeLabel || '')}</span></td>
+          <td style="padding:9px 6px">${escapeHtml(legendLabelMap[r.series] || r.series || '—')}</td>
+          <td style="padding:9px 6px;text-align:right">${formatManYen(r.min).replace('万円','')}</td>
+          <td style="padding:9px 6px;text-align:right">${formatManYen(r.max).replace('万円','')}</td>
+          <td style="padding:9px 6px;text-align:right">${r.memberCount ? Number(r.memberCount).toLocaleString('ja-JP') : '—'}</td>
+        </tr>
+      `).join('')}
+    </tbody>`;
   tableWrap.appendChild(table);
-  sec3.appendChild(tableWrap);
+  sec.appendChild(tableWrap);
 
-  el.appendChild(sec3);
+  return sec;
+}
 
-  /* ════════════════════════════
-     給与グラフ描画（ピクセルベース）
-  ════════════════════════════ */
-  var area = document.getElementById('salaryChartArea');
-  if (!area) return;
+function renderDynamicSalaryChart(area, rows) {
+  if (!area || !rows.length) return;
 
-  var CHART_H = 220;   // グラフ描画高さ(px)
-  var CHART_XPAD = 62; // 左余白(Y軸ラベル用)
-  var XPAD_BOT = 28;   // 下余白(X軸ラベル用)
-  var maxY = 2600;
-  var yTicks = [0,500,1000,1500,2000,2500];
+  const maxY = Number(rows.find(r => r.graphMax)?.graphMax) || Math.ceil(Math.max(...rows.map(r => Number(r.max) || 0)) / 100) * 100;
+  const CHART_H = 220;
+  const CHART_XPAD = 62;
 
-  // コンテナ設定
-  area.style.cssText = 'position:relative;height:'+(CHART_H+XPAD_BOT)+'px;padding-left:'+CHART_XPAD+'px;overflow:visible';
+  area.style.paddingLeft = `${CHART_XPAD}px`;
+  area.style.overflow = 'visible';
 
-  // プロットエリア（ボーダー付き）
-  var plot = document.createElement('div');
-  plot.style.cssText = [
-    'position:absolute',
-    'left:'+CHART_XPAD+'px',
-    'top:0',
-    'right:0',
-    'height:'+CHART_H+'px',
-    'border-left:0.5px solid var(--line2)',
-    'border-bottom:0.5px solid var(--line2)',
-    'overflow:visible',
-  ].join(';');
+  const plot = document.createElement('div');
+  plot.style.cssText = `position:absolute;left:${CHART_XPAD}px;top:0;right:0;height:${CHART_H}px;border-left:0.5px solid var(--line2);border-bottom:0.5px solid var(--line2);overflow:visible`;
   area.appendChild(plot);
 
-  // グリッド線
-  yTicks.forEach(function(v) {
-    var px = CHART_H - Math.round(v / maxY * CHART_H);
-    var g = document.createElement('div');
-    g.style.cssText = 'position:absolute;left:0;right:0;top:'+px+'px;border-top:0.5px dashed var(--line);pointer-events:none';
-    plot.appendChild(g);
-  });
+  const tickCount = 4;
+  const tickStep = Math.ceil(maxY / tickCount / 100) * 100;
+  const ticks = Array.from({length: tickCount + 1}, (_, i) => i * tickStep).filter(v => v <= maxY);
+  if (ticks[ticks.length - 1] !== maxY) ticks.push(maxY);
 
-  // Y軸ラベル
-  yTicks.forEach(function(v) {
-    var px = CHART_H - Math.round(v / maxY * CHART_H);
-    var t = document.createElement('div');
-    t.style.cssText = 'position:absolute;right:100%;padding-right:6px;top:'+(px-7)+'px;font-size:9px;color:var(--text3);font-family:var(--font-mono);line-height:1;white-space:nowrap';
-    t.textContent = v === 0 ? '0' : (v >= 1000 ? (v/1000).toFixed(0)+'000' : v+'');
+  ticks.forEach(v => {
+    const px = CHART_H - Math.round(v / maxY * CHART_H);
+    const g = document.createElement('div');
+    g.style.cssText = `position:absolute;left:0;right:0;top:${px}px;border-top:0.5px dashed var(--line)`;
+    plot.appendChild(g);
+
+    const t = document.createElement('div');
+    t.style.cssText = `position:absolute;right:100%;padding-right:6px;top:${px-7}px;font-size:9px;color:var(--text3);font-family:var(--font-mono);white-space:nowrap`;
+    t.textContent = v === 0 ? '0' : String(v);
     plot.appendChild(t);
   });
 
-  // Y軸単位ラベル
-  var yu = document.createElement('div');
+  const yu = document.createElement('div');
   yu.style.cssText = 'position:absolute;right:100%;padding-right:6px;top:-14px;font-size:9px;color:var(--text3);font-family:var(--font-mono)';
   yu.textContent = '万円';
   plot.appendChild(yu);
 
-  // バー描画
-  var nG = GRADES.length;
-  var plotW = area.clientWidth - CHART_XPAD || 500; // 初回推定値
-  GRADES.forEach(function(g, i) {
-    var slotW = 1 / nG;
-    var leftPct = (i / nG + slotW * 0.08) * 100;
-    var widthPct = slotW * 0.84 * 100;
+  const groups = [];
+  const map = new Map();
+  rows.forEach(r => {
+    const key = r.gradeId || r.gradeLabel || `g${groups.length}`;
+    if (!map.has(key)) {
+      map.set(key, { key, label: r.gradeLabel || r.gradeId || '', items: [] });
+      groups.push(map.get(key));
+    }
+    map.get(key).items.push(r);
+  });
 
-    var grp = document.createElement('div');
-    grp.style.cssText = [
-      'position:absolute',
-      'bottom:0',
-      'left:'+leftPct.toFixed(2)+'%',
-      'width:'+widthPct.toFixed(2)+'%',
-      'height:'+CHART_H+'px',
-      'display:flex',
-      'gap:2px',
-      'align-items:flex-end',
-      'overflow:visible',
-    ].join(';');
+  const nG = groups.length;
+  groups.forEach((grp, i) => {
+    const slotW = 1 / nG;
+    const leftPct = (i / nG + slotW * 0.08) * 100;
+    const widthPct = slotW * 0.84 * 100;
+    const container = document.createElement('div');
+    container.style.cssText = `position:absolute;bottom:0;left:${leftPct}%;width:${widthPct}%;height:${CHART_H}px;overflow:visible`;
 
-    [{d:g.hi,col:'#5B8FCC'},{d:g.std,col:'#3BAA90'}].forEach(function(item) {
-      var barBottom = Math.round(item.d.min / maxY * CHART_H);
-      var barH      = Math.round((item.d.max - item.d.min) / maxY * CHART_H);
-      if (barH < 1) barH = 1;
+    grp.items.forEach((item, j) => {
+      const innerCount = grp.items.length;
+      const innerW = 100 / innerCount;
+      const left = j * innerW + innerW * 0.1;
+      const width = innerW * 0.8;
+      const min = Number(item.min) || 0;
+      const max = Number(item.max) || 0;
+      const barBottom = Math.round(min / maxY * CHART_H);
+      const barH = Math.max(2, Math.round((max - min) / maxY * CHART_H));
+      const bar = document.createElement('div');
+      bar.style.cssText = `position:absolute;bottom:${barBottom}px;left:${left}%;width:${width}%;height:${barH}px;background:${item.color || '#5A6A80'};opacity:0.82;border-radius:2px 2px 0 0`;
+      bar.title = `${item.gradeLabel || item.gradeId || ''} ${item.series || ''} ${min}〜${max}万円`;
 
-      var bar = document.createElement('div');
-      bar.style.cssText = [
-        'flex:1',
-        'border-radius:2px 2px 0 0',
-        'background:'+item.col,
-        'opacity:0.85',
-        'position:absolute',
-        'bottom:'+barBottom+'px',
-        'height:'+barH+'px',
-        'width:calc(50% - 1px)',
-        'min-width:8px',
-      ].join(';');
-      // ハイとスタンダードを左右に並べる
-      if (item.col === '#5B8FCC') bar.style.left = '0';
-      else bar.style.right = '0';
+      const topLabel = document.createElement('div');
+      topLabel.style.cssText = 'position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:8px;color:var(--text3);font-family:var(--font-mono);white-space:nowrap';
+      topLabel.textContent = max;
+      bar.appendChild(topLabel);
 
-      bar.title = item.d.min+'〜'+item.d.max+'万円';
-
-      // 上限ラベル（上に）
-      var lbl = document.createElement('div');
-      lbl.style.cssText = 'position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:8px;color:var(--text3);font-family:var(--font-mono);white-space:nowrap';
-      lbl.textContent = item.d.max >= 2000 ? (item.d.max/100).toFixed(0)+'0〜' : item.d.max;
-      bar.appendChild(lbl);
-      grp.appendChild(bar);
+      if (item.memberCount) {
+        const cnt = document.createElement('div');
+        cnt.style.cssText = 'position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);font-size:8px;color:var(--text2);font-family:var(--font-mono);white-space:nowrap';
+        cnt.textContent = `${Number(item.memberCount).toLocaleString('ja-JP')}名`;
+        bar.appendChild(cnt);
+      }
+      container.appendChild(bar);
     });
 
-    // X軸ラベル
-    var xl = document.createElement('div');
-    xl.style.cssText = 'position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--text2);font-family:var(--font-mono);white-space:nowrap';
-    xl.textContent = g.id;
-    grp.appendChild(xl);
-
-    plot.appendChild(grp);
+    const xl = document.createElement('div');
+    xl.style.cssText = 'position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--text2);font-family:var(--font-sans);white-space:nowrap;text-align:center';
+    xl.textContent = grp.label || grp.key;
+    container.appendChild(xl);
+    plot.appendChild(container);
   });
 }
 
+function buildInfoCardsSection(api) {
+  const cards = Array.isArray(api.infoCards) ? api.infoCards : [];
+  if (cards.length === 0) return null;
 
-/* ══════════════════════════════════════
-   LayerX 給与・評価タブ
-══════════════════════════════════════ */
+  const sec = document.createElement('div');
+  sec.className = 'pt-sec';
+  sec.innerHTML = '<div class="pt-sec-head"><span class="pt-sec-label">補足情報カード</span></div>';
+
+  const body = document.createElement('div');
+  body.style.cssText = 'padding:8px 16px 16px';
+
+  cards.forEach(card => {
+    const c = document.createElement('div');
+    c.className = 'info-card';
+    c.style.cssText = `border-left-color:${card.borderColor || 'var(--slate-dark)'};margin-bottom:8px`;
+    c.innerHTML =
+      '<div class="info-card-meta">' +
+        `<span class="info-card-tag">${escapeHtml(card.tag || 'NOTE')}</span>` +
+        (card.linkUrl ? `<a class="info-card-link" href="${escapeHtml(card.linkUrl)}" target="_blank">${escapeHtml(card.linkLabel || '参照元↗')}</a>` : '') +
+      '</div>' +
+      `<div class="info-card-title">${escapeHtml(card.title || '')}</div>` +
+      `<div class="info-card-body">${escapeHtml(card.body || '')}</div>`;
+    body.appendChild(c);
+  });
+
+  sec.appendChild(body);
+  return sec;
+}
+
+function buildJobsSection(api) {
+  const jobs = Array.isArray(api.jobs) ? api.jobs : [];
+  if (jobs.length === 0) return null;
+
+  const sec = document.createElement('div');
+  sec.className = 'pt-sec';
+  sec.innerHTML = '<div class="pt-sec-head"><span class="pt-sec-label">求人票</span></div>';
+
+  const body = document.createElement('div');
+  body.style.cssText = 'padding:8px 16px 16px';
+
+  const catColor = { eng:'#5B8FCC', biz:'#3BAA90', prd:'#8246b4', dat:'#5A6A80', cop:'#8d6e63' };
+
+  const info = document.createElement('div');
+  info.className = 'pt-footnote';
+  const latestCheck = jobs.map(j => j.checkedDate).filter(Boolean).sort().slice(-1)[0];
+  info.textContent = latestCheck ? `確認日: ${latestCheck} / 公開ステータスの求人を一覧化` : '公開中の求人を一覧化';
+  body.appendChild(info);
+
+  const table = document.createElement('table');
+  table.style.cssText = 'width:100%;border-collapse:collapse;font-size:11px;margin-top:10px';
+  table.innerHTML = `
+    <thead>
+      <tr style="border-bottom:1px solid var(--line)">
+        <th style="text-align:left;padding:8px 6px;color:var(--text3);font-weight:500">カテゴリ</th>
+        <th style="text-align:left;padding:8px 6px;color:var(--text3);font-weight:500">ポジション</th>
+        <th style="text-align:left;padding:8px 6px;color:var(--text3);font-weight:500">レイヤー</th>
+        <th style="text-align:left;padding:8px 6px;color:var(--text3);font-weight:500">概要</th>
+        <th style="text-align:right;padding:8px 6px;color:var(--text3);font-weight:500">年収</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${jobs.map(job => {
+        const cat = escapeHtml(job.categoryLabel || job.category || '—');
+        const color = catColor[job.category] || 'var(--slate-dark)';
+        const salary = (job.salaryMin || job.salaryMax)
+          ? `${job.salaryMin ? Number(job.salaryMin).toLocaleString('ja-JP') : '—'}〜${job.salaryMax ? Number(job.salaryMax).toLocaleString('ja-JP') : '—'}万円`
+          : '—';
+        const pos = job.jobUrl
+          ? `<a href="${escapeHtml(job.jobUrl)}" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px solid rgba(0,0,0,0.2)">${escapeHtml(job.position || '')}</a>`
+          : escapeHtml(job.position || '');
+        return `
+          <tr style="border-bottom:1px solid var(--line)">
+            <td style="padding:10px 6px;white-space:nowrap"><span style="display:inline-block;padding:3px 8px;border-radius:999px;background:${color};color:#fff;font-size:10px">${cat}</span></td>
+            <td style="padding:10px 6px">${pos}</td>
+            <td style="padding:10px 6px;color:var(--text2)">${escapeHtml(job.layer || '—')}</td>
+            <td style="padding:10px 6px;color:var(--text2);line-height:1.6">${escapeHtml(job.description || '')}</td>
+            <td style="padding:10px 6px;text-align:right;font-family:var(--font-mono)">${salary}</td>
+          </tr>`;
+      }).join('')}
+    </tbody>`;
+  body.appendChild(table);
+  sec.appendChild(body);
+  return sec;
+}
+
 function renderLayerX(el) {
   el.innerHTML = '';
 
