@@ -1594,277 +1594,9 @@ canvas { transition: opacity 0.3s; }
 </div>
 
 <script>
-const COMPANIES = [
-  {
-    name: 'SmartHR',
-    sub: '設立 2013年1月 · クラウド人事労務ソフト · 東京都港区',
-    sector: 'HRTech',
-    founding_year: 2013,
-    color: '#f0a732',
-    colorDim: 'rgba(240,167,50,0.15)',
-    funding: [
-      { year: 2015, round: 'Seed', amount: 0.2,  note: 'YC等初期調達' },
-      { year: 2017, round: 'Series A', amount: 1.5,  note: 'インキュベイトファンド等' },
-      { year: 2018, round: 'Series B', amount: 15.0,  note: 'WiL・Eight Roads等' },
-      { year: 2019, round: 'Series C', amount: 61.5,  note: 'Sequoia Capital・WiL等' },
-      { year: 2021, round: 'Series D', amount: 156.0,  note: 'Light Street Capital・Sequoia等' },
-      { year: 2024, round: 'Series E', amount: 214.0,  note: 'KKR・Ontario Teachers等' }
-    ],
-    events: [],
-    data: [
-      { year: 2013, count: 2, est: false, sources: [
-        { text: '創業', method: '—', type: 'default', url: '' }
-      ]},
-      { year: 2014, count: 5, est: true, sources: [
-        { text: 'サービス開発期・文脈から推算', method: '推算', type: 'default', url: '' }
-      ]},
-      { year: 2015, count: 15, est: true, sources: [
-        { text: 'サービスリリース年・文脈から推算', method: '推算', type: 'default', url: '' }
-      ]},
-      { year: 2016, count: 25, est: true, sources: [
-        { text: '文脈から推算', method: '推算', type: 'default', url: '' }
-      ]},
-      { year: 2017, count: 40, est: false, sources: [
-        { text: 'officee magazine（移転記録）「従業員数が40名以上に」', method: 'Webアーカイブ', type: 'wayback', url: '' }
-      ]},
-      { year: 2018, count: 60, est: false, sources: [
-        { text: 'ALL STAR SAAS FUND記事（VP-HR入社時「60人から」）', method: 'メディア記事', type: 'default', url: 'https://blog.allstarsaas.com/posts/tackle-org-impediments' }
-      ]},
-      { year: 2019, count: 100, est: false, sources: [
-        { text: 'officee magazine「従業員数が100名を超え」', method: 'Webアーカイブ', type: 'wayback', url: '' }
-      ]},
-      { year: 2020, count: 200, est: true, sources: [
-        { text: 'CFO note「入社した頃は200人ほど」（2020年3月入社）', method: '公式note', type: 'note', url: 'https://note.com/smarthr_co/n/n083af858a652' }
-      ]},
-      { year: 2021, count: 400, est: false, sources: [
-        { text: 'officee magazine「2021年3月現在、従業員数は400名弱」', method: 'メディア記事', type: 'default', url: '' }
-      ]},
-      { year: 2022, count: 686, est: false, sources: [
-        { text: '採用サイト記載（2022年8月1日時点）「686名」', method: 'コーポレートサイト', type: 'wayback', url: '' }
-      ]},
-      { year: 2023, count: 900, est: false, sources: [
-        { text: 'ALL STAR SAAS FUND（VP-HR）「約900名の規模です」', method: 'メディア記事', type: 'default', url: 'https://blog.allstarsaas.com/posts/tackle-org-impediments' }
-      ]},
-      { year: 2024, count: 1100, est: false, sources: [
-        { text: '自社PRリリース（2024年3月）「1,100名」', method: 'PRリリース', type: 'press', url: '' }
-      ]},
-      { year: 2025, count: 1320, est: false, sources: [
-        { text: '自社Webサイト 人的資本ページ「1,320名（2024年12月）」', method: 'コーポレートサイト', type: 'wayback', url: 'https://smarthr.co.jp/sustainability/human-capital/' }
-      ]},
-      { year: 2026, count: 1593, est: false, sources: [
-        { text: '会社紹介資料 Speaker Deck「1,593名（2026年1月1日）」', method: 'カルチャーデック', type: 'press', url: 'https://speakerdeck.com/smarthr_pr/smarthr-company-introduction1' }
-      ]}
-    ]
-  },
-  {
-    name: 'LayerX',
-    sub: '設立 2018年8月 · 法人支出管理SaaS「バクラク」 · 東京都中央区',
-    sector: 'SaaS',
-    founding_year: 2018,
-    color: '#3db8a0',
-    colorDim: 'rgba(61,184,160,0.1)',
-    funding: [
-      { year: 2021, round: 'Series A', amount: 28.8,  note: 'DNX Ventures・三菱UFJキャピタル等（ファーストクローズ）' },
-      { year: 2023, round: 'Series A+', amount: 55.0,  note: 'セカンドクローズ含む累計' }
-    ],
-    events: [],
-    data: [
-      { year: 2018, count: 2, est: false, sources: [
-        { text: '創業', method: '—', type: 'default', url: '' }
-      ]},
-      { year: 2019, count: 20, est: true, sources: [
-        { text: 'ブロックチェーン期・文脈から推算', method: '推算', type: 'default', url: '' }
-      ]},
-      { year: 2020, count: 30, est: true, sources: [
-        { text: 'バクラクへのピボット期・文脈から推算', method: '推算', type: 'default', url: '' }
-      ]},
-      { year: 2021, count: 40, est: false, sources: [
-        { text: 'エンジニアブログ「人数は40人から180人に」←2021年初', method: 'コーポレートブログ', type: 'note', url: 'https://tech.layerx.co.jp/entry/bakuraku-data-management-2023' }
-      ]},
-      { year: 2022, count: 56, est: false, sources: [
-        { text: '日本銀行フォーラム登壇資料PDF「従業員数 56名」', method: 'カルチャーデック', type: 'press', url: 'https://speakerdeck.com/layerx/layerx-compass' }
-      ]},
-      { year: 2023, count: 220, est: false, sources: [
-        { text: '公式note「はたらきかた2023〜2024」「220名」', method: '公式note', type: 'note', url: 'https://note.layerx.co.jp/n/n1af100ddc022' }
-      ]},
-      { year: 2024, count: 385, est: false, sources: [
-        { text: '採用媒体（2024年10月末日時点）「385名」', method: 'コーポレートサイト', type: 'wayback', url: 'https://note.com/fukkyy/n/nfee7c476287e' }
-      ]},
-      { year: 2025, count: 390, est: false, sources: [
-        { text: '公式note「はたらきかた2025」「390名（2025年1月）」', method: '公式note', type: 'note', url: 'https://note.layerx.co.jp/n/n8edcdec6410c' }
-      ]},
-      { year: 2026, count: 582, est: false, sources: [
-        { text: '公式note「はたらきかた2026」「582名（2026年1月）」', method: '公式note', type: 'note', url: 'https://note.layerx.co.jp/n/n4ca3a768c9bf' }
-      ]}
-    ]
-  },
-  {
-    name: 'Ubie',
-    sub: '設立 2017年5月 · 医療AIプラットフォーム · 東京都中央区',
-    sector: 'HealthTech',
-    founding_year: 2017,
-    color: '#5b8fcc',
-    colorDim: 'rgba(91,143,204,0.1)',
-    funding: [
-      { year: 2018, round: 'Seed', amount: 0.6,  note: 'D4Vから6000万円' },
-      { year: 2020, round: 'Series B', amount: 20.0,  note: 'DCMベンチャーズ等（総額約20億円）' },
-      { year: 2022, round: 'Series C', amount: 62.6,  note: 'インパクトファイナンス含む累計' },
-      { year: 2024, round: 'Impact', amount: 35.0,  note: 'インパクトファイナンス（35億円）' }
-    ],
-    events: [],
-    data: [
-      { year: 2017, count: 2, est: false, sources: [
-        { text: '創業', method: '—', type: 'default', url: '' }
-      ]},
-      { year: 2018, count: 5, est: false, sources: [
-        { text: 'Wikipedia「初めての社員が入社」', method: 'Wikipedia', type: 'default', url: 'https://ja.wikipedia.org/wiki/Ubie' }
-      ]},
-      { year: 2019, count: 31, est: false, sources: [
-        { text: '公式note「2020年振り返り」「2019年12月には31名」', method: '公式note', type: 'note', url: 'https://note.com/ubie/n/n99cba7c28837' }
-      ]},
-      { year: 2020, count: 86, est: false, sources: [
-        { text: '公式note「2020年振り返り」「2020年12月には86名」', method: '公式note', type: 'note', url: 'https://note.com/ubie/n/n99cba7c28837' }
-      ]},
-      { year: 2021, count: 114, est: false, sources: [
-        { text: 'PM Career求人サイト（2021年6月現在）「114名」', method: 'コーポレートサイト', type: 'wayback', url: 'https://blog.allstarsaas.com/posts/ubie-recruitment' }
-      ]},
-      { year: 2022, count: 200, est: false, sources: [
-        { text: 'コンサル転職サイト「2022年4月現在で200名」', method: 'コーポレートサイト', type: 'wayback', url: '' }
-      ]},
-      { year: 2023, count: 300, est: false, sources: [
-        { text: '公式note「会社紹介資料刷新」「300人に届く規模」', method: '公式note', type: 'note', url: 'https://note.com/abeyoshinori/n/nae128c0fd087' }
-      ]},
-      { year: 2024, count: 260, est: true, sources: [
-        { text: '組織再編期・2023年末300名→2025年4月240名から推算', method: '推算', type: 'default', url: '' }
-      ]},
-      { year: 2025, count: 240, est: false, sources: [
-        { text: '採用媒体・Wikipedia「2025年5月現在240名」', method: 'コーポレートサイト', type: 'wayback', url: 'https://ja.wikipedia.org/wiki/Ubie' }
-      ]}
-    ]
-  },
-];
-
-const EVENTS = {
-  SmartHR: [
-    { year: 2015, type: 'product',
-      source: 'TechCrunch Japan', date: '2015年11月',
-      title: 'TechCrunch Tokyo 2015 スタートアップバトル優勝',
-      quote: '',
-      quoteAttr: '',
-      desc: 'グランプリ受賞で一気に知名度拡大。サービスリリース直後の快挙。',
-      url: 'https://jp.techcrunch.com/2015/11/19/techcrunch-tokyo-2015-startup-battle/' },
-    { year: 2018, type: 'interview',
-      source: 'ALL STAR SAAS FUND', date: '2023年（回顧）',
-      title: '採用面接資料をブログで公開、応募5.3倍に',
-      quote: '「私が入社した2018年当時は、マニュアルやプロセスがなく、戸惑ったものです」',
-      quoteAttr: 'VP-HR 薮田孝仁氏',
-      desc: '60名規模で入社したVP-HRが2.5年かけてオンボーディング体制を構築した軌跡。',
-      url: 'https://blog.allstarsaas.com/posts/tackle-org-impediments' },
-    { year: 2021, type: 'org',
-      source: 'INITIAL', date: '2021年6月',
-      title: 'Series D 156億円調達・国内10社目のユニコーンに',
-      quote: '「Light Street Capitalが主導し、評価額は約1,700億円に達した」',
-      quoteAttr: 'INITIAL, 2021年6月',
-      desc: '未上場のまま評価額1,700億円超を達成。300人・1,000人の壁を同時経験。',
-      url: '' },
-    { year: 2022, type: 'interview',
-      source: 'ALL STAR SAAS FUND', date: '2023年3月',
-      title: '「300人・1000人の壁」同時突破 ― VP-HRが語る組織成長',
-      quote: '「SmartHRでは2020年から2022年にかけて、年間におおよそ200名ずつ増えていきました」',
-      quoteAttr: 'VP-HR 薮田孝仁氏（ALL STAR SAAS FUND）',
-      desc: '権限委譲・オンボーディング・ミドルマネジメント構築など急拡大期の組織論を詳述。',
-      url: 'https://blog.allstarsaas.com/posts/tackle-org-impediments' },
-    { year: 2024, type: 'interview',
-      source: 'SmartHR公式note', date: '2024年12月',
-      title: 'CFO森雄志「29歳でCFO就任・214億円調達をリードした軌跡」',
-      quote: '「僕がSmartHRに入社した頃の従業員数は200人ほどでした」',
-      quoteAttr: 'CFO 森雄志氏（SmartHR公式note）',
-      desc: '「国内SaaSが経験したことのない山」を目指す2030年戦略を語る。',
-      url: 'https://note.com/smarthr_co/n/n083af858a652' },
-    { year: 2025, type: 'product',
-      source: 'SmartHR公式Webサイト', date: '2025年',
-      title: 'サービス10周年・7万社突破・人的資本情報を初公開',
-      quote: '「従業員数 1,320名（2024年12月時点）」',
-      quoteAttr: 'SmartHR人的資本ページ',
-      desc: '労務管理クラウド7年連続シェアNo.1。人的資本の定量指標をWebで開示。',
-      url: 'https://smarthr.co.jp/sustainability/human-capital/' },
-    { year: 2026, type: 'org',
-      source: 'Speaker Deck（公式会社紹介資料）', date: '2026年1月',
-      title: '1,593名体制・「スケールアップ企業」宣言',
-      quote: '「1,593名（うち正社員1,505名 / 2026年1月1日時点）」',
-      quoteAttr: 'SmartHR会社紹介資料',
-      desc: '「スタートアップにも大企業にもなれない」スケールアップ企業として2030年売上1,000億円を目指す。',
-      url: 'https://speakerdeck.com/smarthr_pr/smarthr-company-introduction1' },
-  ],
-  LayerX: [
-    { year: 2021, type: 'product',
-      source: 'LayerXエンジニアブログ', date: '2023年7月（回顧）',
-      title: '「バクラク請求書」ローンチ ― 社員40名からの急拡大開始',
-      quote: '「バクラクは2021年1月にサービス公開し...LayerX全体で人数は40人から180人に」',
-      quoteAttr: 'LayerXエンジニアブログ',
-      desc: '電帳法・インボイス制度の追い風を受けて急拡大。1プロダクトから6プロダクト体制へ。',
-      url: 'https://tech.layerx.co.jp/entry/bakuraku-data-management-2023' },
-    { year: 2023, type: 'org',
-      source: 'LayerX公式note', date: '2023年10月',
-      title: '「はたらきかた2023〜2024」公開 ― 組織データをフルオープンに',
-      quote: '「従業員数は220名。直近1年で85名の増員です」',
-      quoteAttr: 'LayerX公式note「はたらきかた2023〜2024」',
-      desc: 'eNPS・リモート比率・育休取得数など組織KPIを全公開。採用広報の先進事例として注目。',
-      url: 'https://note.layerx.co.jp/n/n1af100ddc022' },
-    { year: 2024, type: 'interview',
-      source: 'CEO note（福島良典）', date: '2024年6月',
-      title: 'CEO福島「今LayerXに入るべき理由（2024年版）」',
-      quote: '「社員数はとうとう300名を超えました。今期も200名以上を採用する計画です」',
-      quoteAttr: 'CEO 福島良典氏（note）',
-      desc: '300名超でもスタートアップ感を保てる理由と、事業の急成長ぶりを語る。',
-      url: 'https://note.com/fukkyy/n/nfee7c476287e' },
-    { year: 2025, type: 'org',
-      source: 'LayerX公式note', date: '2025年2月',
-      title: '「はたらきかた2025」公開 ― 390名・eNPS改善',
-      quote: '「従業員（正社員）は...390名（2025年1月時点）」',
-      quoteAttr: 'LayerX公式note',
-      desc: 'フルリモート社員3割・育休延べ40名超。急拡大とエンゲージメント両立の施策を公開。',
-      url: 'https://note.layerx.co.jp/n/n8edcdec6410c' },
-    { year: 2026, type: 'org',
-      source: 'LayerX公式note', date: '2026年3月',
-      title: '「はたらきかた2026」公開 ― 582名・eNPS 20pt以上改善',
-      quote: '「従業員数（正社員）は、この1年で390名から582名になりました」',
-      quoteAttr: 'LayerX公式note「はたらきかた2026」',
-      desc: 'HR Enabling部を新設しデータ・AI活用による人事オペレーションを本格化。',
-      url: 'https://note.layerx.co.jp/n/n4ca3a768c9bf' },
-  ],
-  Ubie: [
-    { year: 2020, type: 'interview',
-      source: 'Ubie公式note', date: '2020年12月',
-      title: '「2020年振り返り」― 31名→86名、約3倍成長の記録',
-      quote: '「2019年12月には31名でしたが、2020年12月には86名となり、約3倍になりました」',
-      quoteAttr: 'Ubie公式note, 2020年12月',
-      desc: 'コロナ禍でのオンライン診療需要増を追い風に急拡大。50名の壁を突破した1年。',
-      url: 'https://note.com/ubie/n/n99cba7c28837' },
-    { year: 2021, type: 'interview',
-      source: 'ALL STAR SAAS FUND', date: '2021年',
-      title: '採用人事不在でリファラル70%超を実現',
-      quote: '「社員約120名が働く...2019年からの2年間で社員数5倍以上と急成長」',
-      quoteAttr: 'Ubie組織開発メンバー（ALL STAR SAAS FUND）',
-      desc: '専任採用担当者を置かず全社員が採用担当という文化で100名超の組織を構築。',
-      url: 'https://blog.allstarsaas.com/posts/ubie-recruitment' },
-    { year: 2023, type: 'interview',
-      source: '代表 阿部吉倫氏 note', date: '2023年4月',
-      title: '代表阿部氏「250名超でも全正社員にSOを配る理由」',
-      quote: '「Ubieも総勢250名を超えて来ました」',
-      quoteAttr: '代表 阿部吉倫氏（note）',
-      desc: '創業以来の「全正社員へのSO付与」方針を大規模化後も維持する哲学を公開。',
-      url: 'https://note.com/abeyoshinori/n/nae128c0fd087' },
-    { year: 2024, type: 'org',
-      source: 'ビズリーチ / Wikipedia', date: '2025年4〜5月',
-      title: '海外事業再編・240名体制へスリム化',
-      quote: '「2025年5月現在の従業員数は240名」',
-      quoteAttr: 'Wikipedia「Ubie」, 2025年5月',
-      desc: '米国・海外事業を縮小し日本市場の製薬企業向けプラットフォームに集中。',
-      url: 'https://ja.wikipedia.org/wiki/Ubie' },
-  ],
-};
-
+// ── グローバルデータ ──
+let COMPANIES = [];
+let EVENTS = {};
 let currentCompany = 0;
 let currentRange = '5y';
 let showFunding = true;
@@ -2284,10 +2016,7 @@ function updateMetrics(company) {
   }
 }
 
-let currentCompanyIndex = 0;
-
 function selectCompany(idx) {
-  currentCompanyIndex = idx;
   currentJobFilter = '全職種';
   const pane = document.getElementById('pane-people');
   if (pane && pane.classList.contains('active')) renderPeopleTab(idx);
@@ -2345,18 +2074,18 @@ function parseCsv(text, skipRows = 0) {
 }
 
 async function loadSiteData() {
-  // SHEET_ID が未設定の場合はスキップ
   if (SHEET_ID === 'YOUR_SHEET_ID_HERE') {
-    console.info('[Sheets] SHEET_ID が未設定のため手動データを使用します');
-    showDataBadge('手動入力データ', 'fallback');
+    console.info('[Sheets] SHEET_ID が未設定です');
+    showDataBadge('SHEET_ID 未設定', 'fallback');
     return;
   }
 
   try {
     showLoadingState('スプレッドシートからデータを読み込み中...');
 
-    // 3シートを並列フェッチ
-    const [hcResp, fundResp, evtResp] = await Promise.all([
+    // 4シートを並列フェッチ（企業マスタ追加）
+    const [masterResp, hcResp, fundResp, evtResp] = await Promise.all([
+      fetch(sheetUrl('企業マスタ'), { cache: 'no-cache' }),
       fetch(sheetUrl('社員数'),     { cache: 'no-cache' }),
       fetch(sheetUrl('資金調達'),   { cache: 'no-cache' }),
       fetch(sheetUrl('トピックス'), { cache: 'no-cache' }),
@@ -2364,23 +2093,55 @@ async function loadSiteData() {
 
     if (!hcResp.ok) throw new Error(`社員数 シートの読み込みに失敗 (HTTP ${hcResp.status})`);
 
-    const hcRows   = parseCsv(await hcResp.text(),   1);
-    const fundRows = fundResp.ok ? parseCsv(await fundResp.text(), 1) : [];
-    const evtRows  = evtResp.ok  ? parseCsv(await evtResp.text(),  1) : [];
+    // 企業マスタ: 1行目が説明行なのでskipRows=1
+    const masterRows = masterResp.ok ? parseCsv(await masterResp.text(), 1) : [];
+    const hcRows     = parseCsv(await hcResp.text(),   1);
+    const fundRows   = fundResp.ok ? parseCsv(await fundResp.text(), 1) : [];
+    const evtRows    = evtResp.ok  ? parseCsv(await evtResp.text(),  1) : [];
 
     if (hcRows.length === 0) throw new Error('社員数 シートにデータがありません');
 
-    // ── 社員数 → COMPANIES[].data に変換 ──────────────
-    // シートの列: company | year | count | source_text | source_method | source_type | source_url
+    // ── 企業マスタをマップ化 ──────────────────────────────
+    // 列: 企業ID | 企業名 | 企業カラー(HEX) | 設立年 | 業種・セクター | 本社所在地 | ミッション | 累計調達額(億円) | 調達ラウンド数
+    const masterMap = {};
+    masterRows.forEach(row => {
+      const name = (row['企業名'] || '').trim();
+      if (!name) return;
+      const hex = (row['企業カラー(HEX)'] || '#5A6A80').trim();
+      const r = parseInt(hex.slice(1,3),16)||90;
+      const g = parseInt(hex.slice(3,5),16)||106;
+      const b = parseInt(hex.slice(5,7),16)||128;
+      const sector   = (row['業種・セクター'] || '').trim();
+      const location = (row['本社所在地'] || '').trim();
+      const founding = parseInt(row['設立年']) || null;
+      const subParts = [];
+      if (founding)  subParts.push(`設立 ${founding}年`);
+      if (sector)    subParts.push(sector);
+      if (location)  subParts.push(location);
+      masterMap[name] = {
+        id:           (row['企業ID'] || '').trim(),
+        color:        hex,
+        colorDim:     `rgba(${r},${g},${b},0.12)`,
+        sector,
+        founding_year: founding,
+        sub:          subParts.join(' · '),
+        totalRaised:  parseFloat(row['累計調達額(億円)']) || null,
+        roundsCount:  parseInt(row['調達ラウンド数'])    || null,
+      };
+    });
+
+    // ── 社員数 ─────────────────────────────────────────────
+    // 列: company | year | count | source_text | source_method | source_type | source_url
+    // est判定: source_method が「推算」なら true
     const byCompany = {};
     hcRows.forEach(row => {
-      const name = row.company?.trim();
+      const name = (row.company || '').trim();
       if (!name) return;
       if (!byCompany[name]) byCompany[name] = [];
       byCompany[name].push({
-        year:    parseInt(row.year) || 0,
+        year:    parseInt(row.year)  || 0,
         count:   parseInt(row.count) || 0,
-        est:     false,
+        est:     (row.source_method || '').trim() === '推算',
         sources: [{
           text:   row.source_text   || '',
           method: row.source_method || '',
@@ -2390,91 +2151,87 @@ async function loadSiteData() {
       });
     });
 
-    // ── 資金調達 → COMPANIES[].funding に変換 ─────────────
-    // シートの列: company | year | round | amount（億円） | note（投資家等）
+    // ── 資金調達 ───────────────────────────────────────────
+    // 列: company | year | round | amount（億円） | note（投資家等）
     const fundByCompany = {};
     fundRows.forEach(row => {
-      const name = row.company?.trim();
+      const name = (row.company || '').trim();
       if (!name) return;
       if (!fundByCompany[name]) fundByCompany[name] = [];
       fundByCompany[name].push({
-        year:   parseInt(row.year) || 0,
-        round:  row.round  || '',
-        amount: parseFloat(row.amount) || 0,
-        note:   row.note   || '',
+        year:   parseInt(row.year)  || 0,
+        round:  row.round           || '',
+        amount: parseFloat(row['amount（億円）']) || parseFloat(row.amount) || 0,
+        note:   row['note（投資家等）'] || row.note || '',
       });
     });
 
-    // ── events → EVENTS に変換 ───────────────────────────
-    // シートの列: company | year | type | title | source | date | quote | quoteAttr | desc | url
+    // ── トピックス ─────────────────────────────────────────
+    // 列: company | year | type | title | source | date | quote | quoteAttr | desc | url
     const evtByCompany = {};
     evtRows.forEach(row => {
-      const name = row.company?.trim();
+      const name = (row.company || '').trim();
       if (!name) return;
       if (!evtByCompany[name]) evtByCompany[name] = [];
       evtByCompany[name].push({
-        year:       parseInt(row.year) || 0,
-        type:       row.type      || 'org',
-        title:      row.title     || '',
-        source:     row.source    || '',
-        date:       row.date      || '',
-        quote:      row.quote     || '',
-        quoteAttr:  row.quoteAttr || '',
-        desc:       row.desc      || '',
-        url:        row.url       || '',
+        year:      parseInt(row.year) || 0,
+        type:      row.type      || 'org',
+        title:     row.title     || '',
+        source:    row.source    || '',
+        date:      row.date      || '',
+        quote:     row.quote     || '',
+        quoteAttr: row.quoteAttr || '',
+        desc:      row.desc      || '',
+        url:       row.url       || '',
       });
     });
 
-    // ── COMPANIES に反映 ─────────────────────────────────
-    let mergedCount = 0;
-    COMPANIES.forEach(company => {
-      const name = company.name;
+    // ── COMPANIES を再構築 ────────────────────────────────
+    // シートに載っている企業を「正」として全件再構築
+    COMPANIES = [];
+    EVENTS    = {};
 
-      if (byCompany[name] && byCompany[name].length > 0) {
-        company.data    = byCompany[name].sort((a, b) => a.year - b.year);
-        company.funding = fundByCompany[name] || company.funding || [];
-        mergedCount++;
-      }
+    // シートに現れた順序を保持しつつ重複排除
+    const allNames = [...new Set(hcRows.map(r => (r.company||'').trim()).filter(Boolean))];
 
-      // EVENTS も上書き（eventsシートがある場合のみ）
-      if (evtByCompany[name] && evtByCompany[name].length > 0) {
-        EVENTS[name] = evtByCompany[name].sort((a, b) => a.year - b.year);
-      }
+    allNames.forEach(name => {
+      const m   = masterMap[name] || {};
+      const hex = m.color || '#5A6A80';
+      const r   = parseInt(hex.slice(1,3),16)||90;
+      const g   = parseInt(hex.slice(3,5),16)||106;
+      const b   = parseInt(hex.slice(5,7),16)||128;
+
+      COMPANIES.push({
+        id:           m.id || name.toLowerCase(),
+        name,
+        sub:          m.sub          || '',
+        sector:       m.sector       || '',
+        founding_year:m.founding_year|| null,
+        color:        hex,
+        colorDim:     m.colorDim || `rgba(${r},${g},${b},0.12)`,
+        totalRaised:  m.totalRaised  || null,
+        roundsCount:  m.roundsCount  || (fundByCompany[name]||[]).length || null,
+        data:         (byCompany[name]   || []).sort((a,b) => a.year - b.year),
+        funding:      (fundByCompany[name]|| []).sort((a,b) => a.year - b.year),
+        events:       (evtByCompany[name] || []).sort((a,b) => a.year - b.year),
+      });
+      EVENTS[name] = evtByCompany[name] || [];
     });
 
-    // スプレッドシートにない企業名があれば新規追加
-    Object.keys(byCompany).forEach(name => {
-      if (!COMPANIES.find(c => c.name === name)) {
-        COMPANIES.push({
-          name,
-          sub:          '',
-          sector:       '',
-          color:        '#888780',
-          colorDim:     'rgba(136,135,128,0.15)',
-          founding_year: byCompany[name][0]?.year,
-          data:          byCompany[name].sort((a, b) => a.year - b.year),
-          funding:       fundByCompany[name] || [],
-        });
-        EVENTS[name] = evtByCompany[name] || [];
-        mergedCount++;
-      }
-    });
-
-    // ヘッダーに更新日を表示
-    const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' });
+    // ヘッダー更新
+    const today = new Date().toLocaleDateString('ja-JP', { year:'numeric', month:'short', day:'numeric' });
     const metaEl = document.querySelector('.header-meta');
     if (metaEl) {
-      const companyCount = Object.keys(byCompany).length;
-      metaEl.innerHTML = `<strong>${companyCount}</strong> 企業 &nbsp;·&nbsp; スプレッドシートより &nbsp;·&nbsp; 更新: <strong>${today}</strong>`;
+      metaEl.innerHTML = `<strong>${COMPANIES.length}</strong> 企業 &nbsp;·&nbsp; スプレッドシートより &nbsp;·&nbsp; 更新: <strong>${today}</strong>`;
     }
 
     showDataBadge('スプレッドシート連携', 'loaded');
-    console.log(`[Sheets] ${mergedCount}社のデータを読み込みました`);
+    console.log(`[Sheets] ${COMPANIES.length}社のデータを読み込みました`);
 
   } catch (e) {
-    console.warn('[Sheets] 読み込みに失敗しました（手動データを使用）:', e.message);
+    console.warn('[Sheets] 読み込みに失敗しました:', e.message);
     showLoadingState('');
-    showDataBadge('手動入力データ（フォールバック）', 'fallback');
+    showDataBadge('読み込みエラー', 'fallback');
   }
 }
 
@@ -2562,7 +2319,7 @@ function switchMainTab(id, btn) {
   document.querySelectorAll('.tab-nav-btn').forEach(el => el.classList.remove('active'));
   document.getElementById('pane-' + id).classList.add('active');
   btn.classList.add('active');
-  if (id === 'people') renderPeopleTab(currentCompanyIndex);
+  if (id === 'people') renderPeopleTab(currentCompany);
 }
 
 // ══════════════════════════════════════════════════════
