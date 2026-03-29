@@ -1251,6 +1251,207 @@ canvas { transition: opacity 0.3s; }
   text-align: right;
 }
 
+/* ══════════════════════════════════════
+   モバイル対応（スマホ・タブレット）
+══════════════════════════════════════ */
+
+/* ── タブレット（768px以下） ── */
+@media (max-width: 768px) {
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr;
+  }
+
+  /* ヘッダー */
+  .header {
+    padding: 0 16px;
+    height: auto;
+    min-height: 52px;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  .header-divider { display: none; }
+  .header-meta { font-size: 9px; }
+  .header-right { margin-left: auto; gap: 8px; }
+  .source-badge { display: none; }
+
+  /* サイドバー：横スクロールバーに変換 */
+  .sidebar {
+    position: static;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+    padding: 12px 0 8px;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 0;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .sidebar::-webkit-scrollbar { display: none; }
+  .sidebar-label { display: none; }
+  .sidebar-divider { display: none; }
+  .add-btn { display: none; }
+
+  .company-card {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border-left: none;
+    border-bottom: 2px solid transparent;
+    min-width: 120px;
+    white-space: nowrap;
+  }
+  .company-card.active {
+    background: var(--bg2);
+    border-left-color: transparent;
+    border-bottom-color: var(--slate);
+  }
+  .company-card.active[data-color='smarthr'] { background: var(--smarthr-light); border-bottom-color: var(--smarthr); }
+  .company-card.active[data-color='layerx']  { background: var(--layerx-light);  border-bottom-color: var(--layerx); }
+  .company-card.active[data-color='ubie']    { background: var(--ubie-light);    border-bottom-color: var(--ubie); }
+  .company-stats { display: none; }
+  .sparkline-wrap { display: none; }
+  .company-name { font-size: 12px; }
+
+  /* メインエリア */
+  .main-header {
+    padding: 12px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .company-title { font-size: 18px; }
+  .metric-row {
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    width: 100%;
+  }
+  .metric-block { text-align: left; }
+  .metric-val { font-size: 20px; }
+
+  /* タブナビ */
+  .tab-nav {
+    padding: 0 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tab-nav::-webkit-scrollbar { display: none; }
+  .tab-nav-btn { font-size: 10px; padding: 10px 10px; white-space: nowrap; }
+
+  /* チャートエリア */
+  .chart-area {
+    padding: 12px 16px 0;
+    height: 220px;
+  }
+  .chart-wrap { height: 200px; }
+
+  .range-bar { padding: 6px 16px; }
+
+  /* イベントストリップ */
+  .events-strip { padding: 0 16px; height: 150px; }
+  .event-cards-col { min-width: 180px; max-width: 220px; }
+
+  /* データテーブル */
+  .data-table-wrap { padding: 0 16px; }
+  .data-table { font-size: 10px; }
+  .data-table th { font-size: 8px; padding: 8px 4px 6px; }
+  .data-table td { padding: 6px 4px; }
+  .data-table td.count { font-size: 11px; }
+
+  /* ボトムバー */
+  .bottom-bar {
+    padding: 8px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .legend { margin-left: 0; flex-wrap: wrap; gap: 10px; }
+
+  /* 給与タブ */
+  .people-tab-wrap { padding: 16px 16px 40px; }
+
+  /* 評価フロー：縦積みに */
+  .eval-flow-strip {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .eval-flow-step:first-child { border-radius: 6px 6px 0 0; }
+  .eval-flow-step:last-child { border-radius: 0 0 6px 6px; }
+  .eval-flow-arrow { display: none; }
+
+  /* 評価軸グリッド：1列に */
+  .eval-axes-grid { grid-template-columns: 1fr; }
+
+  /* 等級グリッド：2列に */
+  .grade-def-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* 評価マトリクス：スクロール可 */
+  .eval-matrix { font-size: 8px; overflow-x: auto; }
+  .eval-matrix-cell { padding: 5px 6px; }
+
+  /* 求人テーブル */
+  .job-table-outer { overflow-x: auto; }
+  .job-table-v3 { min-width: 520px; }
+
+  /* 給与チャート */
+  .salary-chart-canvas-wrap { height: 200px; padding-left: 44px; }
+
+  /* pt-sec-head */
+  .pt-sec-head { padding: 8px 10px; }
+
+  /* 各セクション見出し */
+  div[style*="padding:14px 32px 0"] {
+    padding: 12px 16px 0 !important;
+  }
+}
+
+/* ── スマートフォン（480px以下） ── */
+@media (max-width: 480px) {
+  .header { padding: 6px 12px; }
+  .logo span { display: none; }
+
+  .main-header { padding: 10px 12px; }
+  .company-title { font-size: 16px; }
+  .metric-val { font-size: 18px; }
+  .metric-val[style*="font-size:22px"] { font-size: 16px !important; }
+
+  .tab-nav { padding: 0 12px; }
+
+  .chart-area { padding: 10px 12px 0; height: 200px; }
+  .chart-wrap { height: 180px; }
+
+  .range-bar { padding: 6px 12px; }
+  .range-btn { font-size: 8px; padding: 3px 10px; }
+
+  .events-strip { padding: 0 12px; height: 140px; }
+  .event-card-title { font-size: 10px; }
+  .event-cards-col { min-width: 160px; max-width: 200px; }
+
+  .data-table-wrap { padding: 0 12px; }
+
+  .bottom-bar { padding: 8px 12px; }
+
+  .people-tab-wrap { padding: 12px 12px 40px; }
+
+  .grade-def-grid { grid-template-columns: 1fr; }
+
+  .salary-chart-canvas-wrap { height: 180px; padding-left: 38px; }
+
+  .eval-grade-strip {
+    flex-wrap: wrap;
+    height: auto;
+  }
+  .eval-grade-cell { flex-basis: calc(33% - 4px); }
+
+  div[style*="padding:14px 32px 0"] {
+    padding: 10px 12px 0 !important;
+  }
+}
 
 </style>
 </head>
