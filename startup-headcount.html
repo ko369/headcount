@@ -1622,43 +1622,73 @@ canvas { transition: opacity 0.3s; }
 
 <script>
 const COMPANIES = [
-  // ── 初期スタブ（GAS APIが上書きする。API障害時のフォールバック用に最終既知値のみ保持） ──
+  // ── フォールバックスタブ（GAS API読込成功時に上書きされる） ──
   {
-    id: 'smarthr',
-    name: 'SmartHR',
+    id: 'smarthr', name: 'SmartHR',
     sub: '設立 2013年 · HRTech · 東京都港区',
-    sector: 'HRTech',
-    founding_year: 2013,
-    color: '#E8A020',
-    colorDim: 'rgba(232,160,32,0.08)',
-    funding: [],
-    data: [{ year: 2026, count: 1593, est: false, sources: [{ text: '会社紹介資料（2026年1月）', method: 'カルチャーデック', type: 'press', url: '' }] }]
+    sector: 'HRTech', founding_year: 2013,
+    color: '#E8A020', colorDim: 'rgba(232,160,32,0.08)',
+    funding: [
+      { year: 2015, round: 'Seed',     amount: 0.2   },
+      { year: 2017, round: 'Series A', amount: 1.5   },
+      { year: 2018, round: 'Series B', amount: 15.0  },
+      { year: 2019, round: 'Series C', amount: 61.5  },
+      { year: 2021, round: 'Series D', amount: 156.0 },
+      { year: 2024, round: 'Series E', amount: 214.0 },
+    ],
+    data: [
+      { year: 2013, count: 2,    est: false, sources: [{ text: '創業', method: '—', type: 'default', url: '' }] },
+      { year: 2017, count: 40,   est: false, sources: [{ text: 'officee magazine', method: 'Webアーカイブ', type: 'wayback', url: '' }] },
+      { year: 2019, count: 100,  est: false, sources: [{ text: 'officee magazine', method: 'Webアーカイブ', type: 'wayback', url: '' }] },
+      { year: 2021, count: 400,  est: false, sources: [{ text: 'officee magazine', method: 'メディア記事', type: 'default', url: '' }] },
+      { year: 2022, count: 686,  est: false, sources: [{ text: '採用サイト（2022年8月）', method: 'コーポレートサイト', type: 'wayback', url: '' }] },
+      { year: 2023, count: 900,  est: false, sources: [{ text: 'ALL STAR SAAS FUND', method: 'メディア記事', type: 'default', url: '' }] },
+      { year: 2024, count: 1100, est: false, sources: [{ text: '自社PRリリース（2024年3月）', method: 'PRリリース', type: 'press', url: '' }] },
+      { year: 2025, count: 1320, est: false, sources: [{ text: '自社Webサイト（2024年12月）', method: 'コーポレートサイト', type: 'wayback', url: 'https://smarthr.co.jp/sustainability/human-capital/' }] },
+      { year: 2026, count: 1593, est: false, sources: [{ text: '会社紹介資料（2026年1月）', method: 'カルチャーデック', type: 'press', url: 'https://speakerdeck.com/smarthr_pr/smarthr-company-introduction1' }] },
+    ]
   },
   {
-    id: 'layerx',
-    name: 'LayerX',
+    id: 'layerx', name: 'LayerX',
     sub: '設立 2018年 · SaaS · 東京都中央区',
-    sector: 'SaaS',
-    founding_year: 2018,
-    color: '#3BAA90',
-    colorDim: 'rgba(61,170,144,0.1)',
-    funding: [],
-    data: [{ year: 2026, count: 582, est: false, sources: [{ text: '公式note（2026年1月）', method: '公式note', type: 'note', url: '' }] }]
+    sector: 'SaaS', founding_year: 2018,
+    color: '#3BAA90', colorDim: 'rgba(61,170,144,0.1)',
+    funding: [
+      { year: 2021, round: 'Series A',  amount: 28.8 },
+      { year: 2023, round: 'Series A+', amount: 55.0 },
+    ],
+    data: [
+      { year: 2018, count: 2,   est: false, sources: [{ text: '創業', method: '—', type: 'default', url: '' }] },
+      { year: 2021, count: 40,  est: false, sources: [{ text: 'エンジニアブログ', method: 'コーポレートブログ', type: 'note', url: '' }] },
+      { year: 2022, count: 56,  est: false, sources: [{ text: '日銀フォーラム資料', method: 'カルチャーデック', type: 'press', url: '' }] },
+      { year: 2023, count: 220, est: false, sources: [{ text: '公式note「はたらきかた2023〜2024」', method: '公式note', type: 'note', url: 'https://note.layerx.co.jp/n/n1af100ddc022' }] },
+      { year: 2025, count: 390, est: false, sources: [{ text: '公式note「はたらきかた2025」', method: '公式note', type: 'note', url: 'https://note.layerx.co.jp/n/n8edcdec6410c' }] },
+      { year: 2026, count: 582, est: false, sources: [{ text: '公式note「はたらきかた2026」', method: '公式note', type: 'note', url: 'https://note.layerx.co.jp/n/n4ca3a768c9bf' }] },
+    ]
   },
   {
-    id: 'ubie',
-    name: 'Ubie',
+    id: 'ubie', name: 'Ubie',
     sub: '設立 2017年 · HealthTech · 東京都中央区',
-    sector: 'HealthTech',
-    founding_year: 2017,
-    color: '#5B8FCC',
-    colorDim: 'rgba(91,143,204,0.1)',
-    funding: [],
-    data: [{ year: 2025, count: 240, est: false, sources: [{ text: 'Wikipedia（2025年5月）', method: 'コーポレートサイト', type: 'wayback', url: '' }] }]
+    sector: 'HealthTech', founding_year: 2017,
+    color: '#5B8FCC', colorDim: 'rgba(91,143,204,0.1)',
+    funding: [
+      { year: 2018, round: 'Seed',     amount: 0.6  },
+      { year: 2020, round: 'Series B', amount: 20.0 },
+      { year: 2022, round: 'Series C', amount: 62.6 },
+      { year: 2024, round: 'Impact',   amount: 35.0 },
+    ],
+    data: [
+      { year: 2017, count: 2,   est: false, sources: [{ text: '創業', method: '—', type: 'default', url: '' }] },
+      { year: 2019, count: 31,  est: false, sources: [{ text: '公式note「2020年振り返り」', method: '公式note', type: 'note', url: 'https://note.com/ubie/n/n99cba7c28837' }] },
+      { year: 2020, count: 86,  est: false, sources: [{ text: '公式note「2020年振り返り」', method: '公式note', type: 'note', url: 'https://note.com/ubie/n/n99cba7c28837' }] },
+      { year: 2022, count: 200, est: false, sources: [{ text: 'コーポレートサイト', method: 'コーポレートサイト', type: 'wayback', url: '' }] },
+      { year: 2023, count: 300, est: false, sources: [{ text: '公式note「会社紹介資料刷新」', method: '公式note', type: 'note', url: 'https://note.com/abeyoshinori/n/nae128c0fd087' }] },
+      { year: 2025, count: 240, est: false, sources: [{ text: 'Wikipedia（2025年5月）', method: 'コーポレートサイト', type: 'wayback', url: 'https://ja.wikipedia.org/wiki/Ubie' }] },
+    ]
   },
-]
+];
 
-const EVENTS = {}
+const EVENTS = {};
 let currentCompany = 0;
 let currentRange = 'all';
 let showFunding = true;
@@ -2083,18 +2113,29 @@ function updateMetrics(company) {
     el.className = 'metric-change' + (change < 0 ? ' neg' : '');
   }
 
-  // 資金調達サマリー（企業マスタシートの累計調達額・調達ラウンド数を参照）
+  // 資金調達サマリー
+  // 優先: 企業マスタの totalFunding/totalRounds → フォールバック: funding配列を集計
   const masterFunding = company.api?.totalFunding;
   const masterRounds  = company.api?.totalRounds;
   const raisedEl = document.getElementById('metric-raised');
   const roundsEl = document.getElementById('metric-rounds');
+
   if (masterFunding != null && Number(masterFunding) > 0) {
+    // GASが企業マスタから返した値を優先使用
     const f = Number(masterFunding);
     raisedEl.textContent = '約' + (f >= 100 ? Math.round(f) : f.toFixed(1)) + '億円';
     roundsEl.textContent = (masterRounds != null ? Number(masterRounds) : '?') + 'ラウンド';
   } else {
-    raisedEl.textContent = '—';
-    roundsEl.textContent = 'データなし';
+    // フォールバック: funding配列から集計（旧GASまたはスタブ）
+    const fundings = company.funding || [];
+    const totalRaised = fundings.reduce((sum, f) => sum + (Number(f.amount) || 0), 0);
+    if (totalRaised > 0) {
+      raisedEl.textContent = '約' + (totalRaised >= 100 ? Math.round(totalRaised) : totalRaised.toFixed(1)) + '億円';
+      roundsEl.textContent = fundings.length + 'ラウンド';
+    } else {
+      raisedEl.textContent = '—';
+      roundsEl.textContent = 'データなし';
+    }
   }
 }
 
