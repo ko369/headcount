@@ -1803,15 +1803,32 @@ function buildSparklines() {
 }
 
 function getFilteredData(company, range) {
-  const data = company.data;
+  const data = Array.isArray(company?.data) ? company.data : [];
+  if (data.length === 0) return [];
   const latestYear = data[data.length - 1].year;
   if (range === 'all') return data;
   const cutoff = range === '5y' ? latestYear - 5 : latestYear - 3;
   return data.filter(d => d.year >= cutoff);
 }
 
+function clearMainChart() {
+  if (mainChart) {
+    mainChart.destroy();
+    mainChart = null;
+  }
+  const canvas = document.getElementById('mainChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
 function buildMainChart(company, range) {
   const filtered = getFilteredData(company, range);
+  if (!filtered.length) {
+    clearMainChart();
+    return;
+  }
+
   const allYears = filtered.map(d => d.year);
   const rgb = hexToRgb(company.color);
 
@@ -2087,30 +2104,42 @@ function updateTable(company) {
 }
 
 function updateMetrics(company) {
-  const data = company.data;
-  const latest = data[data.length - 1];
+  const data = Array.isArray(company?.data) ? company.data : [];
+  const latest = data.length > 0 ? data[data.length - 1] : null;
   const prev = data.length >= 2 ? data[data.length - 2] : null;
-  const peak = data.reduce((a,b) => b.count > a.count ? b : a, data[0]);
-  const change = prev ? Math.round((latest.count - prev.count) / prev.count * 100) : null;
+  const peak = data.length > 0 ? data.reduce((a, b) => b.count > a.count ? b : a, data[0]) : null;
+  const change = (latest && prev && prev.count > 0)
+    ? Math.round((latest.count - prev.count) / prev.count * 100)
+    : null;
 
-  document.getElementById('main-title').textContent = company.name;
-  document.getElementById('main-sub').textContent = company.sub;
+  document.getElementById('main-title').textContent = company.name || '—';
+  document.getElementById('main-sub').textContent = company.sub || 'データ未登録';
   const missionEl = document.getElementById('main-mission');
   if (missionEl) {
     const mission = company?.api?.mission || '';
     missionEl.textContent = mission ? `MISSION: ${mission}` : '';
     missionEl.style.display = mission ? 'block' : 'none';
   }
-  document.getElementById('metric-current').textContent = latest.count.toLocaleString();
+
+  const currentEl = document.getElementById('metric-current');
+  const peakEl = document.getElementById('metric-peak');
+  const peakYearEl = document.getElementById('metric-peak-year');
+  const changeEl = document.getElementById('metric-change');
+
   const COLOR_MAP2 = { 'SmartHR':'var(--smarthr)','LayerX':'var(--layerx)','Ubie':'var(--ubie)' };
   const companyColor = COLOR_MAP2[company.name] || 'var(--slate-dark)';
-  document.getElementById('metric-current').style.color = companyColor;
-  document.getElementById('metric-peak').textContent = peak.count.toLocaleString();
-  document.getElementById('metric-peak-year').textContent = peak.year + '年';
+  currentEl.style.color = companyColor;
+
+  currentEl.textContent = latest ? latest.count.toLocaleString() : '—';
+  peakEl.textContent = peak ? peak.count.toLocaleString() : '—';
+  peakYearEl.textContent = peak ? `※${peak.year}年` : '—';
+
   if (change !== null) {
-    const el = document.getElementById('metric-change');
-    el.textContent = (change >= 0 ? '+' : '') + change + '% (前年比)';
-    el.className = 'metric-change' + (change < 0 ? ' neg' : '');
+    changeEl.textContent = (change >= 0 ? '+' : '') + change + '% (前年比)';
+    changeEl.className = 'metric-change' + (change < 0 ? ' neg' : '');
+  } else {
+    changeEl.textContent = '—';
+    changeEl.className = 'metric-change';
   }
 
   // 資金調達サマリー
@@ -2121,20 +2150,18 @@ function updateMetrics(company) {
   const roundsEl = document.getElementById('metric-rounds');
 
   if (masterFunding != null && Number(masterFunding) > 0) {
-    // GASが企業マスタから返した値を優先使用
     const f = Number(masterFunding);
     raisedEl.textContent = '約' + (f >= 100 ? Math.round(f) : f.toFixed(1)) + '億円';
-    roundsEl.textContent = (masterRounds != null ? Number(masterRounds) : '?') + 'ラウンド';
+    roundsEl.textContent = (masterRounds != null && masterRounds !== '') ? String(masterRounds) : '—';
   } else {
-    // フォールバック: funding配列から集計（旧GASまたはスタブ）
-    const fundings = company.funding || [];
+    const fundings = Array.isArray(company.funding) ? company.funding : [];
     const totalRaised = fundings.reduce((sum, f) => sum + (Number(f.amount) || 0), 0);
     if (totalRaised > 0) {
       raisedEl.textContent = '約' + (totalRaised >= 100 ? Math.round(totalRaised) : totalRaised.toFixed(1)) + '億円';
-      roundsEl.textContent = fundings.length + 'ラウンド';
+      roundsEl.textContent = String(fundings.length);
     } else {
       raisedEl.textContent = '—';
-      roundsEl.textContent = 'データなし';
+      roundsEl.textContent = '—';
     }
   }
 }
@@ -2285,15 +2312,9 @@ function applyCompanyApiData(company, api) {
     company.color = api.color;
     company.colorDim = makeColorDim(api.color);
   }
-  if (Array.isArray(api.headcounts) && api.headcounts.length > 0) {
-    company.data = normalizeHeadcounts(api.headcounts);
-  }
-  if (Array.isArray(api.funding)) {
-    company.funding = normalizeFunding(api.funding);
-  }
-  if (Array.isArray(api.topics)) {
-    EVENTS[company.name] = normalizeTopics(api.topics);
-  }
+  company.data = normalizeHeadcounts(api.headcounts || []);
+  company.funding = normalizeFunding(api.funding || []);
+  EVENTS[company.name] = normalizeTopics(api.topics || []);
   company.api = api;
 }
 
