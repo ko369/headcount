@@ -28,16 +28,6 @@
   --slate-light: #EEF1F5;
   --slate-mid:   #C0CAD5;
 
-  /* ─ 企業カラー ─ */
-  --smarthr: #E8A020;
-  --smarthr-light: #FEF8EE;
-  --smarthr-mid:   #F5D090;
-  --layerx:  #3BAA90;
-  --layerx-light:  #EDFAF6;
-  --layerx-mid:    #90D8C0;
-  --ubie:    #5B8FCC;
-  --ubie-light:    #EEF4FC;
-  --ubie-mid:      #A8C8F0;
 
   /* ─ タグカラー ─ */
   --tag-ok-bg:    #EAF5F0; --tag-ok-c:    #1A7A50; --tag-ok-b:    #A8D8C0;
@@ -107,7 +97,6 @@ body.sidebar-collapsed {
 .header-meta { font-family: 'Noto Sans JP', sans-serif; font-size: 10px; color: var(--text3); letter-spacing: 0.02em; }
 .header-meta strong { color: var(--text2); font-weight: 400; }
 .header-right { margin-left: auto; display: flex; align-items: center; gap: 20px; }
-.source-badge { display:none; }
 .main-mission {
   margin-top: 8px;
   font-size: 11px;
@@ -190,12 +179,9 @@ body.sidebar-collapsed .sidebar-body {
 }
 .company-card:hover { background: var(--bg3); }
 .company-card.active {
-  background: var(--bg2);
-  border-left-color: var(--slate);
+  background: var(--company-accent-bg, var(--bg2));
+  border-left-color: var(--company-accent, var(--slate));
 }
-.company-card.active[data-color='smarthr'] { background:var(--smarthr-light); border-left-color:var(--smarthr); }
-.company-card.active[data-color='layerx']  { background:var(--layerx-light);  border-left-color:var(--layerx);  }
-.company-card.active[data-color='ubie']    { background:var(--ubie-light);    border-left-color:var(--ubie);    }
 .company-name {
   font-size: 12px;
   font-weight: 500;
@@ -216,15 +202,7 @@ body.sidebar-collapsed .sidebar-body {
   border-radius: 20px;
   border: 1px solid var(--slate-mid);
 }
-.company-card.active .company-badge { background: rgba(240,167,50,0.15); color: var(--amber2); }
-.company-stats {
-  display: flex;
-  gap: 16px;
-  margin-top: 6px;
-}
-.stat { font-family: 'Noto Sans JP', sans-serif; font-size: 10px; color: var(--text3); }
-.stat-val { color: var(--slate-dark); font-size: 11px; }
-.stat-label { font-size: 9px; color: var(--text3); margin-top: 1px; }
+.company-card.active .company-badge { background: var(--company-accent-bg, rgba(240,167,50,0.15)); color: var(--company-accent, var(--amber2)); border-color: transparent; }
 .sparkline-wrap { margin-top: 6px; height: 16px; }
 
 /* mini sparkline canvas */
@@ -1329,7 +1307,6 @@ canvas { transition: opacity 0.3s; }
   .header-divider { display: none; }
   .header-meta { font-size: 9px; }
   .header-right { margin-left: auto; gap: 8px; }
-  .source-badge { display: none; }
 
   /* サイドバー：横スクロールバーに変換 */
   .sidebar {
@@ -1360,14 +1337,10 @@ canvas { transition: opacity 0.3s; }
     white-space: nowrap;
   }
   .company-card.active {
-    background: var(--bg2);
+    background: var(--company-accent-bg, var(--bg2));
     border-left-color: transparent;
-    border-bottom-color: var(--slate);
+    border-bottom-color: var(--company-accent, var(--slate));
   }
-  .company-card.active[data-color='smarthr'] { background: var(--smarthr-light); border-bottom-color: var(--smarthr); }
-  .company-card.active[data-color='layerx']  { background: var(--layerx-light);  border-bottom-color: var(--layerx); }
-  .company-card.active[data-color='ubie']    { background: var(--ubie-light);    border-bottom-color: var(--ubie); }
-  .company-stats { display: none; }
   .sparkline-wrap { display: none; }
   .company-name { font-size: 12px; }
 
@@ -1521,10 +1494,9 @@ canvas { transition: opacity 0.3s; }
     </div>
     <div class="header-divider"></div>
     <div class="header-meta">
-      <strong>3</strong> 企業 &nbsp;·&nbsp; <strong>2013–2026</strong> &nbsp;·&nbsp; 公開情報より収集
+      データを読込中…
     </div>
     <div class="header-right">
-      <div class="source-badge">Wayback Machine / Corporate Site / PR Times</div>
       <div class="live-dot" title="データ収集中"></div>
     </div>
   </header>
@@ -1536,25 +1508,25 @@ canvas { transition: opacity 0.3s; }
   <main class="main">
     <div class="main-header">
       <div>
-        <div class="company-title" id="main-title">SmartHR</div>
-        <div class="company-subtitle" id="main-sub">設立 2013年1月 · クラウド人事労務ソフト · 東京都港区</div>
+        <div class="company-title" id="main-title">データ読込中…</div>
+        <div class="company-subtitle" id="main-sub">企業データを読み込んでいます</div>
         <div class="main-mission" id="main-mission"></div>
       </div>
       <div class="metric-row">
         <div class="metric-block">
           <div class="metric-label metric-top">最新在職者数</div>
-          <div class="metric-val" id="metric-current">1,593</div>
-          <div class="metric-change" id="metric-change">+45% (前年比)</div>
+          <div class="metric-val" id="metric-current">—</div>
+          <div class="metric-change" id="metric-change">—</div>
         </div>
         <div class="metric-block">
           <div class="metric-label metric-top">過去最高社員数</div>
-          <div class="metric-val" id="metric-peak">1,593</div>
-          <div class="metric-note" id="metric-peak-year">※2026年</div>
+          <div class="metric-val" id="metric-peak">—</div>
+          <div class="metric-note" id="metric-peak-year">—</div>
         </div>
         <div class="metric-block">
           <div class="metric-label metric-top">累計調達額</div>
-          <div class="metric-val" style="color:#7a3fb5;font-size:22px" id="metric-raised">約323億円</div>
-          <div class="metric-note" id="metric-rounds">5</div>
+          <div class="metric-val" style="color:#7a3fb5;font-size:22px" id="metric-raised">—</div>
+          <div class="metric-note" id="metric-rounds">—</div>
         </div>
       </div>
     </div>
@@ -1636,72 +1608,7 @@ canvas { transition: opacity 0.3s; }
 </div>
 
 <script>
-const COMPANIES = [
-  // ── フォールバックスタブ（GAS API読込成功時に上書きされる） ──
-  {
-    id: 'smarthr', name: 'SmartHR',
-    sub: '設立 2013年 · HRTech · 東京都港区',
-    sector: 'HRTech', founding_year: 2013,
-    color: '#E8A020', colorDim: 'rgba(232,160,32,0.08)',
-    funding: [
-      { year: 2015, round: 'Seed',     amount: 0.2   },
-      { year: 2017, round: 'Series A', amount: 1.5   },
-      { year: 2018, round: 'Series B', amount: 15.0  },
-      { year: 2019, round: 'Series C', amount: 61.5  },
-      { year: 2021, round: 'Series D', amount: 156.0 },
-      { year: 2024, round: 'Series E', amount: 214.0 },
-    ],
-    data: [
-      { year: 2013, count: 2,    est: false, sources: [{ text: '創業', method: '—', type: 'default', url: '' }] },
-      { year: 2017, count: 40,   est: false, sources: [{ text: 'officee magazine', method: 'Webアーカイブ', type: 'wayback', url: '' }] },
-      { year: 2019, count: 100,  est: false, sources: [{ text: 'officee magazine', method: 'Webアーカイブ', type: 'wayback', url: '' }] },
-      { year: 2021, count: 400,  est: false, sources: [{ text: 'officee magazine', method: 'メディア記事', type: 'default', url: '' }] },
-      { year: 2022, count: 686,  est: false, sources: [{ text: '採用サイト（2022年8月）', method: 'コーポレートサイト', type: 'wayback', url: '' }] },
-      { year: 2023, count: 900,  est: false, sources: [{ text: 'ALL STAR SAAS FUND', method: 'メディア記事', type: 'default', url: '' }] },
-      { year: 2024, count: 1100, est: false, sources: [{ text: '自社PRリリース（2024年3月）', method: 'PRリリース', type: 'press', url: '' }] },
-      { year: 2025, count: 1320, est: false, sources: [{ text: '自社Webサイト（2024年12月）', method: 'コーポレートサイト', type: 'wayback', url: 'https://smarthr.co.jp/sustainability/human-capital/' }] },
-      { year: 2026, count: 1593, est: false, sources: [{ text: '会社紹介資料（2026年1月）', method: 'カルチャーデック', type: 'press', url: 'https://speakerdeck.com/smarthr_pr/smarthr-company-introduction1' }] },
-    ]
-  },
-  {
-    id: 'layerx', name: 'LayerX',
-    sub: '設立 2018年 · SaaS · 東京都中央区',
-    sector: 'SaaS', founding_year: 2018,
-    color: '#3BAA90', colorDim: 'rgba(61,170,144,0.1)',
-    funding: [
-      { year: 2021, round: 'Series A',  amount: 28.8 },
-      { year: 2023, round: 'Series A+', amount: 55.0 },
-    ],
-    data: [
-      { year: 2018, count: 2,   est: false, sources: [{ text: '創業', method: '—', type: 'default', url: '' }] },
-      { year: 2021, count: 40,  est: false, sources: [{ text: 'エンジニアブログ', method: 'コーポレートブログ', type: 'note', url: '' }] },
-      { year: 2022, count: 56,  est: false, sources: [{ text: '日銀フォーラム資料', method: 'カルチャーデック', type: 'press', url: '' }] },
-      { year: 2023, count: 220, est: false, sources: [{ text: '公式note「はたらきかた2023〜2024」', method: '公式note', type: 'note', url: 'https://note.layerx.co.jp/n/n1af100ddc022' }] },
-      { year: 2025, count: 390, est: false, sources: [{ text: '公式note「はたらきかた2025」', method: '公式note', type: 'note', url: 'https://note.layerx.co.jp/n/n8edcdec6410c' }] },
-      { year: 2026, count: 582, est: false, sources: [{ text: '公式note「はたらきかた2026」', method: '公式note', type: 'note', url: 'https://note.layerx.co.jp/n/n4ca3a768c9bf' }] },
-    ]
-  },
-  {
-    id: 'ubie', name: 'Ubie',
-    sub: '設立 2017年 · HealthTech · 東京都中央区',
-    sector: 'HealthTech', founding_year: 2017,
-    color: '#5B8FCC', colorDim: 'rgba(91,143,204,0.1)',
-    funding: [
-      { year: 2018, round: 'Seed',     amount: 0.6  },
-      { year: 2020, round: 'Series B', amount: 20.0 },
-      { year: 2022, round: 'Series C', amount: 62.6 },
-      { year: 2024, round: 'Impact',   amount: 35.0 },
-    ],
-    data: [
-      { year: 2017, count: 2,   est: false, sources: [{ text: '創業', method: '—', type: 'default', url: '' }] },
-      { year: 2019, count: 31,  est: false, sources: [{ text: '公式note「2020年振り返り」', method: '公式note', type: 'note', url: 'https://note.com/ubie/n/n99cba7c28837' }] },
-      { year: 2020, count: 86,  est: false, sources: [{ text: '公式note「2020年振り返り」', method: '公式note', type: 'note', url: 'https://note.com/ubie/n/n99cba7c28837' }] },
-      { year: 2022, count: 200, est: false, sources: [{ text: 'コーポレートサイト', method: 'コーポレートサイト', type: 'wayback', url: '' }] },
-      { year: 2023, count: 300, est: false, sources: [{ text: '公式note「会社紹介資料刷新」', method: '公式note', type: 'note', url: 'https://note.com/abeyoshinori/n/nae128c0fd087' }] },
-      { year: 2025, count: 240, est: false, sources: [{ text: 'Wikipedia（2025年5月）', method: 'コーポレートサイト', type: 'wayback', url: 'https://ja.wikipedia.org/wiki/Ubie' }] },
-    ]
-  },
-];
+const COMPANIES = [];
 
 const EVENTS = {};
 let currentCompany = 0;
@@ -1710,10 +1617,6 @@ let showFunding = true;
 let mainChart = null;
 const sparkCharts = [];
 
-function toggleFunding() {
-  showFunding = !showFunding;
-  buildMainChart(COMPANIES[currentCompany], currentRange);
-}
 
 function renderEventsStrip(company) {
   const strip = document.getElementById('eventsStrip');
@@ -1760,22 +1663,6 @@ function renderEventsStrip(company) {
   }).join('');
 }
 
-function highlightEventYear(year) {
-  const strip = document.getElementById('eventsStrip');
-  document.querySelectorAll('#eventsStrip [data-year]').forEach(el => {
-    const match = parseInt(el.dataset.year) === year;
-    if (el.classList.contains('event-year-col')) el.classList.toggle('highlighted', match);
-    if (el.classList.contains('event-cards-col')) {
-      el.querySelectorAll('.event-card').forEach(c => c.classList.toggle('highlighted', match));
-      if (match) {
-        // 親のscrollable containerに対してscrollIntoView相当を手動実行
-        const parent = strip;
-        const elLeft = el.offsetLeft;
-        parent.scrollTo({ left: elLeft - 40, behavior: 'smooth' });
-      }
-    }
-  });
-}
 
 // Color helper
 function hexToRgb(hex) {
@@ -2020,8 +1907,6 @@ function buildMainChart(company, range) {
   });
 }
 
-const TYPE_LABEL = { interview: '記事', org: '組織', product: 'プロダクト', award: '受賞', media: 'メディア' };
-
 function highlightEventYear(year) {
   document.querySelectorAll('.event-year-col').forEach(el => {
     el.classList.toggle('highlighted', el.id === `evtYear${year}`);
@@ -2119,6 +2004,34 @@ function updateTable(company) {
 }
 
 function updateMetrics(company) {
+  const titleEl = document.getElementById('main-title');
+  const subEl = document.getElementById('main-sub');
+  const missionEl = document.getElementById('main-mission');
+  const currentEl = document.getElementById('metric-current');
+  const peakEl = document.getElementById('metric-peak');
+  const peakYearEl = document.getElementById('metric-peak-year');
+  const changeEl = document.getElementById('metric-change');
+  const raisedEl = document.getElementById('metric-raised');
+  const roundsEl = document.getElementById('metric-rounds');
+
+  if (!company) {
+    titleEl.textContent = apiState.status === 'error' ? 'データ取得エラー' : 'データ読込中…';
+    subEl.textContent = apiState.status === 'error' ? (apiState.error || '企業データを取得できませんでした') : '企業データを読み込んでいます';
+    if (missionEl) {
+      missionEl.textContent = '';
+      missionEl.style.display = 'none';
+    }
+    currentEl.textContent = '—';
+    peakEl.textContent = '—';
+    peakYearEl.textContent = '—';
+    changeEl.textContent = '—';
+    changeEl.className = 'metric-change';
+    currentEl.style.color = 'var(--slate-dark)';
+    raisedEl.textContent = '—';
+    roundsEl.textContent = '—';
+    return;
+  }
+
   const data = Array.isArray(company?.data) ? company.data : [];
   const latest = data.length > 0 ? data[data.length - 1] : null;
   const prev = data.length >= 2 ? data[data.length - 2] : null;
@@ -2127,22 +2040,15 @@ function updateMetrics(company) {
     ? Math.round((latest.count - prev.count) / prev.count * 100)
     : null;
 
-  document.getElementById('main-title').textContent = company.name || '—';
-  document.getElementById('main-sub').textContent = company.sub || 'データ未登録';
-  const missionEl = document.getElementById('main-mission');
+  titleEl.textContent = company.name || '—';
+  subEl.textContent = company.sub || 'データ未登録';
   if (missionEl) {
     const mission = company?.api?.mission || '';
     missionEl.textContent = mission ? `MISSION: ${mission}` : '';
     missionEl.style.display = mission ? 'block' : 'none';
   }
 
-  const currentEl = document.getElementById('metric-current');
-  const peakEl = document.getElementById('metric-peak');
-  const peakYearEl = document.getElementById('metric-peak-year');
-  const changeEl = document.getElementById('metric-change');
-
-  const COLOR_MAP2 = { 'SmartHR':'var(--smarthr)','LayerX':'var(--layerx)','Ubie':'var(--ubie)' };
-  const companyColor = COLOR_MAP2[company.name] || 'var(--slate-dark)';
+  const companyColor = company.color || company?.api?.color || 'var(--slate-dark)';
   currentEl.style.color = companyColor;
 
   currentEl.textContent = latest ? latest.count.toLocaleString() : '—';
@@ -2157,43 +2063,55 @@ function updateMetrics(company) {
     changeEl.className = 'metric-change';
   }
 
-  // 累計調達額 / 調達ラウンド数
-  // 企業マスタのみ参照（funding配列へのフォールバックはしない）
-  const raisedEl = document.getElementById('metric-raised');
-  const roundsEl = document.getElementById('metric-rounds');
-
   const masterFundingRaw = company?.api?.totalFunding;
   const masterRoundsRaw = company?.api?.totalRounds;
 
-  const masterFunding = (masterFundingRaw !== null && masterFundingRaw !== undefined && masterFundingRaw !== '')
-    ? Number(masterFundingRaw)
-    : null;
+  const hasMasterFunding =
+    masterFundingRaw !== null &&
+    masterFundingRaw !== undefined &&
+    String(masterFundingRaw).trim() !== '' &&
+    !Number.isNaN(Number(masterFundingRaw));
 
-  const normalizedRounds = (masterRoundsRaw !== null && masterRoundsRaw !== undefined && String(masterRoundsRaw).trim() !== '')
-    ? String(masterRoundsRaw).replace(/ラウンド/g, '').trim()
-    : null;
+  const hasMasterRounds =
+    masterRoundsRaw !== null &&
+    masterRoundsRaw !== undefined &&
+    String(masterRoundsRaw).trim() !== '';
 
-  if (masterFunding !== null && !Number.isNaN(masterFunding) && masterFunding > 0) {
-    raisedEl.textContent = '約' + (masterFunding >= 100 ? Math.round(masterFunding) : masterFunding.toFixed(1)) + '億円';
+  if (hasMasterFunding) {
+    const f = Number(masterFundingRaw);
+    raisedEl.textContent = '約' + (f >= 100 ? Math.round(f) : f.toFixed(1)) + '億円';
   } else {
     raisedEl.textContent = '—';
   }
 
-  roundsEl.textContent = normalizedRounds || '—';
+  if (hasMasterRounds) {
+    roundsEl.textContent = String(masterRoundsRaw).replace(/ラウンド/gi, '').trim();
+  } else {
+    roundsEl.textContent = '—';
+  }
 }
 
 let currentCompanyIndex = 0;
 
 function selectCompany(idx) {
-  currentCompanyIndex = idx;
+  if (!Array.isArray(COMPANIES) || COMPANIES.length === 0) {
+    updateMetrics(null);
+    return;
+  }
+  const safeIdx = Math.max(0, Math.min(idx, COMPANIES.length - 1));
+  currentCompanyIndex = safeIdx;
   currentJobFilter = '全職種';
   const pane = document.getElementById('pane-people');
-  if (pane && pane.classList.contains('active')) renderPeopleTab(idx);
-  currentCompany = idx;
+  if (pane && pane.classList.contains('active')) renderPeopleTab(safeIdx);
+  currentCompany = safeIdx;
   document.querySelectorAll('.company-card').forEach((el, i) => {
-    el.classList.toggle('active', i === idx);
+    el.classList.toggle('active', i === safeIdx);
   });
-  const company = COMPANIES[idx];
+  const company = COMPANIES[safeIdx];
+  if (!company) {
+    updateMetrics(null);
+    return;
+  }
   updateMetrics(company);
   buildMainChart(company, currentRange);
   updateTable(company);
@@ -2204,7 +2122,8 @@ function setRange(range, btn) {
   currentRange = range;
   document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  buildMainChart(COMPANIES[currentCompany], range);
+  const company = COMPANIES[currentCompany];
+  if (company) buildMainChart(company, range);
 }
 
 // ══════════════════════════════════════════════════════
@@ -2274,7 +2193,6 @@ async function loadSiteData() {
       metaEl.innerHTML = `<strong>${payload.meta.companyCount}</strong> 企業 &nbsp;·&nbsp; 更新: <strong>${updated}</strong>`;
     }
 
-    showDataBadge('JSON API連携', 'loaded');
     showLoadingState('');
   } catch (e) {
     console.warn('[API] 読み込みに失敗しました:', e);
@@ -2284,8 +2202,12 @@ async function loadSiteData() {
     apiState.loaded = false;
     apiState.payload = null;
 
-    showLoadingState('');
-    showDataBadge('手動入力データ（フォールバック）', 'fallback');
+    const metaEl = document.querySelector('.header-meta');
+    if (metaEl) {
+      metaEl.textContent = 'データ取得エラー';
+    }
+
+    showLoadingState(`データ取得エラー: ${apiState.error}`);
   }
 }
 
@@ -2418,9 +2340,6 @@ function showLoadingState(msg) {
   }
 }
 
-function showDataBadge(label, mode) {
-  return;
-}
 
 // ══════════════════════════════════════════════════════
 // サイドバーを企業リストから動的生成
@@ -2430,19 +2349,42 @@ function renderSidebar() {
   const sidebar = document.querySelector('.sidebar');
   if (!sidebar) return;
 
-  const COLOR_MAP = { 'SmartHR':'smarthr','LayerX':'layerx','Ubie':'ubie' };
-  const cards = COMPANIES.map((c, idx) => {
-    const latest = c.data[c.data.length - 1];
-    const latestStr = latest ? latest.count.toLocaleString() : '—';
-    const latestYear = latest ? `${latest.year}年` : '';
-    const colorKey = COLOR_MAP[c.name] || 'slate';
-    return `
-      <div class="company-card${idx === 0 ? ' active' : ''}" data-color="${colorKey}" onclick="selectCompany(${idx})">
-        <div class="company-name">
-          ${c.name}
-          <span class="company-badge">${c.sector || ''}</span>
+  if (!Array.isArray(COMPANIES) || COMPANIES.length === 0) {
+    const emptyLabel = apiState.status === 'error'
+      ? `企業一覧を取得できませんでした: ${escapeHtml(apiState.error || '不明なエラー')}`
+      : '企業データがまだありません';
+
+    sidebar.innerHTML = `
+      <div class="sidebar-head">
+        <div class="sidebar-label">企業一覧</div>
+        <button class="sidebar-toggle" type="button" onclick="toggleSidebar()" aria-label="企業一覧の開閉">◀</button>
+      </div>
+      <div class="sidebar-body">
+        <div class="company-card active">
+          <div class="company-name">読み込み待機中</div>
+          <div class="company-summary-line">${emptyLabel}</div>
         </div>
-        <div class="company-summary-line">社員数 ${latestStr}　創業年 ${c.founding_year || '—'}</div>
+      </div>`;
+    updateSidebarToggle();
+    return;
+  }
+
+  const cards = COMPANIES.map((c, idx) => {
+    const rows = Array.isArray(c.data) ? c.data : [];
+    const latest = rows.length ? rows[rows.length - 1] : null;
+    const latestStr = latest ? latest.count.toLocaleString() : '—';
+    const accent = c.color || c?.api?.color || '#5A6A80';
+    const accentBg = c.colorDim || makeColorDim(accent);
+
+    return `
+      <div class="company-card${idx === currentCompanyIndex ? ' active' : ''}"
+           style="--company-accent:${escapeHtml(accent)};--company-accent-bg:${escapeHtml(accentBg)}"
+           onclick="selectCompany(${idx})">
+        <div class="company-name">
+          ${escapeHtml(c.name || '—')}
+          <span class="company-badge">${escapeHtml(c.sector || '')}</span>
+        </div>
+        <div class="company-summary-line">社員数 ${latestStr}　創業年 ${escapeHtml(c.founding_year || '—')}</div>
         <div class="sparkline-wrap">
           <canvas class="spark" id="spark${idx}"></canvas>
         </div>
@@ -2483,15 +2425,21 @@ function toggleSidebar() {
 // ══════════════════════════════════════════════════════
 
 window.addEventListener('DOMContentLoaded', async () => {
-  // ① site_data.json を非同期で読み込む（失敗しても続行）
-  await loadSiteData();
+  updateMetrics(null);
 
-  // ② サイドバーを動的生成（データ確定後）
+  await loadSiteData();
   renderSidebar();
 
-  // ③ スパークラインとメインチャートを描画
+  if (!Array.isArray(COMPANIES) || COMPANIES.length === 0) {
+    const tbody = document.getElementById('data-tbody');
+    if (tbody) {
+      tbody.innerHTML = '<tr><td colspan="4" style="padding:24px;color:var(--text3);text-align:center">企業データがありません</td></tr>';
+    }
+    return;
+  }
+
   buildSparklines();
-  selectCompany(0);
+  selectCompany(Math.min(currentCompanyIndex, COMPANIES.length - 1));
 });
 
 // ══════════════════════════════════════════════════════
@@ -2542,17 +2490,22 @@ function getSiteLabelFromUrl(url) {
       ['openwork.jp', 'OpenWork'],
       ['type.jp', 'type'],
       ['herp.careers', 'HERP Careers'],
-      ['jobs.layerx.co.jp', 'LayerX'],
-      ['recruit.ubie.life', 'Ubie 採用サイト'],
       ['speakerdeck.com', 'Speaker Deck'],
-      ['note.com', 'note'],
-      ['blog.allstarsaas.com', 'ALL STAR SAAS FUND']
+      ['note.com', 'note']
     ];
     for (const [domain, label] of hostMap) {
       if (host === domain || host.endsWith('.' + domain)) return label;
     }
-    const parts = host.split('.');
-    const base = parts.length >= 2 ? parts[parts.length - 2] : host;
+    const parts = host.split('.').filter(Boolean);
+    const filtered = parts.filter(part => !['www', 'jobs', 'job', 'recruit', 'careers', 'blog'].includes(part));
+    let base = '';
+    if (filtered.length >= 3 && filtered[filtered.length - 1] === 'jp' && filtered[filtered.length - 2] === 'co') {
+      base = filtered[filtered.length - 3];
+    } else if (filtered.length >= 2) {
+      base = filtered[filtered.length - 2];
+    } else {
+      base = filtered[0] || host;
+    }
     return base ? base.charAt(0).toUpperCase() + base.slice(1) : '参照元';
   } catch (err) {
     return '参照元';
