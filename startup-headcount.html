@@ -2553,7 +2553,7 @@ function renderSidebar() {
           ${c.name}
           <span class="company-badge">${c.sector || ''}</span>
         </div>
-        <div class="company-summary-line">社員数 ${latestStr}　創業年 ${c.founding_year || c.data[0]?.year || '—'}</div>
+        <div class="company-summary-line">社員数 ${latestStr}　創業年 ${c.founding_year || '—'}</div>
         <div class="sparkline-wrap">
           <canvas class="spark" id="spark${idx}"></canvas>
         </div>
