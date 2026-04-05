@@ -277,7 +277,12 @@ body.sidebar-collapsed .sidebar-body {
   gap: 32px;
   align-items: flex-end;
 }
-.metric-block { text-align: right; }
+.metric-block {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
 .metric-val {
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 26px;
@@ -290,13 +295,23 @@ body.sidebar-collapsed .sidebar-body {
   font-size: 9px;
   color: var(--text3);
   letter-spacing: 0.02em;
+}
+.metric-label.metric-top {
+  margin-top: 0;
+  margin-bottom: 6px;
+}
+.metric-note {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 11px;
+  color: var(--text3);
   margin-top: 4px;
+  line-height: 1.2;
 }
 .metric-change {
   font-family: 'Noto Sans JP', sans-serif;
   font-size: 11px;
   color: var(--teal);
-  margin-top: 2px;
+  margin-top: 4px;
 }
 .metric-change.neg { color: var(--rose); }
 
@@ -1527,19 +1542,19 @@ canvas { transition: opacity 0.3s; }
       </div>
       <div class="metric-row">
         <div class="metric-block">
+          <div class="metric-label metric-top">最新在職者数</div>
           <div class="metric-val" id="metric-current">1,593</div>
-          <div class="metric-label">最新在職者数</div>
           <div class="metric-change" id="metric-change">+45% (前年比)</div>
         </div>
         <div class="metric-block">
+          <div class="metric-label metric-top">過去最高社員数</div>
           <div class="metric-val" id="metric-peak">1,593</div>
-          <div class="metric-label">過去最高社員数</div>
-          <div class="metric-label" id="metric-peak-year">2026年</div>
+          <div class="metric-note" id="metric-peak-year">※2026年</div>
         </div>
         <div class="metric-block">
+          <div class="metric-label metric-top">累計調達額</div>
           <div class="metric-val" style="color:#7a3fb5;font-size:22px" id="metric-raised">約323億円</div>
-          <div class="metric-label">累計調達額</div>
-          <div class="metric-label" id="metric-rounds">5ラウンド</div>
+          <div class="metric-note" id="metric-rounds">5</div>
         </div>
       </div>
     </div>
@@ -2142,28 +2157,29 @@ function updateMetrics(company) {
     changeEl.className = 'metric-change';
   }
 
-  // 資金調達サマリー
-  // 優先: 企業マスタの totalFunding/totalRounds → フォールバック: funding配列を集計
-  const masterFunding = company.api?.totalFunding;
-  const masterRounds  = company.api?.totalRounds;
+  // 累計調達額 / 調達ラウンド数
+  // 企業マスタのみ参照（funding配列へのフォールバックはしない）
   const raisedEl = document.getElementById('metric-raised');
   const roundsEl = document.getElementById('metric-rounds');
 
-  if (masterFunding != null && Number(masterFunding) > 0) {
-    const f = Number(masterFunding);
-    raisedEl.textContent = '約' + (f >= 100 ? Math.round(f) : f.toFixed(1)) + '億円';
-    roundsEl.textContent = (masterRounds != null && masterRounds !== '') ? String(masterRounds) : '—';
+  const masterFundingRaw = company?.api?.totalFunding;
+  const masterRoundsRaw = company?.api?.totalRounds;
+
+  const masterFunding = (masterFundingRaw !== null && masterFundingRaw !== undefined && masterFundingRaw !== '')
+    ? Number(masterFundingRaw)
+    : null;
+
+  const normalizedRounds = (masterRoundsRaw !== null && masterRoundsRaw !== undefined && String(masterRoundsRaw).trim() !== '')
+    ? String(masterRoundsRaw).replace(/ラウンド/g, '').trim()
+    : null;
+
+  if (masterFunding !== null && !Number.isNaN(masterFunding) && masterFunding > 0) {
+    raisedEl.textContent = '約' + (masterFunding >= 100 ? Math.round(masterFunding) : masterFunding.toFixed(1)) + '億円';
   } else {
-    const fundings = Array.isArray(company.funding) ? company.funding : [];
-    const totalRaised = fundings.reduce((sum, f) => sum + (Number(f.amount) || 0), 0);
-    if (totalRaised > 0) {
-      raisedEl.textContent = '約' + (totalRaised >= 100 ? Math.round(totalRaised) : totalRaised.toFixed(1)) + '億円';
-      roundsEl.textContent = String(fundings.length);
-    } else {
-      raisedEl.textContent = '—';
-      roundsEl.textContent = '—';
-    }
+    raisedEl.textContent = '—';
   }
+
+  roundsEl.textContent = normalizedRounds || '—';
 }
 
 let currentCompanyIndex = 0;
