@@ -1480,6 +1480,77 @@ canvas { transition: opacity 0.3s; }
   }
 }
 
+
+:root {
+  --funding-accent: #7a3fb5;
+}
+.metric-row { align-items: flex-start; }
+.metric-block { min-width: 92px; }
+.metric-note, .metric-change { white-space: nowrap; }
+#metric-raised { color: var(--funding-accent) !important; }
+.company-summary-line { white-space: normal; }
+.salary-chart-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+.salary-chart-scroll::-webkit-scrollbar { height: 6px; }
+.salary-chart-scroll::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 999px; }
+.mobile-only { display: none; }
+@media (max-width: 900px) {
+  .main-header { gap: 14px; }
+  .metric-row { width: 100%; gap: 14px; }
+  .metric-block { flex: 1 1 calc(33.333% - 10px); min-width: 0; }
+}
+@media (max-width: 768px) {
+  .header { align-items: center; }
+  .header-meta { width: 100%; order: 3; font-size: 9px; }
+  .header-right { order: 2; margin-left: auto; }
+  .sidebar-head { padding: 0 12px 8px; min-width: max-content; }
+  .sidebar-body { display: flex; gap: 0; min-width: max-content; }
+  .company-card { min-width: 144px; }
+  .company-badge { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+  .main-mission { font-size: 10px; line-height: 1.65; }
+  .metric-row { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px 14px; }
+  .metric-block { border-top: 1px solid var(--line); padding-top: 8px; }
+  .metric-block:last-child { grid-column: 1 / -1; }
+  .metric-val, #metric-raised { font-size: 19px !important; }
+  .metric-note, .metric-change, .metric-label { font-size: 10px; }
+  .events-strip { height: auto; min-height: 150px; padding-bottom: 6px; }
+  .events-strip-inner { padding-bottom: 4px; }
+  .event-year-col { min-width: 54px; }
+  .event-cards-col { min-width: 220px; }
+  .data-table-wrap { overflow: visible; }
+  .data-table, .data-table tbody, .data-table tr, .data-table td { display: block; width: 100%; }
+  .data-table thead { display: none; }
+  .data-table tbody { display: grid; gap: 10px; }
+  .data-table tr { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .data-table td { display: grid; grid-template-columns: 68px minmax(0,1fr); gap: 10px; padding: 7px 0; border-bottom: 1px dashed var(--line); }
+  .data-table td:last-child { border-bottom: none; }
+  .data-table td::before { content: attr(data-label); font-size: 9px; color: var(--text3); letter-spacing: 0.04em; }
+  .data-table td.year { font-weight: 600; color: var(--text); }
+  .data-table td.year::before { color: var(--text3); }
+  .src-line { align-items: flex-start; }
+  .people-tab-wrap { padding-bottom: 56px; }
+  .pt-sec { border-radius: 10px; overflow: hidden; }
+  .salary-chart-scroll > .salary-chart-canvas-wrap { min-width: 420px; }
+  .job-table-outer { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+@media (max-width: 480px) {
+  .header { padding: 8px 12px; gap: 6px; }
+  .logo { font-size: 12px; }
+  .main-header { padding: 12px; }
+  .company-title { font-size: 17px; }
+  .company-subtitle { font-size: 10px; line-height: 1.5; }
+  .metric-row { grid-template-columns: 1fr; }
+  .metric-block:last-child { grid-column: auto; }
+  .metric-val, #metric-raised { font-size: 20px !important; }
+  .range-bar { gap: 6px; }
+  .range-btn { min-width: 64px; }
+  .chart-area { height: 216px; }
+  .chart-wrap { height: 196px; }
+  .events-strip { padding: 0 12px; }
+  .event-cards-col { min-width: 188px; max-width: 188px; }
+  .data-table td { grid-template-columns: 58px minmax(0,1fr); gap: 8px; }
+  .salary-chart-scroll > .salary-chart-canvas-wrap { min-width: 360px; }
+}
+
 </style>
 </head>
 <body>
@@ -1620,7 +1691,7 @@ const sparkCharts = [];
 
 function renderEventsStrip(company) {
   const strip = document.getElementById('eventsStrip');
-  const events = EVENTS[company.name] || [];
+  const events = EVENTS[company.id] || EVENTS[company.name] || [];
   if (!events.length) {
     strip.innerHTML = '<div class="events-empty">この企業のトピックデータはまだありません</div>';
     return;
@@ -1957,7 +2028,7 @@ function updateTable(company) {
     const isMulti = sourceEntries.length > 1;
 
     const countCell = `
-      <td class="count">${d.count.toLocaleString()}</td>`;
+      <td class="count" data-label="社員数">${d.count.toLocaleString()}</td>`;
 
     const fundingCell = fundings.length > 0
       ? fundings.map(f => `
@@ -1993,10 +2064,10 @@ function updateTable(company) {
 
     return `
       <tr>
-        <td class="year">${d.year}</td>
+        <td class="year" data-label="年">${d.year}</td>
         ${countCell}
-        <td class="funding-cell" style="padding-top:6px;padding-bottom:6px;vertical-align:top">${fundingCell}</td>
-        <td class="src" style="padding-top:6px;padding-bottom:6px">
+        <td class="funding-cell" data-label="資金調達" style="padding-top:6px;padding-bottom:6px;vertical-align:top">${fundingCell}</td>
+        <td class="src" data-label="ソース" style="padding-top:6px;padding-bottom:6px">
           <div style="display:flex;flex-direction:column;gap:5px">${srcLines}</div>
         </td>
       </tr>`;
@@ -2129,7 +2200,10 @@ function setRange(range, btn) {
 // ══════════════════════════════════════════════════════
 // ★ API連携設定 ★
 // ══════════════════════════════════════════════════════
-const API_URL = 'https://script.google.com/macros/s/AKfycbw_F6CZ5z9BuhvS4UEUFZMCu0TExhYxOIqBfvzCfSVGFDEj9GxdQ0O74uA8DoGEAMGy7g/exec';
+const APP_CONFIG = {
+  API_URL: window.STARTUPFILE_API_URL || document.documentElement.dataset.apiUrl || 'https://script.google.com/macros/s/AKfycbw_F6CZ5z9BuhvS4UEUFZMCu0TExhYxOIqBfvzCfSVGFDEj9GxdQ0O74uA8DoGEAMGy7g/exec'
+};
+const API_URL = APP_CONFIG.API_URL;
 const apiState = {
   status: 'idle',
   error: '',
@@ -2212,17 +2286,20 @@ async function loadSiteData() {
 }
 
 function applyApiData(payload) {
-  const companies = Array.isArray(payload?.companies) ? payload.companies : [];
-  const apiByName = Object.fromEntries(companies.map(c => [c.name, c]));
-
-  COMPANIES.forEach(company => {
-    const api = apiByName[company.name];
-    if (!api) return;
-    applyCompanyApiData(company, api);
+  const rawCompanies = Array.isArray(payload?.companies) ? payload.companies.slice() : [];
+  const normalized = rawCompanies.map((api, idx) => ({
+    ...api,
+    displayOrder: Number.isFinite(Number(api?.displayOrder)) ? Number(api.displayOrder) : (idx + 1)
+  })).sort((a, b) => {
+    const diff = (a.displayOrder || 999999) - (b.displayOrder || 999999);
+    if (diff !== 0) return diff;
+    return naturalCompare(a.name || '', b.name || '');
   });
 
-  companies.forEach(api => {
-    if (COMPANIES.find(c => c.name === api.name)) return;
+  COMPANIES.length = 0;
+  Object.keys(EVENTS).forEach(key => delete EVENTS[key]);
+
+  normalized.forEach(api => {
     const company = {
       id: api.id || slugify(api.name),
       name: api.name,
@@ -2236,8 +2313,14 @@ function applyApiData(payload) {
       api: api
     };
     COMPANIES.push(company);
-    EVENTS[api.name] = normalizeTopics(api.topics || []);
+    EVENTS[company.id || company.name] = normalizeTopics(api.topics || []);
   });
+
+  const defaultId = payload?.meta?.defaultCompanyId || '';
+  const foundIndex = defaultId
+    ? COMPANIES.findIndex(c => String(c.id || '') === String(defaultId))
+    : -1;
+  currentCompanyIndex = foundIndex >= 0 ? foundIndex : 0;
 }
 
 function applyCompanyApiData(company, api) {
@@ -2372,9 +2455,11 @@ function renderSidebar() {
   const cards = COMPANIES.map((c, idx) => {
     const rows = Array.isArray(c.data) ? c.data : [];
     const latest = rows.length ? rows[rows.length - 1] : null;
-    const latestStr = latest ? latest.count.toLocaleString() : '—';
+    const latestStr = latest ? `${latest.count.toLocaleString()}名` : '—';
     const accent = c.color || c?.api?.color || '#5A6A80';
     const accentBg = c.colorDim || makeColorDim(accent);
+    const founded = c.founding_year ? `設立 ${escapeHtml(c.founding_year)}` : '設立年未登録';
+    const sector = c.sector ? escapeHtml(c.sector) : '未分類';
 
     return `
       <div class="company-card${idx === currentCompanyIndex ? ' active' : ''}"
@@ -2382,9 +2467,9 @@ function renderSidebar() {
            onclick="selectCompany(${idx})">
         <div class="company-name">
           ${escapeHtml(c.name || '—')}
-          <span class="company-badge">${escapeHtml(c.sector || '')}</span>
+          <span class="company-badge">${sector}</span>
         </div>
-        <div class="company-summary-line">社員数 ${latestStr}　創業年 ${escapeHtml(c.founding_year || '—')}</div>
+        <div class="company-summary-line">${latestStr} · ${founded}</div>
         <div class="sparkline-wrap">
           <canvas class="spark" id="spark${idx}"></canvas>
         </div>
@@ -2396,14 +2481,7 @@ function renderSidebar() {
       <div class="sidebar-label">企業一覧</div>
       <button class="sidebar-toggle" type="button" onclick="toggleSidebar()" aria-label="企業一覧の開閉">◀</button>
     </div>
-    <div class="sidebar-body">
-      ${cards}
-      <div class="sidebar-divider"></div>
-      <div class="add-btn">
-        <div class="add-icon">+</div>
-        企業を追加する
-      </div>
-    </div>`;
+    <div class="sidebar-body">${cards}</div>`;
   updateSidebarToggle();
 }
 
@@ -2642,10 +2720,13 @@ function buildSalarySection(company, api) {
   ).join('');
   wrap.appendChild(legend);
 
+  const chartScroll = document.createElement('div');
+  chartScroll.className = 'salary-chart-scroll';
   const chartArea = document.createElement('div');
   chartArea.className = 'salary-chart-canvas-wrap';
   chartArea.style.cssText = 'position:relative;height:278px;margin-bottom:8px';
-  wrap.appendChild(chartArea);
+  chartScroll.appendChild(chartArea);
+  wrap.appendChild(chartScroll);
   sec.appendChild(wrap);
 
   renderDynamicSalaryChart(chartArea, rows);
@@ -2729,6 +2810,8 @@ function renderDynamicSalaryChart(area, rows) {
   });
 
   const nG = groups.length;
+  const minChartWidth = Math.max(320, 88 * nG + CHART_XPAD + 28);
+  area.style.minWidth = `${minChartWidth}px`;
   groups.forEach((grp, i) => {
     const slotW = 1 / nG;
     const leftPct = (i / nG + slotW * 0.08) * 100;
@@ -2870,62 +2953,6 @@ function buildJobsSection(api) {
   body.appendChild(table);
   sec.appendChild(body);
   return sec;
-}
-
-/* ══════════════════════════════════════
-   共通: 求人票テーブル描画
-══════════════════════════════════════ */
-function _renderJobTable(el, jobs, maxSal, secLabel, srcLabel, srcUrl) {
-  var catStyle = {eng:'jcat-eng',biz:'jcat-biz',prd:'jcat-prd',dat:'jcat-dat',cop:'jcat-dat'};
-  var barCol   = {eng:'#5B8FCC',biz:'#3BAA90',prd:'#8246b4',dat:'#5A6A80',cop:'#5A6A80'};
-
-  var sec = document.createElement('div');
-  sec.className = 'pt-sec';
-  var head = document.createElement('div');
-  head.className = 'pt-sec-head';
-  head.innerHTML =
-    '<span class="pt-sec-label">'+secLabel+'</span>' +
-    '<span class="pt-src-pill"><a href="'+srcUrl+'" target="_blank">'+srcLabel+'</a></span>';
-  sec.appendChild(head);
-
-  var wrap = document.createElement('div');
-  wrap.className = 'job-table-outer';
-  var table = document.createElement('table');
-  table.className = 'job-table-v3';
-  table.innerHTML =
-    '<thead><tr>' +
-      '<th style="width:68px">大枠</th>' +
-      '<th style="width:175px">ポジション</th>' +
-      '<th style="width:80px">レイヤー</th>' +
-      '<th style="width:195px">概要</th>' +
-      '<th style="width:124px">給与帯</th>' +
-      '<th style="width:112px">参照元</th>' +
-    '</tr></thead>';
-  var tbody = document.createElement('tbody');
-  jobs.forEach(function(j) {
-    var hasSal = j.salMin !== null;
-    var fillLeft  = hasSal ? (j.salMin/maxSal*100).toFixed(1) : 0;
-    var fillWidth = hasSal ? ((j.salMax-j.salMin)/maxSal*100).toFixed(1) : 0;
-    var col = barCol[j.cat] || '#5A6A80';
-    var salHtml = hasSal
-      ? '<div class="jsal-nums" style="white-space:nowrap">'+j.salMin+'〜'+j.salMax+'万円</div>' +
-        '<div class="jsal-track" style="width:88px"><div class="jsal-fill" style="left:'+fillLeft+'%;width:'+fillWidth+'%;background:'+col+';opacity:0.75"></div></div>'
-      : '<div class="jsal-nums">非公開</div>';
-    var refLabel = getSiteLabelFromUrl(j.url);
-    var tr = document.createElement('tr');
-    tr.innerHTML =
-      '<td><span class="jcat-badge '+(catStyle[j.cat]||'jcat-dat')+'">'+j.lbl+'</span></td>' +
-      '<td style="font-size:11px;color:var(--text);font-weight:500;font-family:Noto Sans JP,sans-serif">'+j.pos+'</td>' +
-      '<td><span class="jlv-badge">'+j.lv+'</span></td>' +
-      '<td class="jdesc-cell">'+j.desc+'</td>' +
-      '<td class="jsal-cell" style="width:124px">'+salHtml+'</td>' +
-      '<td style="width:112px"><a class="jlink" href="'+j.url+'" target="_blank">'+refLabel+'↗</a></td>';
-    tbody.appendChild(tr);
-  });
-  table.appendChild(tbody);
-  wrap.appendChild(table);
-  sec.appendChild(wrap);
-  el.appendChild(sec);
 }
 
 </script>
