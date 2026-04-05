@@ -2168,8 +2168,19 @@ function setRange(range, btn) {
 // ★ API連携設定 ★
 // ══════════════════════════════════════════════════════
 const API_URL = 'https://script.google.com/macros/s/AKfycbw_F6CZ5z9BuhvS4UEUFZMCu0TExhYxOIqBfvzCfSVGFDEj9GxdQ0O74uA8DoGEAMGy7g/exec';
+const apiState = {
+  status: 'idle',
+  error: '',
+  loaded: false,
+  payload: null
+};
 
 async function loadSiteData() {
+  apiState.status = 'loading';
+  apiState.error = '';
+  apiState.loaded = false;
+  apiState.payload = null;
+
   try {
     showLoadingState('JSON APIからデータを読み込み中...');
 
@@ -2178,14 +2189,40 @@ async function loadSiteData() {
     });
 
     if (!res.ok) {
-      throw new Error(`APIの読み込みに失敗 (HTTP ${res.status})`);
+      throw new Error(`APIの読み込みに失敗しました（HTTP ${res.status}）`);
     }
 
-    const payload = await res.json();
+    const contentType = (res.headers.get('content-type') || '').toLowerCase();
+    const rawText = await res.text();
+
+    if (!contentType.includes('application/json')) {
+      throw new Error('APIがJSONではないレスポンスを返しました');
+    }
+
+    let payload;
+    try {
+      payload = JSON.parse(rawText);
+    } catch (err) {
+      throw new Error('APIレスポンスのJSON解析に失敗しました');
+    }
+
+    if (!payload || !Array.isArray(payload.companies)) {
+      throw new Error('APIレスポンスの形式が不正です');
+    }
+
+    if (payload.error) {
+      throw new Error(`GASエラー: ${payload.error}`);
+    }
+
     applyApiData(payload);
 
+    apiState.status = 'loaded';
+    apiState.error = '';
+    apiState.loaded = true;
+    apiState.payload = payload;
+
     const metaEl = document.querySelector('.header-meta');
-    if (metaEl && payload.meta) {
+    if (metaEl && payload.meta?.generatedAt) {
       const updated = new Date(payload.meta.generatedAt).toLocaleDateString('ja-JP', {
         year: 'numeric',
         month: 'short',
@@ -2197,7 +2234,13 @@ async function loadSiteData() {
     showDataBadge('JSON API連携', 'loaded');
     showLoadingState('');
   } catch (e) {
-    console.warn('[API] 読み込みに失敗しました:', e.message);
+    console.warn('[API] 読み込みに失敗しました:', e);
+
+    apiState.status = 'error';
+    apiState.error = e?.message || '不明なエラー';
+    apiState.loaded = false;
+    apiState.payload = null;
+
     showLoadingState('');
     showDataBadge('手動入力データ（フォールバック）', 'fallback');
   }
@@ -2489,16 +2532,43 @@ function uniqBy(items, keyFn) {
   });
 }
 
+function renderPeopleEmpty(el, message, kind = 'muted') {
+  const colorMap = {
+    muted: 'var(--text3)',
+    error: '#B85050',
+    loading: 'var(--text3)'
+  };
+
+  el.innerHTML = `
+    <div style="padding:40px 32px;font-size:11px;color:${colorMap[kind] || 'var(--text3)'};font-family:var(--font-mono)">
+      ${escapeHtml(message)}
+    </div>
+  `;
+}
+
 function renderPeopleTab(idx) {
   const company = COMPANIES[idx];
   const el = document.getElementById('people-content');
-  if (!el) return;
+  if (!el || !company) return;
 
   const api = company.api || {};
-  const hasApiPeopleData = (api.salaryRanges?.length || 0) > 0 || (api.infoCards?.length || 0) > 0 || (api.jobs?.length || 0) > 0;
+  const hasApiPeopleData =
+    (Array.isArray(api.salaryRanges) && api.salaryRanges.length > 0) ||
+    (Array.isArray(api.infoCards) && api.infoCards.length > 0) ||
+    (Array.isArray(api.jobs) && api.jobs.length > 0);
+
+  if (apiState.status === 'loading') {
+    renderPeopleEmpty(el, 'データ読込中です...', 'loading');
+    return;
+  }
+
+  if (apiState.status === 'error') {
+    renderPeopleEmpty(el, `データ取得エラー: ${apiState.error}`, 'error');
+    return;
+  }
 
   if (!hasApiPeopleData) {
-    el.innerHTML = '<div style="padding:40px 32px;font-size:11px;color:var(--text3);font-family:var(--font-mono)">データ読込中、またはまだ収集中です</div>';
+    renderPeopleEmpty(el, 'この企業の給与・評価・求人データはまだ収集中です', 'muted');
     return;
   }
 
@@ -2774,8 +2844,13 @@ function buildJobsSection(api) {
     </thead>
     <tbody>
       ${jobs.map(job => {
-        const cat = escapeHtml(job.categoryLabel || job.category || '—');
-        const color = catColor[job.category] || 'var(--slate-dark)';
+        const category = job.category || '';
+        const categoryLabel = job.categoryLabel || job.category || '—';
+        const layer = job.layer || job.level || '—';
+        const jobUrl = job.jobUrl || job.url || '';
+
+        const cat = escapeHtml(categoryLabel);
+        const color = catColor[category] || 'var(--slate-dark)';
         const min = Number(job.salaryMin) || 0;
         const max = Number(job.salaryMax) || Number(job.salaryMin) || 0;
         const salary = (job.salaryMin || job.salaryMax)
@@ -2787,15 +2862,15 @@ function buildJobsSection(api) {
         const salaryViz = salary !== '—'
           ? `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px"><div style="white-space:nowrap">${salary}</div><div style="position:relative;width:88px;height:6px;background:var(--bg3);border-radius:999px;overflow:hidden"><div style="position:absolute;left:${left}%;width:${width}%;height:100%;background:${color};border-radius:999px;opacity:0.82"></div></div></div>`
           : '—';
-        const refLabel = getSiteLabelFromUrl(job.jobUrl);
-        const ref = job.jobUrl
-          ? `<a href="${escapeHtml(job.jobUrl)}" target="_blank" style="color:var(--blue);text-decoration:none">${escapeHtml(refLabel)}↗</a>`
+        const refLabel = getSiteLabelFromUrl(jobUrl);
+        const ref = jobUrl
+          ? `<a href="${escapeHtml(jobUrl)}" target="_blank" style="color:var(--blue);text-decoration:none">${escapeHtml(refLabel)}↗</a>`
           : '<span style="color:var(--text3)">—</span>';
         return `
           <tr style="border-bottom:1px solid var(--line)">
             <td style="padding:10px 6px;white-space:nowrap"><span style="display:inline-block;padding:3px 8px;border-radius:999px;background:${color};color:#fff;font-size:10px">${cat}</span></td>
             <td style="padding:10px 6px">${pos}</td>
-            <td style="padding:10px 6px;color:var(--text2)">${escapeHtml(job.layer || '—')}</td>
+            <td style="padding:10px 6px;color:var(--text2)">${escapeHtml(layer)}</td>
             <td style="padding:10px 6px;color:var(--text2);line-height:1.6">${escapeHtml(job.description || '')}</td>
             <td style="width:124px;padding:10px 6px;text-align:left;font-family:var(--font-mono)">${salaryViz}</td>
             <td style="width:112px;padding:10px 6px">${ref}</td>
