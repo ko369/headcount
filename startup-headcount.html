@@ -2614,9 +2614,11 @@ function renderPeopleTab(idx) {
   if (!el || !company) return;
 
   const api = company.api || {};
+  const topicsForCompany = EVENTS[company.id] || EVENTS[company.name] || [];
+  const hasOrgWorkstyleTopics = topicsForCompany.some(t => t.type && (t.type.indexOf('org') >= 0 || t.type.indexOf('workstyle') >= 0));
   const hasApiPeopleData =
     (Array.isArray(api.salaryRanges) && api.salaryRanges.length > 0) ||
-    (Array.isArray(api.infoCards) && api.infoCards.length > 0) ||
+    hasOrgWorkstyleTopics ||
     (Array.isArray(api.jobs) && api.jobs.length > 0);
 
   if (apiState.status === 'loading') {
@@ -2639,7 +2641,7 @@ function renderPeopleTab(idx) {
   const salary = buildSalarySection(company, api);
   if (salary) el.appendChild(salary);
 
-  const info = buildInfoCardsSection(api);
+  const info = buildInfoCardsSection(company);
   if (info) el.appendChild(info);
 
   const jobs = buildJobsSection(api);
@@ -2853,9 +2855,13 @@ function renderDynamicSalaryChart(area, rows) {
   });
 }
 
-function buildInfoCardsSection(api) {
-  const cards = Array.isArray(api.infoCards) ? api.infoCards : [];
-  if (cards.length === 0) return null;
+function buildInfoCardsSection(company) {
+  const topics = EVENTS[company.id] || EVENTS[company.name] || [];
+  const orgWorkstyle = topics.filter(t => t.type && (t.type.indexOf('org') >= 0 || t.type.indexOf('workstyle') >= 0));
+  if (orgWorkstyle.length === 0) return null;
+
+  const typeLabel = { org: '組織', workstyle: '働き方' };
+  const typeBorderColor = { org: 'var(--slate)', workstyle: 'var(--teal)' };
 
   const sec = document.createElement('div');
   sec.className = 'pt-sec';
@@ -2864,17 +2870,22 @@ function buildInfoCardsSection(api) {
   const body = document.createElement('div');
   body.style.cssText = 'padding:8px 16px 16px';
 
-  cards.forEach(card => {
+  orgWorkstyle.forEach(t => {
+    const primaryType = (t.type || 'org').split(',')[0].trim();
+    const tag = typeLabel[primaryType] || primaryType;
+    const borderColor = typeBorderColor[primaryType] || 'var(--slate-dark)';
+    const linkLabel = [t.source, t.date].filter(Boolean).join('（') + (t.date ? '）' : '') + '↗';
+
     const c = document.createElement('div');
     c.className = 'info-card';
-    c.style.cssText = `border-left-color:${card.borderColor || 'var(--slate-dark)'};margin-bottom:8px`;
+    c.style.cssText = `border-left-color:${borderColor};margin-bottom:8px`;
     c.innerHTML =
       '<div class="info-card-meta">' +
-        `<span class="info-card-tag">${escapeHtml(card.tag || 'NOTE')}</span>` +
-        (card.linkUrl ? `<a class="info-card-link" href="${escapeHtml(card.linkUrl)}" target="_blank">${escapeHtml(card.linkLabel || '参照元↗')}</a>` : '') +
+        `<span class="info-card-tag">${escapeHtml(tag)}</span>` +
+        (t.url ? `<a class="info-card-link" href="${escapeHtml(t.url)}" target="_blank">${escapeHtml(linkLabel)}</a>` : '') +
       '</div>' +
-      `<div class="info-card-title">${escapeHtml(card.title || '')}</div>` +
-      `<div class="info-card-body">${escapeHtml(card.body || '')}</div>`;
+      `<div class="info-card-title">${escapeHtml(t.title || '')}</div>` +
+      `<div class="info-card-body">${escapeHtml(t.desc || '')}</div>`;
     body.appendChild(c);
   });
 
