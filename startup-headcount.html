@@ -1980,17 +1980,6 @@ function highlightEventYear(year) {
   if (target) target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
 }
 
-function methodClass(type) {
-  if (type === 'wayback') return 'wayback';
-  if (type === 'note') return 'note';
-  if (type === 'press') return 'press';
-  return '';
-}
-
-function methodLabel(type, method) {
-  return method;
-}
-
 function updateTable(company) {
   const tbody = document.getElementById('data-tbody');
   const rows = [...company.data].reverse();
@@ -2514,16 +2503,6 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
-}
-
-function formatManYen(v) {
-  if (v === null || v === undefined || v === '' || Number.isNaN(Number(v))) return '—';
-  return `${Number(v).toLocaleString('ja-JP')}万円`;
-}
-
-function formatPeopleCount(v) {
-  if (v === null || v === undefined || v === '' || Number.isNaN(Number(v))) return '—';
-  return `${Number(v).toLocaleString('ja-JP')}名`;
 }
 
 function getSiteLabelFromUrl(url) {
