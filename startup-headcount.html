@@ -1118,11 +1118,6 @@ canvas { transition: opacity 0.3s; }
 }
 
 /* ── 情報カードリスト ── */
-.info-card-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
 .info-card {
   background: #fff;
   border: 1px solid var(--line);
@@ -1674,7 +1669,7 @@ canvas { transition: opacity 0.3s; }
 const COMPANIES = [];
 
 const EVENTS = {};
-let currentCompany = 0;
+let currentCompanyIndex = 0;
 let currentRange = 'all';
 let showFunding = true;
 let mainChart = null;
@@ -2157,8 +2152,6 @@ function updateMetrics(company) {
   }
 }
 
-let currentCompanyIndex = 0;
-
 function selectCompany(idx) {
   if (!Array.isArray(COMPANIES) || COMPANIES.length === 0) {
     updateMetrics(null);
@@ -2166,10 +2159,8 @@ function selectCompany(idx) {
   }
   const safeIdx = Math.max(0, Math.min(idx, COMPANIES.length - 1));
   currentCompanyIndex = safeIdx;
-  currentJobFilter = '全職種';
   const pane = document.getElementById('pane-people');
   if (pane && pane.classList.contains('active')) renderPeopleTab(safeIdx);
-  currentCompany = safeIdx;
   document.querySelectorAll('.company-card').forEach((el, i) => {
     el.classList.toggle('active', i === safeIdx);
   });
@@ -2188,7 +2179,7 @@ function setRange(range, btn) {
   currentRange = range;
   document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  const company = COMPANIES[currentCompany];
+  const company = COMPANIES[currentCompanyIndex];
   if (company) buildMainChart(company, range);
 }
 
@@ -2316,22 +2307,6 @@ function applyApiData(payload) {
     ? COMPANIES.findIndex(c => String(c.id || '') === String(defaultId))
     : -1;
   currentCompanyIndex = foundIndex >= 0 ? foundIndex : 0;
-}
-
-function applyCompanyApiData(company, api) {
-  company.id = api.id || company.id || slugify(api.name || company.name);
-  company.name = api.name || company.name;
-  company.sector = api.sector || company.sector || '';
-  company.founding_year = api.foundingYear || company.founding_year || null;
-  company.sub = buildCompanySub(api) || company.sub || '';
-  if (api.color) {
-    company.color = api.color;
-    company.colorDim = makeColorDim(api.color);
-  }
-  company.data = normalizeHeadcounts(api.headcounts || []);
-  company.funding = normalizeFunding(api.funding || []);
-  EVENTS[company.id] = normalizeTopics(api.topics || []);
-  company.api = api;
 }
 
 function buildCompanySub(api) {
@@ -2646,47 +2621,6 @@ function renderPeopleTab(idx) {
 
   const jobs = buildJobsSection(api);
   if (jobs) el.appendChild(jobs);
-}
-
-function buildPeopleSummarySection(company, api) {
-  const hasAny = api.mission || api.location || api.sector || api.foundingYear;
-  if (!hasAny) return null;
-
-  const sec = document.createElement('div');
-  sec.className = 'pt-sec';
-  sec.innerHTML = '<div class="pt-sec-head"><span class="pt-sec-label">企業マスタ</span></div>';
-
-  const body = document.createElement('div');
-  body.style.cssText = 'padding:14px 16px 2px';
-
-  const top = document.createElement('div');
-  top.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:12px';
-
-  const cards = [
-    ['企業名', company.name],
-    ['設立年', api.foundingYear ? `${api.foundingYear}年` : '—'],
-    ['セクター', api.sector || '—'],
-    ['所在地', api.location || '—']
-  ];
-
-  cards.forEach(([label, value]) => {
-    const item = document.createElement('div');
-    item.style.cssText = 'border:1px solid var(--line);background:var(--bg2);padding:10px 12px;border-radius:8px';
-    item.innerHTML = `<div style="font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-bottom:4px">${escapeHtml(label)}</div><div style="font-size:12px;color:var(--text);line-height:1.6">${escapeHtml(value)}</div>`;
-    top.appendChild(item);
-  });
-
-  body.appendChild(top);
-
-  if (api.mission) {
-    const mission = document.createElement('div');
-    mission.style.cssText = 'border:1px solid var(--line);padding:12px 14px;border-radius:8px;background:#fff;margin-bottom:12px';
-    mission.innerHTML = `<div style="font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-bottom:6px">MISSION</div><div style="font-size:12px;color:var(--text);line-height:1.8">${escapeHtml(api.mission)}</div>`;
-    body.appendChild(mission);
-  }
-
-  sec.appendChild(body);
-  return sec;
 }
 
 function buildSalarySection(company, api) {
