@@ -2640,7 +2640,7 @@ function buildSalarySection(company, api) {
 
   renderDynamicSalaryChart(chartArea, rows);
 
-  const supplement = (rows[0]?.modelType || '').trim();
+  const supplement = (rows[0]?.supplement || '').trim();
   if (supplement) {
     const note = document.createElement('div');
     note.className = 'pt-footnote';
